@@ -99,6 +99,7 @@ in
         pkgs.pnpmConfigHook
       ];
       buildInputs = runtimeLibraries;
+      runtimeDependencies = runtimeLibraries;
       dontWrapGApps = true;
       dontAutoPatchelf = true;
       stripExclude = ["lib/orca/resources/node-runtime/bin/node"];
@@ -204,22 +205,22 @@ in
         cp -r ${desktopItem}/share/applications "$out/share/"
         # Koffi ships both libcs; this package and its Node/Electron runtimes use glibc.
         rm -r "$out/lib/orca/resources/node_modules/@koromix/koffi-linux-x64/musl_x64"
-        autoPatchelf "$out/lib/orca"
+        patchShebangs --host "$out/lib/orca/resources/bin"
         makeWrapper "$out/lib/orca/orca-ide" "$out/bin/orca-desktop" \
           "''${gappsWrapperArgs[@]}" \
           --set-default ORCA_TELEMETRY_DISABLED 1 \
-          --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}" \
           --prefix PATH : ${lib.makeBinPath [python pkgs.xdotool pkgs.xclip pkgs.xorg-server pkgs.wl-clipboard pkgs.xdg-utils]}
         makeWrapper "$out/lib/orca/resources/bin/orca-ide" "$out/bin/orca-ide" \
           "''${gappsWrapperArgs[@]}" \
           --set-default ORCA_TELEMETRY_DISABLED 1 \
-          --prefix LD_LIBRARY_PATH : "${runtimeLibraryPath}" \
           --prefix PATH : ${lib.makeBinPath [python pkgs.xdotool pkgs.xclip pkgs.xorg-server pkgs.wl-clipboard pkgs.xdg-utils]}
         ln -s orca-ide "$out/bin/orca"
         runHook postInstall
       '';
 
       postFixup = ''
+        # Preserve dlopen search paths after the standard RPATH shrink step.
+        autoPatchelf "$out/lib/orca"
         "$out/lib/orca/resources/node-runtime/bin/node" --version
       '';
 

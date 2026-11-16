@@ -3,6 +3,11 @@ const path = require('node:path')
 
 const resources = process.argv[2]
 assert(resources, 'Pass the installed resources directory')
+assert.equal(
+  process.env.LD_LIBRARY_PATH,
+  undefined,
+  'Packaged runtimes must not inject libraries into host subprocesses'
+)
 const koffi = require(path.join(resources, 'node_modules/@koromix/koffi-linux-x64'))
 assert.equal(typeof koffi.version, 'string')
 const pty = require(path.join(resources, 'node_modules/node-pty'))
