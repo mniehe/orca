@@ -43,6 +43,18 @@ const NON_UNIT_TEST_RUNNERS = [
       "'src/**/*.test.ts', 'src/**/*.test.tsx', 'scripts/**/*.test.ts'"
     ]
   },
+  {
+    name: 'mobile Android node:test',
+    include: [
+      'mobile/scripts/build-private-android.test.mjs',
+      'mobile/scripts/install-private-android.test.mjs'
+    ],
+    sources: ['mobile/package.json', '.github/workflows/mobile.yml'],
+    mirrors: [
+      'node --test scripts/build-private-android.test.mjs scripts/install-private-android.test.mjs',
+      'pnpm run test:android-nix'
+    ]
+  },
   ...['push', 'relay'].map((app) => ({
     name: `cloud ${app}`,
     include: [`cloud/apps/${app}/src/**/*.test.ts`],

@@ -10,6 +10,7 @@
     "native": "node scripts/native-client.mjs",
     "postinstall": "node scripts/build-terminal-webview-engine.mjs && node scripts/build-mermaid-page-engine.mjs && node scripts/build-katex-page-style.mjs && node scripts/build-terminal-document-script.mjs",
     "test": "vitest run",
+    "test:android-nix": "node --test scripts/build-private-android.test.mjs scripts/install-private-android.test.mjs",
     "typecheck": "node ../config/scripts/typecheck/project-execution/run-typecheck-projects-in-parallel.mjs --project=mobile/tsconfig.json",
     "typecheck:tests": "node ../config/scripts/typecheck/project-execution/run-typecheck-projects-in-parallel.mjs --project=mobile/tsconfig.test.json",
     "check:tests-typecheck": "node scripts/check-tests-typecheck-ratchet.mjs",

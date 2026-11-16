@@ -320,6 +320,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Android signing and installation safety tests
+        run: pnpm run test:android-nix
+
       - wait: ruby-setup
 
       # ruby/setup-ruby's bundler-cache saves on every miss; the platform warmup saves this key on main.
@@ -510,6 +513,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Android signing and installation safety tests
+        run: pnpm run test:android-nix
 
       - name: Typecheck
         id: production-types
