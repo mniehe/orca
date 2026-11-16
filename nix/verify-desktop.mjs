@@ -197,10 +197,17 @@ try {
   fs.writeFileSync(path.join(artifacts, 'result.json'), JSON.stringify(result, null, 2))
   console.log(JSON.stringify(result, null, 2))
 } catch (error) {
+  const log = fs.readFileSync(path.join(root, 'app.log'), 'utf8')
+  const diagnostics = {
+    sandboxFailure: /No usable sandbox|SUID sandbox|Failed to move to new namespace/.test(log),
+    libraryFailure: /error while loading shared libraries|symbol lookup error/.test(log),
+    displayFailure: /Missing X server|needs a usable display/.test(log)
+  }
   fs.writeFileSync(
     path.join(artifacts, 'result.json'),
-    JSON.stringify({ passed: false, error: error.message }, null, 2)
+    JSON.stringify({ passed: false, error: error.message, diagnostics }, null, 2)
   )
+  console.error(JSON.stringify(diagnostics))
   throw error
 } finally {
   await browser?.close().catch(() => {})

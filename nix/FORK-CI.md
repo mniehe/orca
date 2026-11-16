@@ -89,6 +89,9 @@ the source desktop package, including the native ABI-floor and protocol checks.
 It then tests the final CLI wrappers, Koffi and PTY execution under both bundled
 Node and Electron, and the renderer/preload IPC on a fresh profile and isolated
 Xvfb display through Playwright CDP. It does not disable Chromium's sandbox.
+The disposable Ubuntu runner permits unprivileged user namespaces by relaxing
+its AppArmor restriction when enabled, then verifies namespace creation before
+launching Electron. This changes only the CI host, not the packaged application.
 
 Actions are commit-pinned and the job has read-only repository permissions. It
 uploads only a smoke-test result and screenshot, not application logs, profile

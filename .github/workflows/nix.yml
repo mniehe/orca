@@ -75,6 +75,13 @@ jobs:
           test -x "$package/bin/orca-desktop"
           echo "ORCA_PACKAGE=$package" >> "$GITHUB_ENV"
 
+      - name: Prepare Chromium user namespaces
+        run: |
+          if [ "$(sysctl -n kernel.apparmor_restrict_unprivileged_userns 2>/dev/null || true)" = 1 ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          unshare --user --map-root-user true
+
       - name: Verify installed CLI, native modules and isolated GUI
         env:
           TMPDIR: ${{ runner.temp }}
