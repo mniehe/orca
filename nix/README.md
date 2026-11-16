@@ -88,6 +88,18 @@ separate validation/integration concerns.
 
 ## Verification and integration boundaries
 
+The fork's `Nix desktop` workflow builds and validates the final package on a
+GitHub-hosted Linux runner; see [the CI policy](FORK-CI.md). To repeat its runtime
+checks against an existing output:
+
+```sh
+nix run .#verify-desktop -- ./result ./nix-smoke-artifacts
+```
+
+This launches only on its own Xvfb display with a fresh profile. It writes a JSON
+result and screenshot to the supplied artifact directory, without publishing
+application logs or profile data.
+
 A successful native-helper build or staging-tree packaging probe does not prove
 the final installed desktop works. Before changing dotfiles, verify the complete
 package output, installed CLI, packaged PTY and background GUI startup through

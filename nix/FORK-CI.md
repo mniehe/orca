@@ -81,5 +81,16 @@ changed with `gh workflow disable <filename> --repo mniehe/orca`. Read back the
 settings after changes. An enabled workflow is not evidence that its jobs ran or
 passed.
 
-The inherited checks do not establish that the Nix desktop package builds or
-launches. Fork-specific Nix CI remains a separate follow-up.
+## Nix desktop validation
+
+`nix.yml` is fork-only and runs on relevant pushes to main, pull requests and
+manual dispatch, without a schedule. It evaluates both locked flakes and builds
+the source desktop package, including the native ABI-floor and protocol checks.
+It then tests the final CLI wrappers, Koffi and PTY execution under both bundled
+Node and Electron, and the renderer/preload IPC on a fresh profile and isolated
+Xvfb display through Playwright CDP. It does not disable Chromium's sandbox.
+
+Actions are commit-pinned and the job has read-only repository permissions. It
+uploads only a smoke-test result and screenshot, not application logs, profile
+data or pairing offers. Android toolchain evaluation is not an APK build or
+signing/device validation; remote-server deployment remains out of scope.

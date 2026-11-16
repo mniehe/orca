@@ -51,5 +51,18 @@
       mobile-web-deps = mobilePnpmDeps;
     };
     checks.${system}.desktop-native = desktopNative;
+    apps.${system}.verify-desktop = {
+      type = "app";
+      meta.description = "Validate the installed Orca desktop on an isolated display";
+      program = nixpkgs.lib.getExe (pkgs.writeShellApplication {
+        name = "orca-verify-desktop";
+        runtimeInputs = [pkgs.nodejs_24 pkgs.xorg-server];
+        text = ''
+          export ORCA_CI_PLAYWRIGHT=${pkgs.playwright-driver}
+          export ORCA_CI_EXPECTED_VERSION=${nixpkgs.lib.escapeShellArg (builtins.fromJSON (builtins.readFile ./package.json)).version}
+          exec node ${./nix}/verify-desktop.mjs "$@"
+        '';
+      });
+    };
   };
 }

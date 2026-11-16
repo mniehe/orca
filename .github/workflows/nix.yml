@@ -1,0 +1,92 @@
+name: Nix desktop
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/nix.yml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'nix/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - 'config/**'
+      - 'src/**'
+      - 'native/**'
+      - 'resources/**'
+      - 'mobile/**'
+  pull_request:
+    paths:
+      - '.github/workflows/nix.yml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'nix/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - 'config/**'
+      - 'src/**'
+      - 'native/**'
+      - 'resources/**'
+      - 'mobile/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nix-desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    if: github.repository == 'mniehe/orca'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      ORCA_BACKGROUND_LAUNCH: '1'
+      ORCA_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+        with:
+          github_access_token: ${{ github.token }}
+          enable_kvm: false
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            sandbox = true
+            allow-import-from-derivation = false
+
+      - name: Evaluate locked flakes
+        run: |
+          nix flake check --no-build --no-update-lock-file
+          nix eval --no-update-lock-file --raw ./mobile/nix#apps.x86_64-linux.default.program
+
+      - name: Build desktop and native ABI checks
+        run: |
+          package=$(nix build .#orca --no-update-lock-file --no-link --print-out-paths -L)
+          test -x "$package/bin/orca-desktop"
+          echo "ORCA_PACKAGE=$package" >> "$GITHUB_ENV"
+
+      - name: Verify installed CLI, native modules and isolated GUI
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: nix run .#verify-desktop --no-update-lock-file -- "$ORCA_PACKAGE" "$RUNNER_TEMP/orca-nix-validation"
+
+      - name: Upload smoke-test evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: nix-desktop-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/orca-nix-validation/result.json
+            ${{ runner.temp }}/orca-nix-validation/desktop.png
+          if-no-files-found: ignore
+          retention-days: 7
