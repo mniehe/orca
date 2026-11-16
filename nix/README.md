@@ -1,8 +1,113 @@
-# Fork packaging scope
+# Orca on Nix
 
-Keep fork changes limited to build/deployment support and consume upstream's build
-entry points. The Android environment is documented in [mobile/nix](../mobile/nix/README.md).
-It follows upstream's dependency/tool requirements; it does not freeze the app at an old release.
+This fork packages the Orca desktop application from source for **x86_64 Linux**.
+It uses upstream's build entry points and tool versions rather than wrapping an
+AppImage or maintaining a separate application build system.
+
+The root flake exports packages and a runtime-verification app. It does **not**
+currently export a NixOS service module, Home Manager module, overlay or
+server-only package. Install its desktop package through your existing NixOS or
+Home Manager configuration.
+
+For Android builds, private signing and explicit device installation, use the
+separate [Android Nix guide](../mobile/nix/README.md) and
+[Android workflow](../mobile/nix/ANDROID-WORKFLOW.md).
+
+## Quick start
+
+Nix must have the `nix-command` and `flakes` experimental features enabled.
+From a checkout of this fork:
+
+```sh
+nix build .#orca
+./result/bin/orca-desktop
+./result/bin/orca-ide --version
+```
+
+To build without cloning:
+
+```sh
+nix build github:mniehe/orca#orca
+./result/bin/orca-desktop
+```
+
+The remote command follows the fork's current default branch. For reproducible
+configuration, use a locked flake input or an explicit full commit revision.
+Initial builds fetch the locked toolchain and dependency archives; application
+compilation then runs offline in the Nix sandbox. This is not a development
+shell, and a system Node.js, pnpm or Android SDK installation is not required to
+build the desktop package.
+
+## Use from NixOS or Home Manager
+
+Add this input to your configuration's flake and commit the resulting
+`flake.lock`:
+
+```nix
+inputs.orca.url = "github:mniehe/orca";
+```
+
+Keep Orca's own nixpkgs input: its package asserts exact upstream tool versions,
+so adding `inputs.orca.inputs.nixpkgs.follows = "nixpkgs"` can break those pins.
+
+For a NixOS module that receives `inputs` through `specialArgs`:
+
+```nix
+{ inputs, pkgs, ... }: {
+  environment.systemPackages = [
+    inputs.orca.packages.${pkgs.stdenv.hostPlatform.system}.orca
+  ];
+}
+```
+
+For a Home Manager module that receives `inputs` through `extraSpecialArgs`:
+
+```nix
+{ inputs, pkgs, ... }: {
+  home.packages = [
+    inputs.orca.packages.${pkgs.stdenv.hostPlatform.system}.orca
+  ];
+}
+```
+
+Pass `specialArgs = { inherit inputs; };` to `nixpkgs.lib.nixosSystem`, or
+`extraSpecialArgs = { inherit inputs; };` to
+`home-manager.lib.homeManagerConfiguration`, respectively. When Home Manager is
+used as a NixOS module, pass `home-manager.extraSpecialArgs = { inherit inputs; };`
+instead. These examples support `x86_64-linux` only; no Darwin, Windows or ARM
+package is exported.
+
+The package installs the Orca desktop menu entry and the `orca-desktop`,
+`orca-ide` and `orca` commands. Do not install a second Orca package exposing the
+same commands alongside it. No system service, pairing endpoint or background
+server is enabled by installing the package.
+
+To update only this input from your configuration repository:
+
+```sh
+nix flake update orca
+```
+
+Review the new revision and its [Nix CI result](https://github.com/mniehe/orca/actions/workflows/nix.yml)
+before building and activating your configuration. In-app updates are disabled
+for the Nix-managed installation; update through the flake input instead.
+
+## Flake outputs
+
+| Output                                  | Purpose                                                 |
+| --------------------------------------- | ------------------------------------------------------- |
+| `packages.x86_64-linux.orca`            | Source-built desktop package                            |
+| `packages.x86_64-linux.default`         | Alias of `orca`                                         |
+| `packages.x86_64-linux.desktop-native`  | Clipboard/provider C helpers and their checks           |
+| `packages.x86_64-linux.desktop-deps`    | Fixed-output root pnpm dependency archive               |
+| `packages.x86_64-linux.mobile-web-deps` | Fixed-output mobile dependency archive                  |
+| `checks.x86_64-linux.desktop-native`    | Native ABI-floor and protocol checks                    |
+| `apps.x86_64-linux.verify-desktop`      | Final installed-package CLI, native and GUI smoke tests |
+
+`nix flake check --no-build` checks evaluation without compiling the outputs.
+`nix flake check` builds the exported native check; it does not by itself build
+and launch the full desktop. Use `nix build .#orca` and the runtime verification
+command below for that boundary.
 
 ## Server: use upstream's server-only distribution
 
