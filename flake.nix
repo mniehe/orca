@@ -60,6 +60,7 @@
         text = ''
           export ORCA_CI_PLAYWRIGHT=${pkgs.playwright-driver}
           export ORCA_CI_EXPECTED_VERSION=${nixpkgs.lib.escapeShellArg (builtins.fromJSON (builtins.readFile ./package.json)).version}
+          export ORCA_CI_GSETTINGS=${pkgs.glib.bin}/bin/gsettings
           exec node ${./nix}/verify-desktop.mjs "$@"
         '';
       });

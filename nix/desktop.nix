@@ -63,6 +63,7 @@
     wayland
   ];
   runtimeLibraryPath = lib.makeLibraryPath runtimeLibraries;
+  angleRunpaths = map (p: "${lib.getLib p}/lib") [pkgs.libGL pkgs.pciutils pkgs.vulkan-loader];
   desktopItem = pkgs.makeDesktopItem {
     name = "orca-ide";
     desktopName = "Orca";
@@ -99,7 +100,8 @@ in
         pkgs.pnpmConfigHook
       ];
       buildInputs = runtimeLibraries;
-      runtimeDependencies = runtimeLibraries;
+      runtimeDependencies = map lib.getLib runtimeLibraries;
+      appendRunpaths = angleRunpaths;
       dontWrapGApps = true;
       dontAutoPatchelf = true;
       stripExclude = ["lib/orca/resources/node-runtime/bin/node"];
@@ -205,22 +207,38 @@ in
         cp -r ${desktopItem}/share/applications "$out/share/"
         # Koffi ships both libcs; this package and its Node/Electron runtimes use glibc.
         rm -r "$out/lib/orca/resources/node_modules/@koromix/koffi-linux-x64/musl_x64"
-        patchShebangs --host "$out/lib/orca/resources/bin"
-        makeWrapper "$out/lib/orca/orca-ide" "$out/bin/orca-desktop" \
-          "''${gappsWrapperArgs[@]}" \
-          --set-default ORCA_TELEMETRY_DISABLED 1 \
-          --prefix PATH : ${lib.makeBinPath [python pkgs.xdotool pkgs.xclip pkgs.xorg-server pkgs.wl-clipboard pkgs.xdg-utils]}
-        makeWrapper "$out/lib/orca/resources/bin/orca-ide" "$out/bin/orca-ide" \
-          "''${gappsWrapperArgs[@]}" \
-          --set-default ORCA_TELEMETRY_DISABLED 1 \
-          --prefix PATH : ${lib.makeBinPath [python pkgs.xdotool pkgs.xclip pkgs.xorg-server pkgs.wl-clipboard pkgs.xdg-utils]}
-        ln -s orca-ide "$out/bin/orca"
+        substituteInPlace "$out/lib/orca/resources/bin/orca-ide" \
+          --replace-fail '#!/usr/bin/env bash' '#!${pkgs.bash}/bin/bash'
         runHook postInstall
+      '';
+
+      preFixup = ''
+        # Keep GTK schemas available without leaking plugin paths into host subprocesses.
+        orcaWrapperArgs=(
+          --set-default XDG_DATA_DIRS /usr/local/share/:/usr/share/
+          --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH"
+          --set-default ORCA_TELEMETRY_DISABLED 1
+          --suffix PATH : ${lib.makeBinPath [python pkgs.xdotool pkgs.xclip pkgs.xorg-server pkgs.wl-clipboard pkgs.xdg-utils]}
+        )
+        makeWrapper "$out/lib/orca/orca-ide" "$out/bin/orca-desktop" \
+          "''${orcaWrapperArgs[@]}"
+        makeWrapper "$out/lib/orca/resources/bin/orca-ide" "$out/bin/orca-ide" \
+          "''${orcaWrapperArgs[@]}"
       '';
 
       postFixup = ''
         # Preserve dlopen search paths after the standard RPATH shrink step.
         autoPatchelf "$out/lib/orca"
+        for library in libEGL.so libGLESv2.so; do
+          rpath="$(patchelf --print-rpath "$out/lib/orca/$library")"
+          for required in ${lib.escapeShellArgs angleRunpaths}; do
+            case ":$rpath:" in
+              *":$required:"*) ;;
+              *) echo "$library is missing its dlopen search path: $required" >&2; exit 1 ;;
+            esac
+          done
+        done
+        test "$(head -n 1 "$out/lib/orca/resources/bin/orca-ide")" = '#!${pkgs.bash}/bin/bash'
         "$out/lib/orca/resources/node-runtime/bin/node" --version
       '';
 

@@ -36,7 +36,7 @@ Object.assign(env, {
 })
 const executable = path.join(packagePath, 'bin/orca-desktop')
 const resources = path.join(packagePath, 'lib/orca/resources')
-function run(command, args, extraEnv = {}) {
+function run(command, args, extraEnv = {}, expectedStatus = 0) {
   const result = spawnSync(command, args, {
     env: { ...env, ...extraEnv },
     cwd: root,
@@ -44,7 +44,7 @@ function run(command, args, extraEnv = {}) {
     timeout: 30000
   })
   assert.ifError(result.error)
-  assert.equal(result.status, 0, `${command} failed: ${result.stderr}`)
+  assert.equal(result.status, expectedStatus, `${command} failed: ${result.stderr}`)
   return result.stdout.trim()
 }
 const nativeProbe = path.join(import.meta.dirname, 'verify-desktop-native.cjs')
@@ -86,12 +86,20 @@ async function stop(process) {
 }
 try {
   assert.equal(run(path.join(packagePath, 'bin/orca-ide'), ['--version']), expectedVersion)
-  assert.equal(run(path.join(packagePath, 'bin/orca'), ['--version']), expectedVersion)
+  assert(!fs.existsSync(path.join(packagePath, 'bin/orca')), 'Do not shadow the Orca screen reader')
+  for (const helper of ['orca-provider-exec', 'orca-wayland-clipboard']) {
+    run(path.join(resources, 'bin', helper), ['--help'], {}, 64)
+  }
+  run(path.join(packagePath, 'lib/orca/chrome_crashpad_handler'), ['--version'])
   const node = JSON.parse(
     run(path.join(resources, 'node-runtime/bin/node'), [nativeProbe, resources])
   )
   const electron = JSON.parse(
-    run(executable, [nativeProbe, resources], { ELECTRON_RUN_AS_NODE: '1' })
+    run(executable, [nativeProbe, resources], {
+      ELECTRON_RUN_AS_NODE: '1',
+      ORCA_CI_PARENT_PATH: env.PATH,
+      ORCA_CI_GSETTINGS: process.env.ORCA_CI_GSETTINGS
+    })
   )
   assert.equal(node.node, electron.node)
   assert(electron.electron, 'Electron probe must use the packaged Electron runtime')
