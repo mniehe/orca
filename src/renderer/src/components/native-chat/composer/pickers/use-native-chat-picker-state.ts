@@ -1,4 +1,3 @@
-import { useNativeChatPickerContext } from './use-native-chat-picker-context'
 import {
   writeNativeChatComposerText,
   type NativeChatComposerInput
@@ -124,10 +123,6 @@ export function useNativeChatPickerState(args: {
   const dismissalContext = `${draftScopeKey}:${agent}`
   const [dismissed, setDismissed] = useState<{ context: string; triggerKey: string } | null>(null)
   const skillOriginRef = useRef<string | null>(null)
-  useNativeChatPickerContext(dismissalContext, () => {
-    skillOriginRef.current = null
-    setDismissed(null)
-  })
   const lastOpenKeyRef = useRef<string | null>(null)
   const derivedAutocomplete = useMemo<ComposerAutocomplete>(
     () =>
@@ -171,6 +166,12 @@ export function useNativeChatPickerState(args: {
     caret,
     setActiveSuggestion
   )
+
+  useEffect(() => {
+    // Reset dismissal/origin on context changes so a reused composer cannot retain a prior pane’s suppression.
+    skillOriginRef.current = null
+    setDismissed(null)
+  }, [dismissalContext])
 
   useEffect(() => {
     if (autocomplete.mode !== 'slash') {
@@ -233,9 +234,10 @@ export function useNativeChatPickerState(args: {
 
   const completeMention = useCallback(
     (path: string) => {
-      if (!disabledRef.current && autocomplete.mode === 'mention') {
-        commitCompletion(applyMentionSuggestion(...liveDraft(), path))
+      if (disabledRef.current || autocomplete.mode !== 'mention') {
+        return
       }
+      commitCompletion(applyMentionSuggestion(...liveDraft(), path))
     },
     [autocomplete, commitCompletion, liveDraft]
   )

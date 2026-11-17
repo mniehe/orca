@@ -1,20 +1,10 @@
-import { useNativeChatPaneLifetimeEffect } from '../../pane/ownership/native-chat-pane-lifetime'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type RefObject
-} from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { openHttpLink } from '@/lib/browser/navigation/http-link-routing'
 import {
   NATIVE_CHAT_VISUAL_FRAME_NAME_PREFIX,
   NATIVE_CHAT_VISUAL_PONG_TIMEOUT_MS,
   buildNativeChatVisualDocument,
   nativeChatVisualPingMessage,
-  newNativeChatVisualChannel,
   nativeChatVisualThemeMessage,
   readNativeChatVisualFrameMessage,
   readNativeChatVisualPong
@@ -29,6 +19,12 @@ import { useWebviewDragPassthroughActive } from '../../../browser-pane/host-gues
 export const NATIVE_CHAT_VISUAL_RESERVED_HEIGHT = 160
 // Allow one link per Chromium activation window so one click cannot open multiple pages.
 const LINK_COOLDOWN_MS = 5_000
+
+function newChannel(): string {
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+}
 
 /** Use an opaque script-only frame and restyle in place; unanswered later loads retire it as a tripwire, not a security boundary. */
 export function NativeChatVisualFrame({
@@ -64,7 +60,7 @@ export function NativeChatVisualFrame({
 
   // Built once per revision: the theme at build time paints first, later themes arrive by message.
   const built = useMemo(() => {
-    const channel = newNativeChatVisualChannel()
+    const channel = newChannel()
     return {
       channel,
       srcDoc: buildNativeChatVisualDocument({
@@ -75,90 +71,86 @@ export function NativeChatVisualFrame({
     }
   }, [visual.html])
 
-  useNativeChatPaneLifetimeEffect(
-    useCallback(() => {
+  useEffect(() => {
+    loadsRef.current = 0
+    const governor = createNativeChatVisualHeightGovernor()
+    let deferred: ReturnType<typeof setTimeout> | null = null
+    let latestReported: number | null = null
+    let lastLinkAt = -Infinity
+    const applyHeight = (): void => {
+      deferred = null
+      if (latestReported === null) {
+        return
+      }
+      const decision = governor.decide(latestReported, performance.now())
+      if (decision.kind === 'apply') {
+        setHeight(decision.height)
+      } else if (decision.kind === 'defer') {
+        deferred = setTimeout(applyHeight, decision.retryInMs)
+      }
+    }
+    const onMessage = (event: MessageEvent): void => {
       const frame = frameRef.current
-      loadsRef.current = 0
-      const governor = createNativeChatVisualHeightGovernor()
-      let deferred: ReturnType<typeof setTimeout> | null = null
-      let latestReported: number | null = null
-      let lastLinkAt = -Infinity
-      const applyHeight = (): void => {
-        deferred = null
-        if (latestReported === null) {
-          return
-        }
-        const decision = governor.decide(latestReported, performance.now())
-        if (decision.kind === 'apply') {
-          setHeight(decision.height)
-        } else if (decision.kind === 'defer') {
-          deferred = setTimeout(applyHeight, decision.retryInMs)
-        }
+      if (!frame || event.source !== frame.contentWindow) {
+        return
       }
-      const onMessage = (event: MessageEvent): void => {
-        if (!frame || event.source !== frame.contentWindow) {
-          return
-        }
-        const pong = readNativeChatVisualPong(event.data, built.channel)
-        if (pong !== null) {
-          if (pong === unansweredRef.current?.id) {
-            clearTimeout(unansweredRef.current.timer)
-            unansweredRef.current = null
-          }
-          return
-        }
-        const message = readNativeChatVisualFrameMessage(event.data, built.channel)
-        if (!message) {
-          return
-        }
-        if (message.kind === 'size') {
-          latestReported = message.height
-          if (!deferred) {
-            applyHeight()
-          }
-          return
-        }
-        if (message.kind === 'reader-scroll') {
-          onReaderGestureRef.current?.(
-            message.input === 'wheel'
-              ? { kind: 'wheel', deltaY: message.deltaY, zoom: false }
-              : { kind: 'touch-drag' }
-          )
-          return
-        }
-        // Require recent input in this focused frame; this blocks load-time opens but cannot prove the gesture named this link.
-        const now = performance.now()
-        if (
-          window.document.activeElement !== frame ||
-          navigator.userActivation?.isActive !== true ||
-          now - lastLinkAt < LINK_COOLDOWN_MS
-        ) {
-          return
-        }
-        lastLinkAt = now
-        openHttpLink(message.url, { forceSystemBrowser: true })
-      }
-      window.addEventListener('message', onMessage)
-      return () => {
-        window.removeEventListener('message', onMessage)
-        if (deferred) {
-          clearTimeout(deferred)
-        }
-      }
-    }, [built.channel])
-  )
-
-  // A frame rebuilt for a new revision, or unmounted, owes no answer.
-  useNativeChatPaneLifetimeEffect(
-    useCallback(
-      () => () => {
-        if (unansweredRef.current) {
+      const pong = readNativeChatVisualPong(event.data, built.channel)
+      if (pong !== null) {
+        if (pong === unansweredRef.current?.id) {
           clearTimeout(unansweredRef.current.timer)
           unansweredRef.current = null
         }
-      },
-      [built.channel]
-    )
+        return
+      }
+      const message = readNativeChatVisualFrameMessage(event.data, built.channel)
+      if (!message) {
+        return
+      }
+      if (message.kind === 'size') {
+        latestReported = message.height
+        if (!deferred) {
+          applyHeight()
+        }
+        return
+      }
+      if (message.kind === 'reader-scroll') {
+        onReaderGestureRef.current?.(
+          message.input === 'wheel'
+            ? { kind: 'wheel', deltaY: message.deltaY, zoom: false }
+            : { kind: 'touch-drag' }
+        )
+        return
+      }
+      // Require recent input in this focused frame; this blocks load-time opens but cannot prove the gesture named this link.
+      const now = performance.now()
+      if (
+        window.document.activeElement !== frame ||
+        navigator.userActivation?.isActive !== true ||
+        now - lastLinkAt < LINK_COOLDOWN_MS
+      ) {
+        return
+      }
+      lastLinkAt = now
+      openHttpLink(message.url, { forceSystemBrowser: true })
+    }
+    window.addEventListener('message', onMessage)
+    return () => {
+      window.removeEventListener('message', onMessage)
+      if (deferred) {
+        clearTimeout(deferred)
+      }
+    }
+  }, [built.channel])
+
+  // A frame rebuilt for a new revision, or unmounted, owes no answer.
+  useEffect(
+    () => () => {
+      if (unansweredRef.current) {
+        clearTimeout(unansweredRef.current.timer)
+        unansweredRef.current = null
+      }
+    },
+    [built.channel]
   )
 
   useEffect(() => {
@@ -186,9 +178,9 @@ export function NativeChatVisualFrame({
           colorScheme: theme.colorScheme,
           pointerEvents: dragPassthrough ? 'none' : undefined
         }}
-        onLoad={(event) => {
+        onLoad={() => {
           loadsRef.current += 1
-          const frameWindow = event.currentTarget.contentWindow
+          const frameWindow = frameRef.current?.contentWindow
           if (loadsRef.current > 1) {
             // A tripwire for a frame gone blank or to another page (WebKit also loads on `#x`).
             if (unansweredRef.current) {

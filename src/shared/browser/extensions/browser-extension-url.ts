@@ -1,4 +1,4 @@
-import '../../orca-profiles/constants'
+import '../../constants'
 import { ORCA_BROWSER_BLANK_URL } from '../browser-blank-page'
 import { normalizeBrowserNavigationUrl } from '../navigation/browser-url'
 

@@ -3,7 +3,7 @@ import {
   normalizeVisibleExecutionHostIds,
   type ExecutionHostId,
   type ExecutionHostScope
-} from '../execution-host/execution-host'
+} from '../execution-host'
 import {
   expandEquivalentExecutionHostIds,
   pickerExecutionHosts,

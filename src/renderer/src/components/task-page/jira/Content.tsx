@@ -22,7 +22,6 @@ import {
   runtimeTargetEnvironmentId
 } from '@/runtime/rpc/targets/runtime-client-target'
 import { getEnvironmentRuntimeContextKey } from '@/runtime/hosts/observations/provider-runtime-context'
-import { getJiraBoardColumnOrderScopeKey } from './boards/task-page-jira-board-column-order'
 export function TaskPageJiraContent({
   model
 }: {
@@ -57,7 +56,6 @@ export function TaskPageJiraContent({
     toggleJiraColumn,
     displayedJiraIssues,
     displayedJiraStatusOrder,
-    displayedJiraProjectScope,
     sortedJiraIssues,
     setJiraConnectOpen,
     handleUseJiraItem,
@@ -209,11 +207,6 @@ export function TaskPageJiraContent({
               sourceContext={jiraTaskSourceContext}
               target={boardTarget}
               scopeKey={boardScopeKey}
-              columnOrderScopeKey={getJiraBoardColumnOrderScopeKey(
-                jiraTaskSourceContext,
-                boardTarget,
-                displayedJiraProjectScope
-              )}
               onOpenIssue={openJiraDetailPage}
               onStartWorkspace={handleUseJiraItem}
               showSiteContext={selectedJiraSiteId === 'all'}

@@ -1,7 +1,7 @@
-import type { ProviderChild } from '../../provider-process/provider-child'
+import type { ChildProcess } from 'node:child_process'
 
 type RootTerminationInput = {
-  child: Pick<ProviderChild, 'kill'>
+  child: Pick<ChildProcess, 'kill'>
   exited: () => boolean
 }
 

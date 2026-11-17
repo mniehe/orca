@@ -1,8 +1,5 @@
 import { structuredLaunchSlotIds } from '@/lib/agent-session/launch/structured-agent-session-launch-persistence'
-import type {
-  TabGroup,
-  TabGroupLayoutNode
-} from '../../../../../shared/workspace-layout/tab-groups/tab-types'
+import type { TabGroup, TabGroupLayoutNode } from '../../../../../shared/tab-types'
 import {
   pickNextActiveTab,
   pushRecentTabId,

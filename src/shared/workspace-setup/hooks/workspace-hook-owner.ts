@@ -1,9 +1,6 @@
 import type { ProjectGroup } from '../../project/groups/project-group-types'
 import type { Repo } from '../../repository/repo-types'
-import {
-  getRepoExecutionHostId,
-  normalizeExecutionHostId
-} from '../../execution-host/execution-host'
+import { getRepoExecutionHostId, normalizeExecutionHostId } from '../../execution-host'
 
 export type WorkspaceHookOwner = Pick<
   Repo,

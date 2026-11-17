@@ -24,10 +24,7 @@ import {
   getLocalProjectWorktreeGitOptions
 } from '../../workspaces/execution-host/project-runtime-git-options'
 import { getWorktreeSharedLinkPaths } from '../../git/worktrees/content-paths/worktree-shared-directories'
-import {
-  getRepoExecutionHostId,
-  getRepoSshConnectionId
-} from '../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, getRepoSshConnectionId } from '../../../shared/execution-host'
 import { getStoredRepoExecutionHostId } from '../../workspaces/execution-host/repo-execution-host'
 import { guardWslUncPathAccess } from '../../wsl/filesystem/wsl-unc-access-gate'
 

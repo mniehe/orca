@@ -45,10 +45,11 @@ export function startCodexHooks({
   ...appConfig
 }: ReconcileConfig & {
   pathReady: Promise<unknown>
-  /** Hold background work for host readiness or first paint; launches never wait on it. */
+  /** orcad passes its readiness so this PATH scan stays off it; launches never wait on it. */
   startAfter?: Promise<unknown>
 }): void {
   const pathReady = hydrating.catch(() => {})
+  startCodexHookHashLookup(pathReady)
   config = appConfig
   const released = Promise.withResolvers<void>()
   releaseStartup = released.resolve
@@ -56,7 +57,6 @@ export function startCodexHooks({
     pathReady,
     Promise.race([startAfter.catch(() => {}), released.promise])
   ])
-  startCodexHookHashLookup(pathReady, ready)
   // Warm the hash cache before the first managed launch.
   void ready.then(() => (appConfig.isEnabled() ? resolveCodexHookAnswer() : undefined))
   // Early launches must join this run and wait for PATH hydration.
@@ -81,7 +81,6 @@ function reconcileAfter(ready: Promise<unknown>, request: ReconcileRequest): Pro
 }
 
 export function scheduleCodexHookReconcile(): void {
-  releaseStartup?.()
   // One run already reads after the spawn; coalesce calls from its multiple env builders.
   if (config && (!running || findingCodexAnswer)) {
     void reconcileCodexHooks()

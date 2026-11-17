@@ -191,19 +191,16 @@ export function NativeChatMessageList({
       isStructuredAgentSessionThinking({ items: journalItems ?? [], latestTurn }),
     [journalItems, latestTurn, subagentId]
   )
-  // The clock starts once the opening message lands, not while it still says "Sending…".
-  const turnWorking =
-    working && (liveTurnKey === undefined || deliveryNotices?.get(liveTurnKey)?.sending !== true)
   const turnStatuses = useNativeChatTurnStatus({
     turnKeys,
     liveTurnKey,
-    isWorking: turnWorking,
+    isWorking: working,
     workingStartedAt,
     settledTurns,
     thinking
   })
   // Only unshown prompts need a waiting tail row; prompt cards explain their own wait.
-  const tailRow = transcriptTailRow(turnWorking, awaitingInput)
+  const tailRow = transcriptTailRow(working, awaitingInput)
   const lifecycleWorking = subagentId === null && session.transcriptLifecycle?.state === 'working'
   const { measureContent, typography } = useNativeChatRowTypography(contentRef)
   const forkOffer = useNativeChatSideChatForkOffer(latestTurnKey)

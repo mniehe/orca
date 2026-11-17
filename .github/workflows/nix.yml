@@ -69,6 +69,9 @@ jobs:
           nix flake check --no-build --no-update-lock-file
           nix eval --no-update-lock-file --raw ./mobile/nix#apps.x86_64-linux.default.program
 
+      - name: Verify locked dependency archive hashes
+        run: nix build .#desktop-deps .#mobile-web-deps --keep-going --no-update-lock-file --no-link -L
+
       - name: Build desktop and native ABI checks
         run: |
           package=$(nix build .#orca --no-update-lock-file --no-link --print-out-paths -L)

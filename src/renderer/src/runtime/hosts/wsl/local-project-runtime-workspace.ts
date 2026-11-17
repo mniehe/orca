@@ -1,9 +1,6 @@
 import type { AppState } from '@/store/types'
 import { getIndexedWorktreeById } from '@/store/slices/worktrees/listing/worktree-catalog-index'
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../../shared/execution-host'
 import {
   findLocalFolderWorkspaceRuntimeRepo,
   resolveQualifiedFolderWorkspaceResult

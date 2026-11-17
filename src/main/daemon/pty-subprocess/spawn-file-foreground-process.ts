@@ -12,7 +12,7 @@ import { isShellProcess } from '../../../shared/agent-status/process/shell-proce
 import {
   getCommandTokenPathBasename,
   getFirstCommandToken
-} from '../../../shared/shell/command-resolution/command-token-scanner'
+} from '../../../shared/command-token-scanner'
 import {
   collectDescendantsFromIndex,
   getProcessTableIndex

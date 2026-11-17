@@ -1,9 +1,5 @@
 import type { RuntimeMobileSessionTabGroup } from '../../../../shared/remote-runtime/session-graph/runtime-session-contracts'
-import type {
-  Tab,
-  TabGroup,
-  TabGroupLayoutNode
-} from '../../../../shared/workspace-layout/tab-groups/tab-types'
+import type { Tab, TabGroup, TabGroupLayoutNode } from '../../../../shared/tab-types'
 import {
   structuredAgentSessionHostTabId,
   isReopenedChatTabId
@@ -12,7 +8,7 @@ import {
   getActiveTabNavOrder,
   getGroupVisibleTabOrder,
   type VisibleTabRef
-} from '../../lib/workspace/tabs/order/group-tab-order'
+} from '../../components/tab-bar/group-tab-order'
 import type { MobileSessionWorktreeInputs } from './types'
 import { isEditorSurfaceTab } from './mobile-session-surfaces'
 

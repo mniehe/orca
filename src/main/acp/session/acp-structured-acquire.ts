@@ -10,7 +10,6 @@ import type {
 import { providerTimelineSink } from '../../native-chat/agent-session-timeline/provider-timeline-plan'
 import { providerSpawnedProcessIdentity } from '../../provider-process/provider-spawned-process-identity'
 import { acpPrivateTempConnect } from '../launch/acp-private-temp'
-import { acpClientInfo } from '../launch/acp-client-info'
 import * as childState from './children/acp-structured-child'
 import type { AcpSessionEvent } from '../protocol/acp-session-events'
 import type { AcpStructuredConnection } from '../process/acp-structured-connection'
@@ -102,7 +101,7 @@ export async function acquireAcpStructuredSession(input: {
       envToDelete: launch.envToDelete
     },
     {
-      clientInfo: acpClientInfo(spec, launch.version ?? null),
+      clientInfo: { name: 'orca', version: '1' },
       // Only a chat can show a URL request's card, so other connections never advertise it.
       clientCapabilities: withAcpUrlElicitation(spec.dialect.clientCapabilities),
       retryBusyPrompts: spec.agent === 'omp',

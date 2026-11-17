@@ -36,7 +36,6 @@ import { buildWorktreeVirtualRowContext } from './virtual-row-context'
 import type { RepoHeaderProjectActions } from '../rows/repo-header-project-actions'
 import { getRepoOwnerWorktreeVisibilityDefaults } from '../../../../store/slices/worktrees/listing/worktree-visibility-defaults-by-host'
 import { renderWorktreeVirtualRow } from '../rows/virtual-row-dispatch'
-import { selectDrawsNewWorktreeCards } from '@/store/appearance/worktree-card-style'
 
 const EMPTY_HOST_OPTIONS: NonNullable<VirtualizedWorktreeViewportProps['hostOptions']> = []
 
@@ -78,7 +77,7 @@ export const VirtualizedWorktreeViewport = React.memo(function VirtualizedWorktr
     repoMap,
     projectGrouping: props.projectGrouping
   })
-  const newCardStyle = useAppStore(selectDrawsNewWorktreeCards)
+  const newCardStyle = settings?.experimentalNewWorktreeCardStyle === true
   const {
     handleOpenRepoSettings,
     handleOpenWorktreeVisibility,

@@ -3,7 +3,10 @@ import {
   openOwnedHttpLink,
   type HttpLinkSourceOwner
 } from '@/lib/browser/navigation/http-link-routing'
-import { canOpenRemoteLinkInWorkspaceBrowser } from '@/lib/browser/workspace/workspace-browser-route-eligibility'
+import {
+  canOpenWorkspaceBrowserTabOnRuntime,
+  canOpenWorkspaceBrowserTabOnSsh
+} from '@/lib/browser/workspace/workspace-browser-route-eligibility'
 import type { AppState } from '@/store/types'
 
 export function openMarkdownExternalUrl(
@@ -32,10 +35,12 @@ export function openMarkdownExternalUrl(
     return
   }
   const canOpenOwnedBrowser =
-    sourceOwner.kind === 'local'
-      ? getWorkspaceClientCreationActionPolicy(state, worktreeId)['managed-browser'].state ===
-        'enabled'
-      : canOpenRemoteLinkInWorkspaceBrowser(state, worktreeId, sourceOwner)
+    sourceOwner.kind === 'runtime'
+      ? canOpenWorkspaceBrowserTabOnRuntime(state, worktreeId, sourceOwner.runtimeEnvironmentId)
+      : sourceOwner.kind === 'ssh'
+        ? canOpenWorkspaceBrowserTabOnSsh(state, worktreeId, sourceOwner.connectionId)
+        : getWorkspaceClientCreationActionPolicy(state, worktreeId)['managed-browser'].state ===
+          'enabled'
   if (!canOpenOwnedBrowser) {
     openOwnedHttpLink(url, {
       worktreeId,

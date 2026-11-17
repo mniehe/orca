@@ -1,7 +1,4 @@
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../shared/execution-host'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree/id'
 import type { Repo } from '../../shared/repository/repo-types'
 import type { WorktreeMeta } from '../../shared/worktree/meta-types'

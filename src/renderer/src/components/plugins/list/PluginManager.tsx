@@ -161,7 +161,13 @@ export function PluginManager({
   // Why: dev folders, local installs and bundled plugins have no catalog card to carry their switch.
   const uncataloged = catalog.loading ? [] : installed.filter((entry) => !listedInCatalog(entry))
   const catalogInstalled = filter === 'available' ? [] : entries.installed
-  const updateDialog = usePluginUpdateDialog()
+  const updateDialog = usePluginUpdateDialog({
+    ready: !pluginsLoading && !catalog.loading,
+    updates,
+    page,
+    showUpdates: () => setTab('updates'),
+    reloadCatalogs: catalog.loadMarketplaceData
+  })
   const rowHandlers: InstalledRowHandlers = {
     ...handlers,
     onOpen: openEntry,

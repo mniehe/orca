@@ -7,26 +7,29 @@ export {
   registerBrowserSessionNotificationGrant
 } from './browser-guest-idle-protection'
 import { randomUUID } from 'node:crypto'
-import { observeBrowserGuestRequests } from '../../../sessions/requests/browser-session-web-request-observer'
+import {
+  installBrowserGuestHistoryProvenance,
+  type BrowserGuestHistoryProtection
+} from './browser-guest-history-provenance'
 import {
   BROWSER_GUEST_PROTECTION_CHALLENGE,
   BROWSER_GUEST_PROTECTION_REPORT,
   type BrowserGuestDiscardProtection
 } from '../../../../../shared/browser/guest-lifecycle/browser-guest-discard-protection'
 
-type ProtectionOwner = {
+type ProtectionOwner = BrowserGuestHistoryProtection & {
   generation: string | null
-  dirty: boolean | null
-  navigating: boolean
-  currentEdited: boolean
-  currentPost: boolean
-  mediaGranted: boolean
   unavailable: boolean
   // Null until the private observer reports them for the current challenge.
   pictureInPicture: boolean | null
   pdf: boolean | null
   changed: () => void
 }
+const initialGuests = new WeakSet<Electron.WebContents>()
+export function markInitialBrowserGuest(guest: Electron.WebContents): void {
+  initialGuests.add(guest)
+}
+
 const owners = new WeakMap<Electron.WebContents, ProtectionOwner>()
 export function invalidateBrowserGuestDiscardProtection(guest: Electron.WebContents): void {
   try {
@@ -57,10 +60,6 @@ export function readBrowserGuestDiscardProtection(
   if (owner.dirty) {
     return result('protected', 'edits')
   }
-  // Restore reloads a POST entry as a plain GET, so reopening a POST result would show another page.
-  if (owner.currentPost) {
-    return result('protected', 'post')
-  }
   if (owner.pictureInPicture === null || owner.pdf === null) {
     return result('unknown', 'observer')
   }
@@ -76,13 +75,8 @@ export function readBrowserGuestDiscardProtection(
   if (owner.mediaGranted) {
     return result('protected', 'capture')
   }
-  try {
-    // Only web and data pages can be freed; files and workspace documents stay.
-    if (!/^(https?|data):/i.test(guest.getURL())) {
-      return result('protected', 'url')
-    }
-  } catch {
-    return result('unknown', 'observer')
+  if (owner.historyEdits || owner.historyMethodUnknown || !owner.knownGet) {
+    return result('protected', 'history')
   }
   return result('discardable', 'clean')
 }
@@ -96,7 +90,8 @@ export function readBrowserGuestDiscardAdmission(
 
 export function installBrowserGuestDiscardProtection(
   guest: Electron.WebContents,
-  changed: () => void
+  changed: () => void,
+  initial = initialGuests.has(guest)
 ): () => void {
   const owner: ProtectionOwner = {
     changed,
@@ -105,8 +100,13 @@ export function installBrowserGuestDiscardProtection(
     unavailable: false,
     navigating: false,
     currentEdited: false,
-    currentPost: false,
+    coverageUnknown: !initial,
+    documentSeen: !initial,
+    knownGet: false,
+    historyEdits: !initial,
+    historyMethodUnknown: !initial,
     mediaGranted: false,
+    episode: null,
     pictureInPicture: null,
     pdf: null
   }
@@ -146,6 +146,22 @@ export function installBrowserGuestDiscardProtection(
       // Missing observers stay protected until a real readiness event rebinds them.
     }
   }
+  const rederiveSoleHistory = (): void => {
+    // Only a proved sole clean GET can retire earlier, now absent obligations.
+    if (owner.dirty === false && owner.knownGet && !owner.unavailable && !owner.coverageUnknown) {
+      try {
+        if (
+          guest.navigationHistory.length() === 1 &&
+          guest.navigationHistory.getActiveIndex() === 0
+        ) {
+          owner.historyEdits = false
+          owner.historyMethodUnknown = false
+        }
+      } catch {
+        owner.historyMethodUnknown = true
+      }
+    }
+  }
   const report = (event: Electron.IpcMainEvent, channel: string, payload: unknown): void => {
     if (
       channel !== BROWSER_GUEST_PROTECTION_REPORT ||
@@ -173,6 +189,7 @@ export function installBrowserGuestDiscardProtection(
       return
     }
     if (payload.dirty) {
+      owner.historyEdits = true
       owner.currentEdited = true
     }
     owner.dirty = owner.currentEdited || payload.dirty
@@ -185,36 +202,16 @@ export function installBrowserGuestDiscardProtection(
       'contentType' in payload && typeof payload.contentType === 'string'
         ? payload.contentType === 'application/pdf'
         : null
+    rederiveSoleHistory()
     publish()
   }
-  // Only the current document protects; restored back/forward entries reload on demand.
-  let pendingMethod: string | null = null
-  const stopRequests = observeBrowserGuestRequests(guest.id, (session, event, details) => {
-    if (
-      event === 'onBeforeRequest' &&
-      details.resourceType === 'mainFrame' &&
-      session === guest.session
-    ) {
-      pendingMethod = details.method
-    }
-  })
-  const navigation = (
-    details: Electron.Event<Electron.WebContentsDidStartNavigationEventParams>
-  ): void => {
-    if (details.isMainFrame && !details.isSameDocument) {
-      pendingMethod = null
-      owner.navigating = true
-      invalidate()
-    } else if (!details.isMainFrame) {
-      publish()
-    }
-  }
-  const committed = (): void => {
-    owner.currentEdited = false
-    owner.currentPost = pendingMethod !== null && pendingMethod !== 'GET'
-    owner.mediaGranted = false
-    publish()
-  }
+  const stopHistory = installBrowserGuestHistoryProvenance(
+    guest,
+    owner,
+    publish,
+    invalidate,
+    rederiveSoleHistory
+  )
   const settled = (): void => {
     owner.navigating = false
     owner.unavailable = false
@@ -231,13 +228,18 @@ export function installBrowserGuestDiscardProtection(
   }
   const unresponsive = (): void => {
     owner.unavailable = true
+    owner.historyEdits = true
+    owner.coverageUnknown = true
     invalidate()
   }
   const responsive = (): void => {
     owner.unavailable = false
     snapshot()
   }
-  const frameCreated = (): void => publish()
+  const frameCreated = (): void => {
+    owner.coverageUnknown = true
+    publish()
+  }
   const inPageNavigation = (_event: Electron.Event, _url: string, isMainFrame: boolean): void => {
     if (isMainFrame) {
       publish()
@@ -251,11 +253,9 @@ export function installBrowserGuestDiscardProtection(
   guest.on('unresponsive', unresponsive)
   guest.on('render-process-gone', unresponsive)
   guest.on('frame-created', frameCreated)
-  guest.on('did-start-navigation', navigation)
-  guest.on('did-navigate', committed)
   guest.on('did-navigate-in-page', inPageNavigation)
   return () => {
-    stopRequests()
+    stopHistory()
     stopIdleProtection()
     if (owners.get(guest) === owner) {
       owners.delete(guest)
@@ -267,8 +267,6 @@ export function installBrowserGuestDiscardProtection(
     guest.off('unresponsive', unresponsive)
     guest.off('render-process-gone', unresponsive)
     guest.off('frame-created', frameCreated)
-    guest.off('did-start-navigation', navigation)
-    guest.off('did-navigate', committed)
     guest.off('did-navigate-in-page', inPageNavigation)
   }
 }

@@ -7,15 +7,12 @@ export const SOURCE_CONTROL_KILL_SITE = 'source-control-text-generation'
 export async function killSourceControlAgentProcess(
   child: SpawnedSourceControlAgentProcess
 ): Promise<void> {
-  if (child.supervised) {
-    if (!child.pid && !child.ready) {
-      return
-    }
-    await stopSupervisedChildProcess(child, { site: SOURCE_CONTROL_KILL_SITE })
-    return
-  }
   const pid = child.pid
   if (!pid) {
+    return
+  }
+  if (child.supervised) {
+    await stopSupervisedChildProcess(child, { site: SOURCE_CONTROL_KILL_SITE })
     return
   }
   if (process.platform === 'win32') {

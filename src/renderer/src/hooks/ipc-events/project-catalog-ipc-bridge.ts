@@ -4,7 +4,6 @@ import type { WorktreeChangeRefreshQueue } from '../worktree-change-refresh-queu
 import { useAppStore } from '../../store'
 import { adoptFromEndpoint } from '../../store/host-catalog/endpoint-catalog-adoption'
 import { selectWorktreesByRepo } from '@/store/workspaces/catalog/workspace-record-fields'
-import { patchDetectedWorktreeHeadIdentities } from '@/store/slices/worktrees/listing/detected-worktree-head-identity'
 
 export function registerProjectCatalogIpcBridge(
   unsubs: (() => void)[],
@@ -64,9 +63,6 @@ export function registerProjectCatalogIpcBridge(
           getWorktreesForRepo: (repoId) => selectWorktreesByRepo(state)[repoId],
           updateWorktreeGitIdentity: state.updateWorktreeGitIdentity
         })
-        useAppStore.setState(
-          (s) => patchDetectedWorktreeHeadIdentities(s, data.repoId, data.identities) ?? s
-        )
       })
     )
   }

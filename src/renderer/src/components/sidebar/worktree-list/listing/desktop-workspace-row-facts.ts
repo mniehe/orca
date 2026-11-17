@@ -2,7 +2,7 @@ import { isWorktreeRetiredByRemoval } from '../../../../../../shared/worktree/re
 import {
   getWorktreeExecutionHostId,
   type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+} from '../../../../../../shared/execution-host'
 import type { Repo } from '../../../../../../shared/repository/repo-types'
 import type { TerminalTab } from '../../../../../../shared/workspace-layout/terminal-tab-types'
 import type { WorkspaceRowFactReader } from '../../../../../../shared/workspace-view/workspace-row-filters'
@@ -18,7 +18,7 @@ import type { Worktree } from '../../../../../../shared/worktree/types'
 import {
   hiddenProjectRowFacts,
   type HiddenProjects
-} from '../../../../../../shared/project/catalog/hidden-projects'
+} from '../../../../../../shared/hidden-projects'
 import { isInactiveWorkspace } from '@/lib/workspace/activity/worktree-activity-state'
 
 export type DesktopWorkspaceRowFactInputs = {

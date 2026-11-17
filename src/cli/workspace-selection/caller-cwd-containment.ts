@@ -2,12 +2,9 @@ import { resolve as resolvePath } from 'node:path'
 import {
   isPathInsideOrEqual,
   normalizeRuntimePathForComparison
-} from '../../shared/file-access/cross-platform-path'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
-} from '../../shared/execution-host/execution-host'
-import { resolveRealPathSync } from '../../shared/file-access/real-path-sync'
+} from '../../shared/cross-platform-path'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../shared/execution-host'
+import { resolveRealPathSync } from '../../shared/real-path-sync'
 
 // One CLI process is one command, so the folder prefilter and ranking share each resolution.
 const realPaths = new Map<string, string>()

@@ -4,7 +4,6 @@ import {
   getCommitMessageAgentSpec,
   getCommitMessageModel,
   isCustomAgentId,
-  isNamingOnlyTextAgent,
   listCommitMessageAgentCapabilities,
   resolveCommitMessageAgentChoice
 } from './generation/commit-message-agent-spec'
@@ -13,8 +12,8 @@ import {
   textGenerationFailure,
   type TextGenerationFailureCode,
   type TextGenerationFailureFields
-} from '../../text-generation/text-generation-failure-copy'
-import type { GlobalSettings } from '../../settings/global-settings-types'
+} from '../../text-generation-failure-copy'
+import type { GlobalSettings } from '../../global-settings-types'
 import type { Repo } from '../../repository/repo-types'
 import type { TuiAgent } from '../../agent-launch/catalog/tui-agent'
 
@@ -118,8 +117,8 @@ const CUSTOM_COMMAND_EMPTY = {
   dictationCleanup: 'sourceControlCustomCommandEmpty'
 } as const satisfies Record<AiTextOperation, TextGenerationFailureCode>
 
-function supportedAgentLabels(operation: AiTextOperation): string {
-  return listCommitMessageAgentCapabilities(operation)
+function supportedAgentLabels(): string {
+  return listCommitMessageAgentCapabilities()
     .map((capability) => capability.label)
     .join(', ')
 }
@@ -140,9 +139,7 @@ export function resolveSourceControlAiForOperation(
     : normalizeRepoOverrides(input.repo?.sourceControlAi)
   const agentUnsupported = (): { ok: false } & TextGenerationFailureFields =>
     resolveFailure(
-      textGenerationFailure(AGENT_UNSUPPORTED[input.operation], {
-        agents: supportedAgentLabels(input.operation)
-      })
+      textGenerationFailure(AGENT_UNSUPPORTED[input.operation], { agents: supportedAgentLabels() })
     )
   const prCreationDefaults = resolvePrCreationDefaults(
     source,
@@ -207,11 +204,11 @@ export function resolveSourceControlAiForOperation(
     return agentUnsupported()
   }
   const spec = getCommitMessageAgentSpec(resolvedAgent)
-  if (!spec || (input.operation !== 'conversationName' && isNamingOnlyTextAgent(resolvedAgent))) {
+  if (!spec) {
     return resolveFailure(
       textGenerationFailure(AGENT_CANNOT_GENERATE[input.operation], {
-        agent: spec?.label ?? resolvedAgent,
-        agents: supportedAgentLabels(input.operation)
+        agent: resolvedAgent,
+        agents: supportedAgentLabels()
       })
     )
   }

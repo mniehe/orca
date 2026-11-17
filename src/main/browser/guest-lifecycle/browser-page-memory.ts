@@ -184,10 +184,10 @@ export function reserveBrowserPageDiscard(pageId: string, guest: Electron.WebCon
   }
   let history: History
   try {
-    // pageState restores scroll and form contents; it can hold typed secrets, so it stays in memory only.
+    // Project immediately: opaque native page state never enters the cold record.
     const entries = guest.navigationHistory
       .getAllEntries()
-      .map((entry) => ({ url: entry.url, title: entry.title, pageState: entry.pageState }))
+      .map((entry) => ({ url: entry.url, title: entry.title }))
     const index = guest.navigationHistory.getActiveIndex()
     if (
       !entries.length ||
@@ -256,7 +256,6 @@ export function closeBrowserMemoryPage(pageId: string): void {
   }
   page.releaseThrottle?.()
   forgetBrowserPageAttach(page)
-  page.history = null
   pages.delete(pageId)
   for (const retired of page.retired.values()) {
     if (!retired.guest.isDestroyed()) {

@@ -5,7 +5,7 @@ import {
   normalizeExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../shared/execution-host/execution-host'
+} from '../../shared/execution-host'
 import type {
   WorkspaceSessionPatch,
   WorkspaceSessionState

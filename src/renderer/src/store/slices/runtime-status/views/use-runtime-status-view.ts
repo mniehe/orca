@@ -28,13 +28,3 @@ export function usePairedRuntimeParkingEnvironmentIds() {
     runtimeStatusSubscriptions.getParkingSnapshot
   )
 }
-
-export function subscribeRuntimeHostConnectionState(
-  environmentId: string,
-  listener: (state: ReturnType<typeof runtimeStatusSubscriptions.getConnectionSnapshot>) => void
-): () => void {
-  const update = () => listener(runtimeStatusSubscriptions.getConnectionSnapshot(environmentId))
-  const unsubscribe = runtimeStatusSubscriptions.subscribeConnection(environmentId, update)
-  update()
-  return unsubscribe
-}

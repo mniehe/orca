@@ -22,12 +22,12 @@ function reports(output: string): Report[] {
     .slice(1)
     .map((report) => report.slice(0, report.indexOf('\x07')))
     .map((uri) => ({
-      hosted: !uri.startsWith('file:///') && !uri.startsWith('file://localhost/'),
+      hosted: !uri.startsWith('file:///'),
       folder: parseFileUriPath(uri, { wslDistro: 'Ubuntu' }) ?? 'unparsed'
     }))
 }
 
-// Separate Orca's localhost reports and the foreign report from fish's own hostname.
+// Orca's reports and the foreign one carry no host; fish 4 also sends its own, with one.
 const hostless = (output: string): string[] =>
   reports(output)
     .filter((report) => !report.hosted)

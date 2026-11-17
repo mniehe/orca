@@ -2,7 +2,7 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   normalizeExecutionHostId,
   type ExecutionHostId
-} from '../../execution-host/execution-host'
+} from '../../execution-host'
 import { isWslUncPath } from '../../file-access/wsl-paths'
 import { antigravitySessionOrigin } from '../../agent-session/lifecycle/provider-handles/antigravity-session-origin'
 

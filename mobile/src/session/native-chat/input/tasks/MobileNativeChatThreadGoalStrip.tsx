@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native'
 import { ChevronDown, Goal, Pause, Play, Trash2 } from 'lucide-react-native'
 import {
   agentSessionThreadGoalElapsedSeconds,
-  agentSessionThreadGoalOfferedStatusChange
+  agentSessionThreadGoalStatusChange
 } from '../../../../../../src/shared/agent-session/agent-session-thread-goal'
 import {
   agentSessionThreadGoalStatusLabel,
@@ -55,13 +55,7 @@ export function MobileNativeChatThreadGoalStrip({
   const elapsed = formatAgentSessionThreadGoalElapsed(
     agentSessionThreadGoalElapsedSeconds(goal, now - threadGoal.hostClockOffsetMs, runningTurn)
   )
-  const statusChange =
-    changes === null
-      ? null
-      : agentSessionThreadGoalOfferedStatusChange(goal.status, {
-          hostChanges: changes === 'host',
-          agentResumes: threadGoal.agentResumes
-        })
+  const statusChange = changes === 'host' ? agentSessionThreadGoalStatusChange(goal.status) : null
   const toggleLabel = expanded
     ? t('chat.goal.collapse', 'Hide full goal')
     : t('chat.goal.expand', 'Show full goal')
@@ -108,7 +102,7 @@ export function MobileNativeChatThreadGoalStrip({
                       ? t('chat.goal.pause', 'Pause')
                       : t('chat.goal.resume', 'Resume')
                   }
-                  disabled={changes === 'agent' ? threadGoal.clearLocked : locked}
+                  disabled={locked}
                   onPress={() => void threadGoal.change({ kind: 'status', status: statusChange })}
                   icon={
                     statusChange === 'paused' ? (

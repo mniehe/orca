@@ -7,10 +7,7 @@ import type {
   StructuredAgentSessionForkSource,
   StructuredAgentSessionResumeSource
 } from '../../../../../shared/agent-session/structured-agent-session-create'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../../../shared/execution-host'
 import {
   hasStructuredAgentLaunchCancellationTombstonePersisted,
   readStructuredAgentLaunchRecord

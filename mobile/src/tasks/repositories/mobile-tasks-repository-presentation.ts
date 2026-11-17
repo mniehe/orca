@@ -1,8 +1,5 @@
 import { resolveRepoBadgeColor } from '../../../../src/shared/repository/appearance/repo-badge-color'
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../../src/shared/execution-host/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../src/shared/execution-host'
 import {
   getHostContextLabel,
   type HostContextLabelSources

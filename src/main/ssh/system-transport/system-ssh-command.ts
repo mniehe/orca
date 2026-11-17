@@ -21,11 +21,7 @@ export type SystemSshCommandChannel = ClientChannel & {
   _closeRequested?: boolean
 }
 
-export type SystemSshCommandOptions = SshExecOptions &
-  SystemSshBuildArgsOptions & {
-    /** For commands that send no input: Windows OpenSSH can hang after remote exit while its stdin pipe stays open. */
-    closeStdin?: boolean
-  }
+type SystemSshCommandOptions = SshExecOptions & SystemSshBuildArgsOptions
 
 /** Expose system SSH stdin/stdout as the relay channel when ssh2 cannot provide the required authentication/reuse. */
 export function spawnSystemSsh(
@@ -68,11 +64,7 @@ export function spawnSystemSshCommand(
     stdio: ['pipe', 'pipe', 'pipe'],
     windowsHide: true
   })
-  const channel = wrapCommandProcess(proc)
-  if (options?.closeStdin) {
-    channel.stdin.end()
-  }
-  return channel
+  return wrapCommandProcess(proc)
 }
 
 function wrapChildProcess(proc: ChildProcess): SystemSshProcess {

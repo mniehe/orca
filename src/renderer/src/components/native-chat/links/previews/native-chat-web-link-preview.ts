@@ -3,7 +3,7 @@ import {
   linkPreviewSize,
   type LinkPreview,
   type LinkPreviewResult
-} from '../../../../../../shared/browser/link-preview'
+} from '../../../../../../shared/link-preview'
 import { createHoverPreviewCache } from './native-chat-hover-preview-cache'
 
 const previews = createHoverPreviewCache<LinkPreview>({

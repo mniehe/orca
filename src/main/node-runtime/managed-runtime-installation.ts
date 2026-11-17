@@ -6,7 +6,7 @@ import { rm } from 'node:fs/promises'
 import type {
   ManagedRuntimeInstallState,
   ManagedRuntimeOperation
-} from '../../shared/agent-launch/installation/managed-runtime-install'
+} from '../../shared/managed-runtime-install'
 import type { MainHttpClient } from '../network/http-client'
 import { RevisionedState } from '../runtime/events/revisioned-state'
 import {

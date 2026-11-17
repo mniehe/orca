@@ -4,7 +4,8 @@ import type { Worktree } from '../../../../../../shared/worktree/types'
 import { normalizeWorkspaceAttachmentUpdate } from '../../../../../../shared/workspace-attachments/workspace-attachments'
 import type { WorktreeSlice } from '../worktree-slice-contract'
 import { getRepoIdFromWorktreeId } from '../../../../../../shared/worktree/id'
-import { deriveGitIdentityDisplayName } from './detached-head-display-name'
+import { branchName } from '@/lib/source-control/branches/branch-name'
+import { detachedHeadAutoDerivedDisplayNames } from './detached-head-display-name'
 import {
   hostedReviewClearUpdates,
   type HostedReviewClearUpdates
@@ -32,10 +33,7 @@ import { persistWorktreeMeta } from './worktree-meta-persist'
 import { withRepoHostOwnership } from '../listing/worktree-host-ownership'
 import { getRepoRegistrationHostIds } from '../../../../../../shared/repository/repo-host-identity'
 import { isRuntimeSelectorNotFoundError } from '../listing/runtime-worktree-rpc-errors'
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../../../shared/execution-host'
 import { hostWorktreeTarget } from '../../../../../../shared/worktree/host-qualified-identity'
 import {
   selectWorkspaceByHostTarget,
@@ -189,12 +187,25 @@ export function createUpdateWorktreeGitIdentity(
           }
         }
         // Why: terminal branch switches only patch branch/head here; re-derive auto titles like full listing does.
-        const nextDisplayName = deriveGitIdentityDisplayName(
-          worktree,
-          worktreeId,
-          nextBranch,
-          identity.branch
-        )
+        const currentBranchName = branchName(worktree.branch)
+        const wasAutoDerived =
+          worktree.displayNameMode === 'automatic' ||
+          (worktree.displayNameMode === undefined &&
+            worktree.cliProvenance?.kind !== 'created-by-cli' &&
+            worktree.displayName === currentBranchName)
+        const wasDetachedAutoDerived =
+          worktree.branch === '' &&
+          nextBranch !== '' &&
+          detachedHeadAutoDerivedDisplayNames.get(worktreeId) === worktree.displayName
+        const nextDisplayName =
+          (wasAutoDerived || wasDetachedAutoDerived) && nextBranch
+            ? branchName(nextBranch)
+            : worktree.displayName
+        if (identity.branch === null && wasAutoDerived) {
+          detachedHeadAutoDerivedDisplayNames.set(worktreeId, worktree.displayName)
+        } else if (identity.branch !== undefined) {
+          detachedHeadAutoDerivedDisplayNames.delete(worktreeId)
+        }
         return {
           ...worktree,
           head: nextHead,

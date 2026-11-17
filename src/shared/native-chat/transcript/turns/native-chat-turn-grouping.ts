@@ -2,15 +2,9 @@
 
 import type { AgentJournalRenderItem } from '../../../agent-session/journal/agent-session-journal-types'
 import { readAgentJournalTurn } from '../../../agent-session/lifecycle/records/agent-session-turn-record'
-import type { NativeChatMessage, NativeChatRole } from '../../native-chat-types'
-import { isNativeChatProviderTurnStart } from './native-chat-provider-turn-start'
+import type { NativeChatRole } from '../../native-chat-types'
 
 type NativeChatTurnRow = { id: string; role: NativeChatRole }
-
-export type NativeChatTurnMember = Pick<
-  NativeChatMessage,
-  'id' | 'role' | 'blocks' | 'unsent' | 'journalPosition'
->
 
 /** Which rows can open a turn by themselves: in a conversation, its user rows. */
 export type NativeChatOpensTurn = (message: NativeChatTurnRow) => boolean
@@ -19,10 +13,10 @@ export const nativeChatUserRowOpensTurn: NativeChatOpensTurn = (message) => mess
 
 /** Host turn attribution wins over mid-turn send position. Unmapped rows use preceding-user grouping;
  * opensTurn restricts which unmapped rows can anchor turns in interleaved streams. */
-export function nativeChatRowTurnKeys<Row extends NativeChatTurnRow>(
-  messages: readonly Row[],
+export function nativeChatRowTurnKeys(
+  messages: readonly NativeChatTurnRow[],
   turnKeysByItemId?: ReadonlyMap<string, string> | null,
-  opensTurn: (message: Row) => boolean = nativeChatUserRowOpensTurn
+  opensTurn: NativeChatOpensTurn = nativeChatUserRowOpensTurn
 ): (string | undefined)[] {
   let currentTurnKey: string | undefined
   return messages.map((message) => {
@@ -36,18 +30,6 @@ export function nativeChatRowTurnKeys<Row extends NativeChatTurnRow>(
     }
     return currentTurnKey
   })
-}
-
-/** Without turn records, the host marks where the agent resumed on its own, and that opens a turn too. */
-export function nativeChatPositionalTurnKeys(
-  messages: readonly NativeChatTurnMember[],
-  opensTurn: NativeChatOpensTurn
-): (string | undefined)[] {
-  return nativeChatRowTurnKeys(
-    messages,
-    null,
-    (message) => opensTurn(message) || isNativeChatProviderTurnStart(message)
-  )
 }
 
 /** Legacy unscoped hosts assign rows between root records to that turn’s mapped opener. Openers key themselves;

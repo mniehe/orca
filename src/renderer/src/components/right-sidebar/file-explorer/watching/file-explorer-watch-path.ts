@@ -4,7 +4,7 @@ import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathForComparison,
   relativePathInsideRoot
-} from '../../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../../shared/cross-platform-path'
 
 export function normalizeExplorerAbsolutePath(path: string): string {
   return path === '/' || /^[A-Za-z]:[\\/]$/.test(path)

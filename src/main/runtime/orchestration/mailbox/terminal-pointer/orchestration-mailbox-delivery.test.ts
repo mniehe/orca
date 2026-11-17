@@ -8,4 +8,5 @@ vi.mock('electron', () => ({
   webContents: { fromId: vi.fn(() => null) }
 }))
 
+import '../../db/messages/orchestration-dispatch-mailbox-delivery.spec'
 import './orchestration-mailbox-typed-pointer-submit.spec'

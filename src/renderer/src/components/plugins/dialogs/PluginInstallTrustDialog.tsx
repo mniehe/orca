@@ -111,8 +111,6 @@ export function PluginInstallTrustDialog({
     <Dialog open={prompt !== null} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent
         surface="security"
-        className="z-[120]"
-        overlayClassName="z-[115]"
         data-plugin-install-trust={current?.kind}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
@@ -179,7 +177,7 @@ export function PluginInstallTrustDialog({
   )
 }
 
-/** Shows the install waiting for review, including language packs during onboarding. */
+/** Shows whichever install is waiting; leaving Settings declines it so nothing installs unseen. */
 export function PluginInstallTrustDialogHost(): React.JSX.Element {
   const pending = usePluginInstallTrustStore((state) => state.pending)
   useEffect(() => () => settlePluginInstallTrust(false), [])

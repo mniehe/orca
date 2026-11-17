@@ -2,7 +2,7 @@ import type { PRComment } from '../../../../../../shared/github/comments/comment
 import type {
   GitLabDiscussionResolveResult,
   GitLabWorkItemDetails
-} from '../../../../../../shared/gitlab/gitlab-types'
+} from '../../../../../../shared/gitlab-types'
 import { gitLabApiFor } from '@/runtime/repository-gitlab/gitlab-owner-api'
 import type { HostedReviewInfo as ChecksPanelReview } from '../../../../../../shared/source-control/hosted-review/hosted-review-contracts'
 

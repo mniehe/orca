@@ -1,7 +1,6 @@
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AcpLaunchSpec } from '../acp/launch/acp-launch-contract'
-import { acpClientInfo } from '../acp/launch/acp-client-info'
 import { acpSessionStartMeta } from '../acp/launch/acp-session-meta'
 import type { AcpAgentConnection, AcpSignInWatch } from '../acp/process/acp-agent-connection'
 import type { ConnectAcpAgent } from '../acp/process/acp-structured-connection'
@@ -20,11 +19,7 @@ type SignInServerInput = {
   /** A new private temp folder per server: each server's exit removes its own. */
   connectServer: () => Promise<ConnectAcpAgent<AcpAgentConnection>>
   home: string
-  launch: Parameters<ConnectAcpAgent<AcpAgentConnection>>[0] & {
-    cwd: string
-    spec: Pick<AcpLaunchSpec, 'clientInfo'>
-    version?: string
-  }
+  launch: Parameters<ConnectAcpAgent<AcpAgentConnection>>[0] & { cwd: string }
   signal: AbortSignal
   closed: () => void
   /** Every server, so cleanup can wait for each one's exit. */
@@ -45,10 +40,7 @@ export function antigravitySignInServers({
     body: (server: AcpAgentConnection) => Promise<T>
   ): Promise<T> => {
     const connect = await connectServer()
-    const server = connect(launch, {
-      clientInfo: acpClientInfo(launch.spec, launch.version ?? null),
-      signIn: watch
-    })
+    const server = connect(launch, { clientInfo: { name: 'orca', version: '1' }, signIn: watch })
     spawned(server)
     const stop = (): void => void server.close().catch(() => false)
     signal.addEventListener('abort', stop, { once: true })

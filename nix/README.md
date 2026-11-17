@@ -9,6 +9,20 @@ It does not export a NixOS or Home Manager module, an overlay or a server-only p
 
 For Android builds, see the [Android Nix guide](../mobile/nix/README.md) and the [Android workflow](../mobile/nix/ANDROID-WORKFLOW.md).
 
+## Source baseline
+
+The packaging targets upstream stable **v1.4.261**, commit
+`92d4266cc4ffa945dbc1fa52850e62448d2dfc1c`, with Electron 43.8.7, Bun 1.4.4,
+pnpm 12.14.0 and packaged Node 24.22.1. This release builds and bundles only the
+Wayland/X11 clipboard C helper on Linux; it has no provider-exec helper. Nix
+prepares the clipboard cache using upstream's fingerprint and retains its ELF
+architecture, ABI-floor and protocol gates.
+
+The desktop and mobile-web dependency hashes in `flake.nix` still belong to the
+previous source baseline. They must be measured against this release by the
+authorized Nix CI build before this revision is ready to install. Evaluation
+does not validate fixed-output hashes or demonstrate a successful package build.
+
 ## Build and run
 
 Nix needs the `nix-command` and `flakes` experimental features.
@@ -112,7 +126,7 @@ Review the new revision and its [Nix CI result](https://github.com/mniehe/orca/a
 | --------------------------------------- | ---------------------------------------------------- |
 | `packages.x86_64-linux.orca`            | Source-built desktop package                         |
 | `packages.x86_64-linux.default`         | Alias of `orca`                                      |
-| `packages.x86_64-linux.desktop-native`  | Native C helpers, built with their checks            |
+| `packages.x86_64-linux.desktop-native`  | Native clipboard helper, built with its checks       |
 | `packages.x86_64-linux.desktop-deps`    | Fixed-output pnpm dependency archive for the desktop |
 | `packages.x86_64-linux.mobile-web-deps` | Fixed-output pnpm dependency archive for mobile web  |
 | `checks.x86_64-linux.desktop-native`    | Native ABI-floor and protocol checks                 |
@@ -122,11 +136,11 @@ Review the new revision and its [Nix CI result](https://github.com/mniehe/orca/a
 
 There are three levels of check, and only the last one exercises the installed application.
 
-| Command                           | What it proves                                                         |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| `nix flake check --no-build`      | The flake evaluates. Nothing is compiled.                              |
-| `nix flake check`                 | The native helpers build and pass their ABI-floor and protocol checks. |
-| `nix run .#verify-desktop -- ...` | The installed package passes CLI, native-module and GUI smoke checks.  |
+| Command                           | What it proves                                                            |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `nix flake check --no-build`      | The flake evaluates. Nothing is compiled.                                 |
+| `nix flake check`                 | The clipboard helper builds and passes its ABI-floor and protocol checks. |
+| `nix run .#verify-desktop -- ...` | The installed package passes CLI, native-module and GUI smoke checks.     |
 
 To verify a built package:
 

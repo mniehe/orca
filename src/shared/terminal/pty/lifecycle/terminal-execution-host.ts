@@ -2,7 +2,7 @@ import {
   toRuntimeExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../../../execution-host/execution-host'
+} from '../../../execution-host'
 import {
   parseRemoteRuntimePtyId,
   isRemoteRuntimePtyId

@@ -29,8 +29,8 @@ import {
   setBrowserSitePermissionDecisions
 } from '../../browser/site-settings/permissions/browser-site-permission-store'
 import {
-  isBrowserSitePermissionKey,
-  isValidBrowserSitePermissionDecision,
+  isBrowserSitePermission,
+  isBrowserSitePermissionDecision,
   type BrowserSitePermissionEntry
 } from '../../../shared/browser/site-settings/browser-site-permission'
 
@@ -167,9 +167,8 @@ export function registerBrowserSessionProfileHandlers(): void {
         return []
       }
       if (
-        !isBrowserSitePermissionKey(args.permission) ||
-        (args.decision !== null &&
-          !isValidBrowserSitePermissionDecision(args.permission, args.decision))
+        !isBrowserSitePermission(args.permission) ||
+        (args.decision !== null && !isBrowserSitePermissionDecision(args.decision))
       ) {
         throw new Error('Unsupported site permission change')
       }

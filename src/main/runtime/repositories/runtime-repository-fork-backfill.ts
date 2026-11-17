@@ -1,7 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  getRepoSshConnectionId
-} from '../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, getRepoSshConnectionId } from '../../../shared/execution-host'
 import type { Repo } from '../../../shared/repository/repo-types'
 import { githubAvatarIcon, githubAvatarSlug } from '../../../shared/repository/appearance/repo-icon'
 import { probeRepoUpstream } from '../../github/client/fetch/repo-slug-upstream'

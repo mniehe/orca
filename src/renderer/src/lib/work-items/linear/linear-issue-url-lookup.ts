@@ -2,7 +2,7 @@ import { linearStatus } from '@/runtime/linear/runtime-linear-client'
 import {
   credentialDecryptionMessage,
   isIntegrationCredentialDecryptionError
-} from '../../../../../shared/secure-storage/integration-credential-errors'
+} from '../../../../../shared/integration-credential-errors'
 import {
   findLinearIssueWorkspaceLookupIds,
   isLinearIssueUrlResolutionMatch,

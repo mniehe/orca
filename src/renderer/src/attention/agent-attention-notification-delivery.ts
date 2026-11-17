@@ -4,7 +4,7 @@ import { showBlockedNotificationFallbackToast } from '@/lib/notifications/blocke
 import type {
   NotificationDispatchRequest,
   NotificationDispatchResult
-} from '../../../shared/notifications/notification-settings-types'
+} from '../../../shared/notification-settings-types'
 
 export type AgentAttentionNotificationSound = {
   customSoundId: string

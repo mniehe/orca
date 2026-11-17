@@ -11,7 +11,7 @@ import {
 import type { SearchableSimulatorTab } from '@/lib/simulator/search/simulator-palette-search-types'
 import '@/lib/workspace/search/tabs/workspace-tab-search-types'
 import type { SearchableWorkspaceTab } from '@/lib/workspace/search/tabs/workspace-tab-search-types'
-import { createWorkspaceTabPaletteIndex } from '@/lib/workspace/search/tabs/workspace-tab-palette-index'
+import { buildSearchableWorkspaceTabEntries } from '@/lib/workspace/search/tabs/workspace-tab-palette-entry-builder'
 
 import { searchWorkspaceTabs } from '@/lib/workspace/search/tabs/workspace-tab-palette-results'
 import { comparePaletteRankedItems } from '@/lib/workspace/search/palette/cmd-j-section-leadership'
@@ -161,15 +161,11 @@ export function useWorktreeJumpPaletteOpenTabs({
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- simulator titles translate the default label.
     [simulatorTabEntries, deferredQuery, paletteSearchContext, languageRevision, t]
   )
-  const buildWorkspaceTabEntries = useMemo(
-    () => (paletteStatusInputsActive ? createWorkspaceTabPaletteIndex() : null),
-    [paletteStatusInputsActive]
-  )
   const workspaceTabEntries = useMemo<SearchableWorkspaceTab[]>(() => {
-    if (!buildWorkspaceTabEntries) {
+    if (!paletteStatusInputsActive) {
       return EMPTY_WORKSPACE_TAB_ENTRIES
     }
-    return buildWorkspaceTabEntries({
+    return buildSearchableWorkspaceTabEntries({
       worktrees: browserSortedWorktrees,
       ownershipWorktrees: workspaces,
       repoMap,
@@ -196,7 +192,7 @@ export function useWorktreeJumpPaletteOpenTabs({
       paneForegroundAgentByPaneKey
     })
   }, [
-    buildWorkspaceTabEntries,
+    paletteStatusInputsActive,
     activeFileId,
     activeFileIdByWorktree,
     activeGroupIdByWorktree,

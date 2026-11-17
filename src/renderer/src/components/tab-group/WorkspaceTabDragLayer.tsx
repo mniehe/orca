@@ -1,9 +1,8 @@
 import { DndContext, DragOverlay } from '@dnd-kit/core'
-import TabDragPreview from './drag/TabDragPreview'
-import { TabDragProvider } from './drag/tab-drag-context'
-import TabPaneColumnSplitDragOverlay from './drag/TabPaneColumnSplitDragOverlay'
-import { useTabDragSplit } from './drag/useTabDragSplit'
-import type { HoveredTabInsertion } from './drag/tab-insertion'
+import TabDragPreview from '../tab-bar/TabDragPreview'
+import { TabDragProvider } from './tab-drag-context'
+import TabPaneColumnSplitDragOverlay from './TabPaneColumnSplitDragOverlay'
+import { useTabDragSplit, type HoveredTabInsertion } from './useTabDragSplit'
 
 export type WorkspaceTabDragState = {
   isTabDragActive: boolean

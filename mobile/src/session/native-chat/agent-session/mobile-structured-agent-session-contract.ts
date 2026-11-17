@@ -32,7 +32,6 @@ import type { MobileStructuredSends } from '../composer/delivery/use-mobile-stru
 import type { AgentSessionRewindSurface } from '../../../../../src/shared/agent-session/lifecycle/rewind/agent-session-rewind-request'
 import type { MobileNativeChatUsageLimit } from '../status/use-mobile-native-chat-usage-limit'
 import type { MobileStructuredMcpPanel } from '../mcp/use-mobile-structured-mcp-panel'
-import type { MobileStructuredAsyncQuestionSkip } from './use-mobile-structured-async-questions'
 
 export type StructuredMobileSession = Omit<
   ReturnType<typeof useMobileStructuredAgentOptions>,
@@ -44,7 +43,6 @@ export type StructuredMobileSession = Omit<
     submissions: readonly AgentJournalSubmission[]
     session: MobileNativeChatSession
     asyncQuestionSourceScope: string
-    asyncQuestionSkip: MobileStructuredAsyncQuestionSkip | null
     isWorking: boolean
     /** Desktop's Stop rule: a running turn, or conversation Stop while working or sending. */
     canStop: boolean

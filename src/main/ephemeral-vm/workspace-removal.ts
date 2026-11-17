@@ -11,8 +11,8 @@ import {
   RecipeWorkspaceRemovalError,
   type RecipeEnvironmentDescription,
   type RecipeHostRemovalState
-} from '../../shared/remote-runtime/ephemeral-vm-recipes/recipe-host-removal'
-import { toRuntimeExecutionHostId } from '../../shared/execution-host/execution-host'
+} from '../../shared/recipe-host-removal'
+import { toRuntimeExecutionHostId } from '../../shared/execution-host'
 
 export type RecipeWorkspaceRemoveParams = z.infer<typeof WorktreeRemove>
 

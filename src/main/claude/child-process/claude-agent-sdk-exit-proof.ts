@@ -1,4 +1,4 @@
-import type { ProviderChild } from '../../provider-process/provider-child'
+import type { ChildProcess } from 'node:child_process'
 import {
   terminateDescendantSnapshotWithVerdict,
   type DescendantTreeVerdict
@@ -23,7 +23,7 @@ const TREE_VERDICT_TRUST: Record<DescendantTreeVerdict, number> = {
   exited: 2
 }
 
-type ReapableChild = Pick<ProviderChild, 'pid' | 'kill' | 'leaderExited'>
+type ReapableChild = Pick<ChildProcess, 'pid' | 'kill'>
 
 // A missing or exited root may have reparented descendants; its walk cannot prove an empty tree.
 function admissibleTree(
@@ -33,7 +33,7 @@ function admissibleTree(
   if (!captured || exited) {
     return null
   }
-  return captured.rootPgid === null || !captured.root ? null : captured
+  return captured.rootPgid === null ? null : captured
 }
 
 export type ClaudeChildTreeReaperDeps = {
@@ -68,7 +68,7 @@ export function createClaudeChildTreeReaper(
   deps: ClaudeChildTreeReaperDeps
 ): ClaudeChildTreeReaper {
   const platform = deps.platform ?? process.platform
-  const exited = (): boolean => child.leaderExited === true || deps.exited?.() === true
+  const exited = deps.exited ?? (() => false)
   // Windows reaches the tree through the held root instead, so it never snapshots.
   const snapshots = platform !== 'win32'
   const capture = deps.captureDescendants ?? captureDescendantSnapshot
@@ -219,14 +219,18 @@ export function createClaudeChildTreeReaper(
   }
 
   async function judgeTree(): Promise<DescendantTreeVerdict> {
+    let writerSnapshot: DescendantSnapshot | null = null
     const killRoot = (): void => {
       if (!exited()) {
-        killDelivered = killProviderWriter(child, snapshot ?? null, deps) || killDelivered
+        killDelivered = killProviderWriter(child, writerSnapshot, deps) || killDelivered
+        if (deps.supervised) {
+          terminateClaudeRoot({ child, exited })
+        }
       }
     }
     const rootPid = child.pid
     if (!rootPid) {
-      return exited() ? 'exited' : 'unverifiable'
+      return 'exited'
     }
     if (!exited()) {
       forcedReapAttempted = true
@@ -235,6 +239,10 @@ export function createClaudeChildTreeReaper(
       return judgeWindowsTree(rootPid)
     }
     await captureOnce()
+    if (deps.supervised && !exited()) {
+      child.kill('SIGSTOP')
+      writerSnapshot = await capture(rootPid).catch(() => null)
+    }
     if (!snapshot) {
       killRoot()
       return 'unverifiable'
@@ -245,6 +253,9 @@ export function createClaudeChildTreeReaper(
       return 'exited'
     }
     // Stopping the root leaves killed children as zombies on macOS; kill it so init can reap them.
+    if (deps.supervised) {
+      killDelivered = killProviderWriter(child, writerSnapshot, deps) || killDelivered
+    }
     const verdictPromise = deps.terminateDescendants
       ? deps.terminateDescendants(snapshot)
       : terminateDescendantSnapshotWithVerdict(snapshot, {

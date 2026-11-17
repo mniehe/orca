@@ -1,9 +1,9 @@
 // Share locally stored folder rows (without host stamps) and saved partitions across main routing/window-save tests.
-import type { ExecutionHostId } from '../execution-host/execution-host'
+import type { ExecutionHostId } from '../execution-host'
 import type { FolderWorkspace } from './folder-workspace-types'
 import type { ProjectGroup } from '../project/groups/project-group-types'
 
-export function makeProjectGroup(overrides: Partial<ProjectGroup>): ProjectGroup {
+function makeGroup(overrides: Partial<ProjectGroup>): ProjectGroup {
   return {
     id: 'group-mixed',
     name: 'group',
@@ -20,7 +20,7 @@ export function makeProjectGroup(overrides: Partial<ProjectGroup>): ProjectGroup
   }
 }
 
-export function makeFolderWorkspace(overrides: Partial<FolderWorkspace>): FolderWorkspace {
+function makeFolder(overrides: Partial<FolderWorkspace>): FolderWorkspace {
   return {
     id: 'notes-1',
     projectGroupId: 'group-mixed',
@@ -41,9 +41,9 @@ export function makeFolderWorkspace(overrides: Partial<FolderWorkspace>): Folder
 }
 
 /** A local group holding a local repo and an SSH repo: its folders have no single host. */
-export const MIXED_GROUP = makeProjectGroup({})
+export const MIXED_GROUP = makeGroup({})
 /** Imported from a remote root, so it carries the target, yet it also holds a local repo. */
-const SSH_GROUP = makeProjectGroup({ id: 'group-ssh', connectionId: 'target-1' })
+const SSH_GROUP = makeGroup({ id: 'group-ssh', connectionId: 'target-1' })
 
 export const ROUTING_REPOS = [
   { id: 'repo-1', path: '/Users/dev/orca', projectGroupId: MIXED_GROUP.id, connectionId: null },
@@ -56,7 +56,7 @@ export const ROUTING_REPOS = [
   { id: 'repo-local-2', path: '/Users/dev/web', projectGroupId: SSH_GROUP.id, connectionId: null }
 ]
 
-export const MIXED_FOLDER = makeFolderWorkspace({})
+export const MIXED_FOLDER = makeFolder({})
 
 export const FOLDER_HOST_CASES: {
   name: string
@@ -72,37 +72,37 @@ export const FOLDER_HOST_CASES: {
   },
   {
     name: 'in an SSH group that also holds a local repo',
-    folder: makeFolderWorkspace({ projectGroupId: SSH_GROUP.id }),
+    folder: makeFolder({ projectGroupId: SSH_GROUP.id }),
     groups: [SSH_GROUP],
     expected: 'ssh:target-1'
   },
   {
     name: 'with its own SSH target, in an SSH group holding a local repo',
-    folder: makeFolderWorkspace({ projectGroupId: SSH_GROUP.id, connectionId: 'target-1' }),
+    folder: makeFolder({ projectGroupId: SSH_GROUP.id, connectionId: 'target-1' }),
     groups: [SSH_GROUP],
     expected: 'ssh:target-1'
   },
   {
     name: 'with its own SSH target and no stamp (legacy), in a local group',
-    folder: makeFolderWorkspace({ connectionId: 'target-1' }),
+    folder: makeFolder({ connectionId: 'target-1' }),
     groups: [MIXED_GROUP],
     expected: 'ssh:target-1'
   },
   {
     name: 'stamped with a host',
-    folder: makeFolderWorkspace({ executionHostId: 'ssh:target-2' }),
+    folder: makeFolder({ executionHostId: 'ssh:target-2' }),
     groups: [MIXED_GROUP],
     expected: 'ssh:target-2'
   },
   {
     name: 'inside an SSH repo but with no target of its own',
-    folder: makeFolderWorkspace({ folderPath: '/home/dev/api/docs' }),
+    folder: makeFolder({ folderPath: '/home/dev/api/docs' }),
     groups: [MIXED_GROUP],
     expected: 'local'
   },
   {
     name: 'in a group main does not list',
-    folder: makeFolderWorkspace({ projectGroupId: 'gone' }),
+    folder: makeFolder({ projectGroupId: 'gone' }),
     groups: [],
     expected: 'local'
   }

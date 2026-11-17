@@ -8,10 +8,7 @@ import {
 } from '../../git/worktrees/catalog/worktree-scan-cache'
 import { listWorktreesStrict } from '../../git/worktrees/catalog/worktree-listing'
 import { isFolderRepo } from '../../../shared/repository/repo-kind'
-import {
-  getRepoExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID
-} from '../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../shared/execution-host'
 import { resolveGitRouteForHost } from '../../providers/execution-host-provider-dispatch'
 import { areWorktreePathsEqual } from '../../git/worktrees/catalog/worktree-path-comparison'
 import { WorktreeCatalogUnavailableError } from '../../../shared/worktree/catalog/worktree-catalog-availability'

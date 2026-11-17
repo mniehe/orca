@@ -1,4 +1,4 @@
-import type { GlobalSettings } from '../../../../../shared/settings/global-settings-types'
+import type { GlobalSettings } from '../../../../../shared/global-settings-types'
 
 export function getProviderRuntimeContextKey(
   settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
@@ -8,12 +8,8 @@ export function getProviderRuntimeContextKey(
 
 /** Context key for an explicit owner; `null` is this app. */
 export function getEnvironmentRuntimeContextKey(environmentId: string | null): string {
-  return `${getEnvironmentRuntimeIdentityKey(environmentId)}#${providerRuntimeSessionGeneration}`
-}
-
-/** The owner without the session generation, for preferences that must outlive a reconnect. */
-export function getEnvironmentRuntimeIdentityKey(environmentId: string | null): string {
-  return environmentId ? `runtime:${environmentId}` : 'local'
+  const baseKey = environmentId ? `runtime:${environmentId}` : 'local'
+  return `${baseKey}#${providerRuntimeSessionGeneration}`
 }
 
 /** Whether a context key from {@link getEnvironmentRuntimeContextKey} names a paired server. */

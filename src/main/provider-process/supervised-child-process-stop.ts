@@ -1,6 +1,4 @@
-import type { Writable } from 'node:stream'
-import type { EventEmitter } from 'node:events'
-import type { ProviderChild } from './provider-child'
+import type { ChildProcess } from 'node:child_process'
 import {
   closeProviderProcess,
   rootOnlyProviderClosePolicy,
@@ -10,10 +8,9 @@ import type { ProviderCloseRequest } from './provider-process-supervisor'
 import { terminateProviderProcessTree } from './provider-process-teardown'
 
 type SupervisedChild = Pick<
-  ProviderChild,
-  'pid' | 'kill' | 'exitCode' | 'signalCode' | 'groupVerdict'
-> &
-  Pick<EventEmitter, 'once'> & { stdin?: Writable | null }
+  ChildProcess,
+  'pid' | 'kill' | 'stdin' | 'exitCode' | 'signalCode' | 'once'
+>
 
 /** Allow the supervisor its full stop before forcing tree teardown for this root-only child. */
 export async function stopSupervisedChildProcess(
@@ -23,23 +20,13 @@ export async function stopSupervisedChildProcess(
     closeRequest = 'stdin-end-and-sigterm'
   }: { site: string; closeRequest?: ProviderCloseRequest }
 ): Promise<ProviderProcessCloseResult> {
-  let rootExited = false
-  const exited = (): boolean =>
-    rootExited ||
-    child.groupVerdict === 'exited' ||
-    child.exitCode !== null ||
-    child.signalCode !== null
+  const exited = (): boolean => child.exitCode !== null || child.signalCode !== null
   if (exited()) {
     return { root: 'exited', tree: null }
   }
   return closeProviderProcess({
     child,
-    exitPromise: new Promise<void>((resolve) =>
-      child.once('exit', () => {
-        rootExited = true
-        resolve()
-      })
-    ),
+    exitPromise: new Promise<void>((resolve) => child.once('exit', () => resolve())),
     rootVerdict: () => (exited() ? 'exited' : 'live'),
     supervised: true,
     policy: {

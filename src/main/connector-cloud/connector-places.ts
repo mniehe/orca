@@ -5,12 +5,12 @@ import {
   CONNECTOR_CLIENT_LIMITS,
   type ConnectorConversation,
   type ConnectorProject
-} from '../../shared/connectors/connector-cloud-contract'
+} from '../../shared/connector-cloud-contract'
 import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../shared/execution-host/execution-host'
+} from '../../shared/execution-host'
 import { splitGitRemoteKey } from '../../shared/git/remotes/git-remote-identity'
 import { getRepoIdFromWorktreeId } from '../../shared/worktree/id'
 import { isFolderRepo } from '../../shared/repository/repo-kind'

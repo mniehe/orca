@@ -17,7 +17,6 @@ import {
   sessionTabsInventoryOmissionsByWorktree,
   hostSessionTabIdByLocalKey,
   hostSessionTabMappingKeysByEnvironmentAndWorktree,
-  markHostSessionTabMappingsChanged,
   hostWorkingClientBoundaryByPaneKey,
   resetReceivedSessionTabsFrameSequence,
   sessionTabsFreshnessKey
@@ -98,7 +97,6 @@ export function resetWebSessionTabsSnapshotFreshnessForTests(): void {
   sessionTabsInventoryOmissionsByWorktree.clear()
   hostSessionTabIdByLocalKey.clear()
   hostSessionTabMappingKeysByEnvironmentAndWorktree.clear()
-  markHostSessionTabMappingsChanged()
   hostWorkingClientBoundaryByPaneKey.clear()
   sessionTabsTrackingGenerations.reset()
   resetWebSessionBrowserPlacementsForTests()
@@ -218,7 +216,6 @@ export function clearWebSessionTabsTrackingForEnvironment(environmentId: string)
       }
     }
     hostSessionTabMappingKeysByEnvironmentAndWorktree.delete(trimmedEnvironmentId)
-    markHostSessionTabMappingsChanged()
   }
   clearWebAgentSessionHandoffsForEnvironment(trimmedEnvironmentId)
   clearWebSessionBrowserPlacementsForEnvironment(trimmedEnvironmentId)

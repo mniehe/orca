@@ -13,17 +13,9 @@ export type JournalStatusItemSelection =
       first?: true
       direction?: 'asc' | 'desc'
     }
-  /** Newest first, or oldest first from `after`; fromPerson leaves out another agent's messages. */
-  | {
-      kind: 'users'
-      floor?: number
-      unknown?: true
-      fromPerson?: true
-      after?: JournalStatusPosition
-      before?: JournalStatusPosition
-    }
+  | { kind: 'users'; floor?: number; unknown?: true }
   | { kind: 'assistant-prose'; floor?: number }
-  | { kind: 'async-question-candidates'; floor?: number }
+  | { kind: 'async-question-candidates'; after: JournalStatusPosition; floor?: number }
   | { kind: 'assistant-exists' }
   | { kind: 'prompt' }
   | { kind: 'pending-prompts'; floor?: number }

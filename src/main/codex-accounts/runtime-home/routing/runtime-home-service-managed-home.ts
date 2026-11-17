@@ -1,16 +1,20 @@
 import { statSync } from 'node:fs'
 import { join } from 'node:path'
-import { isDefinitiveAbsence } from '../../../../shared/errors/definitive-filesystem-absence'
+import { isDefinitiveAbsence } from '../../../../shared/definitive-filesystem-absence'
 import {
   syncSystemCodexResourcesIntoManagedHome,
-  getSystemCodexHomePath
+  getSystemCodexHomePath,
+  resolveOrcaManagedCodexHomePath
 } from '../../../codex/configuration/homes/codex-home-paths'
 import { syncSystemConfigIntoManagedCodexHome } from '../../../codex/configuration/settings/codex-config-mirror'
-import { CodexAccountHistoryPasses } from '../../../codex/history/shared-store/codex-account-history-passes'
+import { startCodexAccountSessionBridgeInBackground } from '../../../codex/history/bridges/codex-account-session-bridge'
 import { isCodexHistorySharedAcrossAccounts } from './codex-history-sharing'
-import { resolveHostCodexSessionSourceHome } from '../../../codex/history/rollouts/codex-session-source-home'
+import {
+  resolveHostCodexSessionSourceHome,
+  resolveWslCodexSessionSourceHome
+} from '../../../codex/history/rollouts/codex-session-source-home'
 import { parseWslUncPath } from '../../../../shared/file-access/wsl-paths'
-import { normalizeRuntimePathForComparison } from '../../../../shared/file-access/cross-platform-path'
+import { normalizeRuntimePathForComparison } from '../../../../shared/cross-platform-path'
 import { normalizeCodexRuntimeSelection } from '../../account-management/runtime-selection'
 import {
   resolveHostCodexManagedHomeVerdict,
@@ -23,14 +27,14 @@ import {
   markCodexSessionBackfillMarkerNeedsFullScan
 } from '../../../codex/history/backfill/codex-session-backfill-marker'
 import { getDefaultWslDistro } from '../../../wsl/discovery/distro-catalog'
-import { WslCodexAccountHistoryLaunches } from '../../../codex/history/shared-store/wsl-codex-account-history'
+import { startWslCodexSessionBridgeInBackground } from '../../../codex/history/bridges/wsl-codex-session-bridge'
 import type { CodexAccountSelectionTarget } from '../../../../shared/agent-accounts/codex/codex-selection-lane'
 import type { CodexManagedAccount } from '../../../../shared/agent-accounts/managed-account-types'
 import { CodexRuntimeHomeSync } from '../runtime-home-service-sync'
 
 export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
-  private readonly accountHistoryPasses = new CodexAccountHistoryPasses()
-  private readonly wslAccountHistory = new WslCodexAccountHistoryLaunches()
+  // One WSL sibling-bridge loop per target home; keyed by distro and Linux path.
+  private readonly wslSessionBridgesByTarget = new Map<string, Promise<void>>()
 
   // Host accounts refresh auth in separate homes so concurrent accounts cannot race one auth.json.
   protected getSelfContainedManagedHostAccount(): CodexManagedAccount | null {
@@ -136,39 +140,19 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
     } else {
       syncConfig()
     }
+    this.startSelfContainedSessionBridgeForLaunch(perAccountHome)
     return perAccountHome
   }
 
-  /** Links this home's history into ~/.codex (fresh private folders when sharing is off). */
-  prepareAccountHistory(accountHome: string): Promise<void> {
-    return this.accountHistoryPasses.run(
-      accountHome,
-      isCodexHistorySharedAcrossAccounts(this.store.getSettings())
-    )
-  }
-
-  /** Brings every trusted host account's history into the store without waiting for its launch. */
-  protected prepareAllAccountHistoryInBackground(): void {
-    for (const home of this.getManagedHostAccountHomesForSessionDiscovery()) {
-      void this.prepareAccountHistory(home)
-    }
-  }
-
-  /**
-   * For launches pinned to a home other than the selected account's, such as a resume. Only
-   * shares: provenance chose this home for a transcript that unsharing would move out of reach.
-   */
-  async prepareAccountHistoryForPinnedHome(home: string): Promise<void> {
+  // Bridge history in the background: /resume only sees launch-home rollouts, and scans can be large.
+  protected startSelfContainedSessionBridgeForLaunch(perAccountHome: string): void {
     if (!isCodexHistorySharedAcrossAccounts(this.store.getSettings())) {
       return
     }
-    const key = normalizeRuntimePathForComparison(home)
-    const accountHome = this.getManagedHostAccountHomesForSessionDiscovery().find(
-      (candidate) => normalizeRuntimePathForComparison(candidate) === key
-    )
-    if (accountHome) {
-      await this.prepareAccountHistory(accountHome)
-    }
+    void startCodexAccountSessionBridgeInBackground({
+      targetCodexHomePath: perAccountHome,
+      sourceCodexHomePaths: this.getSelfContainedSessionBridgeSourceHomes()
+    })
   }
 
   // Reading a distro's history over 9P would boot it (E9); the WSL lane owns those homes.
@@ -177,6 +161,20 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
     const sourceHome =
       resolveHostCodexSessionSourceHome(this.store.getSettings()) ?? getSystemCodexHomePath()
     return parseWslUncPath(sourceHome) !== null
+  }
+
+  protected getSelfContainedSessionBridgeSourceHomes(): string[] {
+    return [
+      // Honor custom history sources without changing credential routing.
+      ...(this.isHostHistorySourceInWsl()
+        ? []
+        : [
+            resolveHostCodexSessionSourceHome(this.store.getSettings()) ?? getSystemCodexHomePath()
+          ]),
+      // Resolve the mirror path without creating it for per-account launches.
+      resolveOrcaManagedCodexHomePath(),
+      ...this.getManagedHostAccountHomesForSessionDiscovery()
+    ]
   }
 
   // Per-account homes own auth refreshes in place; selection needs no shared-mirror read-back.
@@ -192,8 +190,8 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
       this.lastHostAccountUsedSelfContainedHome = true
       this.sharedAuthRefreshBlockedByManagedTransition = true
       this.markSharedRuntimeAuthManaged(account.id)
-      // Link history at selection so the next launch finds it done.
-      void this.prepareAccountHistory(perAccountHome)
+      // Start history bridging at selection so /resume is ready before the next launch.
+      this.startSelfContainedSessionBridgeForLaunch(perAccountHome)
       return
     }
     this.clearSelfContainedManagedSelection(account)
@@ -279,41 +277,55 @@ export abstract class CodexRuntimeHomeManagedHome extends CodexRuntimeHomeSync {
     return this.prepareHostSystemDefaultSessionMigrationPass()
   }
 
-  // Inside the distro its ~/.codex is the store; host and guest stores stay separate.
-  /** The launched WSL account home's pass is awaited; the distro's other homes run behind it. */
-  protected prepareWslAccountHistory(
+  protected startWslSessionBridgeForLaunch(
     target: CodexAccountSelectionTarget,
     runtimeHomePath: string | null
-  ): Promise<void> {
-    if (process.platform !== 'win32' || !runtimeHomePath) {
-      return Promise.resolve()
+  ): void {
+    if (
+      process.platform !== 'win32' ||
+      !runtimeHomePath ||
+      !isCodexHistorySharedAcrossAccounts(this.store.getSettings())
+    ) {
+      return
     }
-    const distro =
-      target.wslDistro?.trim() || parseWslUncPath(runtimeHomePath)?.distro || getDefaultWslDistro()
-    const storeHome = distro
-      ? this.getWslSystemCodexHomePath({ runtime: 'wsl', wslDistro: distro })
-      : null
-    if (!distro || !storeHome) {
-      return Promise.resolve()
+    const runtimeHomeWsl = parseWslUncPath(runtimeHomePath)
+    const distro = target.wslDistro?.trim() || runtimeHomeWsl?.distro || getDefaultWslDistro()
+    if (!distro) {
+      return
     }
+    // Honor custom WSL history sources without changing credential routing.
+    const systemCodexHomePath =
+      resolveWslCodexSessionSourceHome(this.store.getSettings(), distro) ??
+      this.getWslSystemCodexHomePath({ runtime: 'wsl', wslDistro: distro })
     const linuxPathOf = (home: string): string => parseWslUncPath(home)?.linuxPath ?? home
-    const launched = linuxPathOf(runtimeHomePath)
-    const run = (accountHome: string): Promise<void> =>
-      this.wslAccountHistory.run({
-        distro,
-        accountHome,
-        storeHome: linuxPathOf(storeHome),
-        shared: isCodexHistorySharedAcrossAccounts(this.store.getSettings())
-      })
+    const targetLinuxPath = linuxPathOf(runtimeHomePath)
     const accountHomes = this.store
       .getSettings()
-      .codexManagedAccounts.flatMap(
-        (account) => this.getWslLaunchCodexHomePath(account, distro) ?? []
-      )
-      .map(linuxPathOf)
-    for (const home of accountHomes.filter((candidate) => candidate !== launched)) {
-      void run(home)
+      .codexManagedAccounts.map((account) => this.getWslLaunchCodexHomePath(account, distro))
+    // Siblings only flow into a selected account's home; system default's own ~/.codex gets none (#24511).
+    const targetIsAccountHome = accountHomes.some(
+      (home) => !!home && linuxPathOf(home) === targetLinuxPath
+    )
+    const sourceHomes = [
+      systemCodexHomePath,
+      // Sibling account homes are sources too, or a switch hides the previous account's sessions (#18486).
+      ...(targetIsAccountHome ? accountHomes : [])
+    ].filter((home): home is string => !!home && linuxPathOf(home) !== targetLinuxPath)
+    const targetKey = `${distro.toLowerCase()}\0${targetLinuxPath}`
+    if (sourceHomes.length === 0 || this.wslSessionBridgesByTarget.has(targetKey)) {
+      // A concurrent launch joins the loop already bridging this home.
+      return
     }
-    return accountHomes.includes(launched) ? run(launched) : Promise.resolve()
+    // Create history links inside the distro so Codex can see them in /resume; one wsl.exe at a time.
+    const loop = (async () => {
+      for (const sourceHome of new Set(sourceHomes)) {
+        await startWslCodexSessionBridgeInBackground({
+          distro,
+          systemCodexHomePath: sourceHome,
+          managedCodexHomePath: runtimeHomePath
+        })
+      }
+    })().finally(() => this.wslSessionBridgesByTarget.delete(targetKey))
+    this.wslSessionBridgesByTarget.set(targetKey, loop)
   }
 }

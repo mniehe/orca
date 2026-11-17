@@ -284,7 +284,9 @@ export class AgentSessionSubscribers {
       if (error instanceof SubscriberFrameSuperseded) {
         throw error
       }
-      this.fail(subscriber, error)
+      // A dropped subscriber gets no more frames, so end its stream or the client never resubscribes.
+      this.drop(subscriber)
+      subscriber.end?.(error)
     }
   }
 
@@ -298,7 +300,7 @@ export class AgentSessionSubscribers {
       })
       .catch((error: unknown) => {
         if (!(error instanceof SubscriberFrameSuperseded)) {
-          this.fail(subscriber, error)
+          this.drop(subscriber)
         }
       })
     this.deliveries.set(subscriber, next)
@@ -307,18 +309,6 @@ export class AgentSessionSubscribers {
         this.deliveries.delete(subscriber)
       }
     })
-  }
-
-  /**
-   * A dropped subscriber gets no more frames, so end its stream or the client never resubscribes.
-   * An inactive subscriber was already ended, and a newer one may now own its id.
-   */
-  private fail(subscriber: Subscriber, error: unknown): void {
-    if (!this.isActive(subscriber)) {
-      return
-    }
-    this.drop(subscriber)
-    subscriber.end?.(error)
   }
 
   private drop(subscriber: Subscriber): void {

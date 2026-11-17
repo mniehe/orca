@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import { intentPresentation } from '@/lib/browser/workspace/workspace-browser-tab-presentation'
 import { parseAppSshPtyId } from '../../../../../../shared/remote-runtime/ssh/ssh-pty-id'
-import { parseRoutableExecutionHostId } from '../../../../../../shared/execution-host/execution-host'
+import { parseRoutableExecutionHostId } from '../../../../../../shared/execution-host'
 import {
   parseRemoteRuntimePtyId,
   isRemoteRuntimePtyId
@@ -11,7 +11,10 @@ import { resolveOwner } from '@/lib/workspace/ownership/resolve-owner'
 import { resolveWorktreeOperationRoute } from '@/lib/workspace/ownership/worktree-operation-route'
 import { createBrowserLinkHostMatcher } from '@/lib/browser/navigation/browser-link-owner'
 import { getWorkspaceClientCreationActionPolicy } from '@/lib/workspace/creation/surface-policy/client-creation-action-policy'
-import { canOpenRemoteLinkInWorkspaceBrowser } from '@/lib/browser/workspace/workspace-browser-route-eligibility'
+import {
+  canOpenWorkspaceBrowserTabOnRuntime,
+  canOpenWorkspaceBrowserTabOnSsh
+} from '@/lib/browser/workspace/workspace-browser-route-eligibility'
 import {
   buildHttpLinkActions,
   httpLinkActionDestinationsFor,
@@ -21,7 +24,7 @@ import type {
   HttpLinkDestination,
   HttpLinkActionDestinations
 } from '@/lib/browser/navigation/http-link-destinations'
-import type { DashboardCard } from '../../../../../../shared/agent-status/presentation/dashboard-snapshot'
+import type { DashboardCard } from '../../../../../../shared/dashboard-snapshot'
 import type { HttpLinkSourceOwner } from '@/lib/browser/navigation/http-link-routing'
 
 export type DashboardPreviewLinkSource = Pick<
@@ -83,7 +86,10 @@ export function dashboardPreviewHttpActions(
     matchesHost(route.executionHostId) &&
     getWorkspaceClientCreationActionPolicy(state, source.worktreeId)['managed-browser'].state ===
       'enabled' &&
-    (owner.kind === 'local' || canOpenRemoteLinkInWorkspaceBrowser(state, source.worktreeId, owner))
+    (owner.kind === 'local' ||
+      (owner.kind === 'runtime'
+        ? canOpenWorkspaceBrowserTabOnRuntime(state, source.worktreeId, owner.runtimeEnvironmentId)
+        : canOpenWorkspaceBrowserTabOnSsh(state, source.worktreeId, owner.connectionId)))
   )
   const destinations = canOpen
     ? httpLinkActionDestinationsFor(state.settings, owner, true)

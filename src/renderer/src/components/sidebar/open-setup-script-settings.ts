@@ -1,5 +1,5 @@
 import { getRepositoryLocalCommandsSectionId } from '@/components/settings/repository/repository-settings-targets'
-import type { ExecutionHostId } from '../../../../shared/execution-host/execution-host'
+import type { ExecutionHostId } from '../../../../shared/execution-host'
 
 export function openSetupScriptSettings(input: {
   repoId: string

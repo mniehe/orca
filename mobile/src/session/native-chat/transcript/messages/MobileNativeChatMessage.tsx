@@ -11,7 +11,6 @@ import {
   withoutSubagentGroupTwins
 } from '../../../../../../src/shared/native-chat/transcript/subagents/native-chat-subagent-summary'
 import { deriveNativeChatRowContent } from '../../../../../../src/shared/native-chat/transcript/row-content/native-chat-row-content'
-import { isNativeChatProviderTurnStart } from '../../../../../../src/shared/native-chat/transcript/turns/native-chat-provider-turn-start'
 import {
   MobileNativeChatGroupedThought,
   MobileNativeChatReasoningRow
@@ -204,8 +203,8 @@ function MobileNativeChatMessageImpl({
       onToggleExpanded={turnKey && onToggleTurn ? () => onToggleTurn(turnKey) : undefined}
     />
   ) : null
-  // Keep answered receipts visible even when their tool run folds away; a provider turn mark draws only its bar.
-  if (joinsWorkRun || (foldedAway && !receipt) || isNativeChatProviderTurnStart(message)) {
+  // Keep answered receipts visible even when their tool run folds away.
+  if (joinsWorkRun || (foldedAway && !receipt)) {
     return <>{statusRow}</>
   }
   if (receipt) {
@@ -248,9 +247,10 @@ function MobileNativeChatMessageImpl({
     )
   }
   const isChatTurn = message.role === 'user' || message.role === 'assistant'
-  // Paced prose calls this from its own renders too, so the key must not depend on earlier calls.
+  let proseOffset = 0
   const proseRow = (block: Chat.NativeChatBlock, key: number, text: string, revealing = false) => {
-    const textKey = `${message.id}:text:${key}`
+    const textKey = `${message.id}:text:${proseOffset}`
+    proseOffset += text.length + 1
     return Chat.isSubagentGroupBlock(block) && isRenderableSubagentGroup(block) ? (
       <MobileNativeChatSubagentGroup
         key={`subagent-group:${block.groupId}`}

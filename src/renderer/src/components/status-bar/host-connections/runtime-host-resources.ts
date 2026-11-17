@@ -3,7 +3,7 @@ import type { Translate } from '@/i18n/use-translate'
 import {
   parseExecutionHostId,
   toRuntimeExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+} from '../../../../../shared/execution-host'
 import type {
   SessionMemory,
   WorktreeMemory

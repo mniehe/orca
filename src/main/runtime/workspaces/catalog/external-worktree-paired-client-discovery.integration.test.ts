@@ -190,11 +190,9 @@ describe('external worktree discovery for paired clients', () => {
       pendingStructureRepoIds: new Set<string>(),
       pendingGitStatusRepoIds: new Set<string>(),
       pendingHeadIdentityRepoIds: new Set<string>(),
-      pendingHeadMoveRepoIds: new Set<string>(),
       pendingHeadIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
       pendingGitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE,
       headIdentityRefresh: createWorktreeHeadIdentityRefreshState(),
-      isRuntimeEnvironmentActive: () => false,
       disposed: false
     }
     vi.useFakeTimers()
@@ -380,11 +378,9 @@ describe('external worktree discovery for paired clients', () => {
       pendingStructureRepoIds: new Set<string>(),
       pendingGitStatusRepoIds: new Set<string>(),
       pendingHeadIdentityRepoIds: new Set<string>(),
-      pendingHeadMoveRepoIds: new Set<string>(),
       pendingHeadIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
       pendingGitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE,
       headIdentityRefresh: createWorktreeHeadIdentityRefreshState(),
-      isRuntimeEnvironmentActive: () => false,
       disposed: false
     }
     vi.useFakeTimers()
@@ -469,11 +465,9 @@ describe('external worktree discovery for paired clients', () => {
       pendingStructureRepoIds: new Set<string>(),
       pendingGitStatusRepoIds: new Set<string>(),
       pendingHeadIdentityRepoIds: new Set<string>(),
-      pendingHeadMoveRepoIds: new Set<string>(),
       pendingHeadIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
       pendingGitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE,
       headIdentityRefresh: createWorktreeHeadIdentityRefreshState(),
-      isRuntimeEnvironmentActive: () => false,
       disposed: false
     }
     vi.useFakeTimers()

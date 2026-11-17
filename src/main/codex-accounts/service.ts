@@ -70,7 +70,6 @@ function killLoginProcessTree(
 export class CodexAccountService {
   // Serialize settings read-modify-write operations to prevent overlapping account changes losing updates.
   private mutationQueue: Promise<unknown> = Promise.resolve()
-  private readonly renameListeners = new Set<() => void>()
   private cancelPendingCodexLogin: (() => boolean) | null = null
   private pendingLoginUrl: string | null = null
   private readonly pendingLoginUrlListeners = new Set<(url: string | null) => void>()
@@ -84,7 +83,7 @@ export class CodexAccountService {
   private readonly registration: CodexAccountRegistration
 
   constructor(
-    private readonly store: Store,
+    store: Store,
     rateLimits: RateLimitService,
     private readonly runtimeHome: CodexRuntimeHomeService,
     lifecycle: CodexAccountServiceLifecycle = {}
@@ -225,28 +224,6 @@ export class CodexAccountService {
     return this.serializeMutation(() => this.selection.remove(accountId))
   }
 
-  // Outside the mutation queue: a pending sign-in can hold it for minutes, and this
-  // synchronous write touches no state a queued account change reads.
-  renameAccount(accountId: string, displayName: string | null): CodexRateLimitAccountsState {
-    const before = this.store.getSettings().managedAccountDisplayNames
-    const state = this.selection.rename(accountId, displayName)
-    // Account streams otherwise republish only on usage changes; an unchanged name writes nothing.
-    if (this.store.getSettings().managedAccountDisplayNames !== before) {
-      for (const listener of this.renameListeners) {
-        listener()
-      }
-    }
-    return state
-  }
-
-  /** Listeners live as long as their account stream subscription. */
-  onAccountRenamed(listener: () => void): () => void {
-    this.renameListeners.add(listener)
-    return () => {
-      this.renameListeners.delete(listener)
-    }
-  }
-
   async selectAccount(accountId: string | null): Promise<CodexRateLimitAccountsState> {
     this.supersedePendingLogin()
     return this.serializeMutation(() => this.selection.select(accountId))
@@ -287,10 +264,7 @@ export class CodexAccountService {
   }
 
   private toSummary(account: CodexManagedAccount): CodexManagedAccountSummary {
-    return toCodexManagedAccountSummary(
-      account,
-      this.store.getSettings().managedAccountDisplayNames
-    )
+    return toCodexManagedAccountSummary(account)
   }
 
   private safeRemoveManagedHome(candidatePath: string, expectedAccountId: string): Promise<void> {

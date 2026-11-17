@@ -1,8 +1,5 @@
 import type { BrowserNetworkExecutionHost } from '../../../../shared/browser/client-hosting/browser-network-execution-host'
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import type { ProjectExecutionRuntimeResolution } from '../../../../shared/execution-host/project-execution-runtime'
 import type { SshConnectionState } from '../../../../shared/remote-runtime/ssh/ssh-types'
 

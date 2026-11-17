@@ -16,9 +16,18 @@ export function useIconThemePickerLabels() {
   return { themes, builtIn, labels: disambiguatedPluginContentLabels(themes, [builtIn], t) }
 }
 
-/** Orca's languages, labelled as the language picker lists them, and installed language packs. */
+/** Orca's languages and plugin language packs, labelled as the language picker lists them. */
 export function useUiLanguagePickerLabels() {
+  const t = useTranslate()
   const packs = usePluginLanguagePacks()
   const choices = UI_LANGUAGE_CHOICES.map((choice) => getUiLanguageChoiceLabel(choice, translate))
-  return { packs, choices }
+  const packLabels = disambiguatedPluginContentLabels(
+    packs.map((pack) => ({
+      ...pack,
+      label: pack.displayName ?? `${pack.locale} — ${pack.pluginKey}`
+    })),
+    choices,
+    t
+  )
+  return { packs, choices, packLabels }
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useTranslate } from '@/i18n/use-translate'
-import { usePluginInstallTrust } from '../state/use-plugin-install-trust'
+import { confirmPluginInstallTrust } from '@/store/plugins/installation/plugin-install-trust-request'
 import { Button } from '../../ui/button'
 import {
   Dialog,
@@ -40,7 +40,6 @@ export function PluginDevelopmentDialog({
   onChange
 }: PluginDevelopmentDialogProps): React.JSX.Element {
   const t = useTranslate()
-  const confirmTrust = usePluginInstallTrust(open)
   const [pathInput, setPathInput] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -56,7 +55,7 @@ export function PluginDevelopmentDialog({
       return
     }
     setError(null)
-    if (!(await confirmTrust(localFolderTrustPrompt('dev-folder', path)))) {
+    if (!(await confirmPluginInstallTrust(localFolderTrustPrompt('dev-folder', path)))) {
       return
     }
     try {

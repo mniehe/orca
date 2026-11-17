@@ -3,8 +3,10 @@ import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { AGENT_SESSION_CREATE_TAB_PLACEMENT_RUNTIME_CAPABILITY } from '../../src/shared/agent-session/agent-session-create-capabilities'
-import { structuredAgentSessionCreateParams } from '../../src/shared/agent-session/structured-agent-session-create'
-import { createOrcaSessionId } from '../../src/shared/agent-session/identity/orca-session-address'
+import {
+  createStructuredAgentSessionId,
+  structuredAgentSessionCreateParams
+} from '../../src/shared/agent-session/structured-agent-session-create'
 import { structuredAgentSessionTabId } from '../../src/shared/agent-session/view/structured-agent-session-projection'
 import { HOST_TERMINAL_SURFACE_SEPARATOR } from '../../src/shared/workspace-layout/terminal-surface-id'
 import { expect, test } from './helpers/orca-app'
@@ -60,7 +62,7 @@ test.describe('a chat a paired client creates lands where it asked', () => {
         })
         .toEqual([first, second])
 
-      const sessionId = createOrcaSessionId(randomUUID)
+      const sessionId = createStructuredAgentSessionId('claude', randomUUID)
       await host.client.call(
         'agentSession.create',
         structuredAgentSessionCreateParams({

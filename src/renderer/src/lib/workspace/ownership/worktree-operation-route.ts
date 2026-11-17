@@ -3,9 +3,9 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+} from '../../../../../shared/execution-host'
 import { parseWorkspaceKey } from '../../../../../shared/workspace/identity/workspace-scope'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../../shared/workspace/identity/floating-workspace-id'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../../shared/constants'
 import { getRepoIdFromWorktreeId } from '../../../../../shared/worktree/id'
 import { resolveExactWorktreeRoute } from './worktree-owner-route'
 import {

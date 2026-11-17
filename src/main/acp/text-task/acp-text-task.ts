@@ -12,7 +12,6 @@ import { resolveAcpLaunchInvocation } from '../launch/acp-structured-launch-reso
 import { acpLaunchSpecForAccount } from '../launch/acp-launch-command'
 import { prepareAcpLaunch } from '../launch/acp-structured-launch-preparation'
 import { acpPrivateTempConnect } from '../launch/acp-private-temp'
-import { acpClientInfo } from '../launch/acp-client-info'
 import {
   acpTextTaskCompletion,
   acpTextTaskArgs,
@@ -28,8 +27,6 @@ import type { AcpStructuredSessionAdapterDeps } from '../session/acp-structured-
 import { grokTextTaskPreservesAccount, runGrokTextTask } from '../../grok/grok-text-task'
 
 type TextInput = Parameters<NonNullable<StructuredAgentSessionAdapter['generateText']>>[0]
-
-const NAMING_CLIENT_INFO = { name: 'orca-chat-naming', version: '1' }
 
 /** Disposable native tasks belong to the adapter so shutdown also owns uncertain closes. */
 export class AcpTextTasks {
@@ -159,7 +156,7 @@ export class AcpTextTasks {
             envToDelete: [...launch.envToDelete, ...TASK_ENV_TO_DELETE]
           },
           {
-            clientInfo: acpClientInfo(launch.spec, launch.version ?? null, NAMING_CLIENT_INFO),
+            clientInfo: { name: 'orca-chat-naming', version: '1' },
             signIn: spec.signIn,
             onPermission: (request) =>
               spec.agent === 'antigravity' ? denyAcpTextTaskPermission(request) : reject(),

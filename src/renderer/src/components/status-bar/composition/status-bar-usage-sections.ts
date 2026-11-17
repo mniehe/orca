@@ -29,12 +29,7 @@ export function getStatusBarUsageSections(
   if (mode === 'compact') {
     // Why 'all': the status bar keeps its original headline, Fable included.
     const headline = getUsageHeadlineSection(p, t, 'all')
-    if (!headline) {
-      return []
-    }
-    // Why: named pools read "Cursor Models 64%" in Detailed, so Compact keeps that order.
-    const isNamedBucket = p.buckets?.some((bucket) => bucket === headline.window) ?? false
-    return [{ key: 'headline', ...headline, labelFirst: isNamedBucket }]
+    return headline ? [{ key: 'headline', ...headline }] : []
   }
   if (p.buckets?.length) {
     // Antigravity pool names vary by account tier; Gemini's experimental pools stay hidden.

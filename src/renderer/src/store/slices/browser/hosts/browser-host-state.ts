@@ -10,7 +10,7 @@ import {
   parseExecutionHostId,
   toRuntimeExecutionHostId,
   type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+} from '../../../../../../shared/execution-host'
 import type {
   BrowserSlice,
   BrowserCookieImportExecutionResult,

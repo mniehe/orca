@@ -11,10 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import { useTranslate } from '@/i18n/use-translate'
 import { useUiLanguageRevision } from '@/i18n/use-ui-language-revision'
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../../../shared/execution-host'
 import { runSleepWorktrees } from './sleep-worktree-flow'
 import { selectExecutionHostDisplayLabel } from '@/runtime/hosts/display/execution-host-display-label'
 

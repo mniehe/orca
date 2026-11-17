@@ -1,4 +1,5 @@
 import type { WebContents } from 'electron'
+import { BrowserError } from '../../browser-error'
 
 export function isAbortedNavigationError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
@@ -25,63 +26,54 @@ export function isLoadingMainFrame(wc: WebContents): boolean {
   }
 }
 
-// True until the main resource's first response arrives, which can precede commit; subframes never count.
-export function isWaitingForMainFrameResponse(wc: WebContents): boolean {
-  try {
-    return wc.isWaitingForResponse()
-  } catch {
-    return false
-  }
-}
-
-/** Settles when loading stops, or once a committed main document loads while subframes still load. */
-export function waitForInFlightNavigation(
+export function waitForAbortedNavigationReplacement(
   wc: WebContents,
+  browserPageId: string,
   timeoutMs: number
-): Promise<'settled' | 'timed-out'> {
+): Promise<void> {
   if (!isWebContentsLoading(wc)) {
-    return Promise.resolve('settled')
+    return Promise.resolve()
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let settled = false
-    let mainFrameCommitted = false
     let timeout: ReturnType<typeof setTimeout> | null = null
-    const finish = (outcome: 'settled' | 'timed-out'): void => {
+    const finish = (error?: BrowserError): void => {
       if (settled) {
         return
       }
       settled = true
-      wc.removeListener('did-stop-loading', onSettled)
-      wc.removeListener('did-navigate', onDidNavigate)
-      wc.removeListener('did-finish-load', onDidFinishLoad)
-      wc.removeListener('destroyed', onSettled)
+      wc.removeListener('did-stop-loading', onDidStopLoading)
+      wc.removeListener('destroyed', onDestroyed)
       if (timeout) {
         clearTimeout(timeout)
       }
-      resolve(outcome)
-    }
-    const onSettled = (): void => finish('settled')
-    const onDidNavigate = (): void => {
-      mainFrameCommitted = true
-    }
-    // did-finish-load is main-frame only; the outgoing document's own load must not count.
-    const onDidFinishLoad = (): void => {
-      if (mainFrameCommitted) {
-        finish('settled')
+      if (error) {
+        reject(error)
+      } else {
+        resolve()
       }
     }
+    const onDidStopLoading = (): void => finish()
+    const onDestroyed = (): void => finish()
 
-    wc.on('did-stop-loading', onSettled)
-    wc.on('did-navigate', onDidNavigate)
-    wc.on('did-finish-load', onDidFinishLoad)
-    wc.on('destroyed', onSettled)
-    timeout = setTimeout(() => finish('timed-out'), timeoutMs)
+    wc.on('did-stop-loading', onDidStopLoading)
+    wc.on('destroyed', onDestroyed)
+    timeout = setTimeout(
+      () =>
+        finish(
+          new BrowserError(
+            'browser_error',
+            `Failed to navigate browser page ${browserPageId}: Browser navigation timed out after ${EMBEDDED_NAVIGATION_TIMEOUT_MS}ms`
+          )
+        ),
+      timeoutMs
+    )
     timeout.unref?.()
 
-    // Loading may finish between loadURL settling and listener attachment.
+    // Loading may finish between loadURL rejection and listener attachment.
     if (!isWebContentsLoading(wc)) {
-      finish('settled')
+      finish()
     }
   })
 }

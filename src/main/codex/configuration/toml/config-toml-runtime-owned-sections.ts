@@ -1,5 +1,4 @@
 import { stripCodexDaemonOverride } from '../shared-server/codex-daemon-socket-path-guard'
-import { stripCodexSharedSqliteHome } from './config-toml-shared-sqlite-home'
 import {
   createTomlLineScanState,
   getTomlTableHeader,
@@ -241,8 +240,6 @@ export function extractOrdinaryCodexSettings(config: string): string {
       .filter((section) => isRuntimeProjectTomlSection(section))
       .map((section) => getTomlSectionHeaderKey(section))
   )
-  // The daemon override and shared sqlite_home belong to the managed home and must not be promoted.
-  return stripCodexSharedSqliteHome(
-    stripCodexDaemonOverride(stripRuntimeOwnedTomlSections(config, projectHeaders))
-  ).trimEnd()
+  // The daemon override belongs to the managed home and must not be promoted.
+  return stripCodexDaemonOverride(stripRuntimeOwnedTomlSections(config, projectHeaders)).trimEnd()
 }

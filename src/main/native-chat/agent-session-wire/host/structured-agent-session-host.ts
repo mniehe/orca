@@ -197,6 +197,7 @@ export class StructuredAgentSessionHost {
   serializeCreateIntent = this.tasks.serializeCreateIntent.bind(this.tasks)
 
   supportsCreate = this.reads.supportsCreate
+  agentDefinitions = this.reads.agentDefinitions
   knownAgentIds = this.reads.knownAgentIds
 
   private readonly tabs = createTabs(this, this.sessions, this.clientDelivery, (ids) =>
@@ -336,7 +337,6 @@ export class StructuredAgentSessionHost {
   publishConversationName = this.clientDelivery.publishConversationName
   regenerateConversationName = this.reads.regenerateConversationName
   setUserConversationName = this.reads.setUserConversationName
-  skipAsyncQuestions = this.reads.skipAsyncQuestions
 
   subscribeTurnCompletions = this.clientDelivery.subscribeTurnCompletions
   readStatusSummary = this.clientDelivery.readStatusSummary

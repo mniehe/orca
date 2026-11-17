@@ -1,8 +1,5 @@
 import type { AppState } from '../../../types'
-import {
-  toSshExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+import { toSshExecutionHostId, type ExecutionHostId } from '../../../../../../shared/execution-host'
 import '../../../../../../shared/folder-workspaces/folder-workspace-execution-host'
 import {
   collectRemovedHostTwinState,

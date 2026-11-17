@@ -53,7 +53,7 @@ vi.mock('../gitea/client', () => ({
 
 import { registerPreflightHandlers } from './preflight'
 import { _resetPreflightCache } from '../preflight/agent-detection'
-import { getDefaultSettings } from '../../shared/orca-profiles/constants'
+import { getDefaultSettings } from '../../shared/constants'
 
 const UBUNTU = { wslDistro: 'Ubuntu' }
 

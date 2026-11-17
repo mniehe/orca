@@ -3,10 +3,6 @@ import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
-import {
-  ORCAD_PROVIDER_EXEC_FILENAME,
-  ORCAD_PROVIDER_EXEC_SLOT_FILE
-} from '../../../../src/shared/remote-runtime/orcad-distribution/orcad-artifacts.ts'
 
 const require = createRequire(import.meta.url)
 
@@ -30,15 +26,7 @@ export const COMPAT_SLOT_ADDONS = Object.freeze({
 
 // Find native files missing compat replacements: base-target binaries require newer glibc/libstdc++ than the compat host.
 export function findCompatAddonGaps(targetFilenames, compatSources) {
-  return targetFilenames.filter(
-    (file) =>
-      (file.endsWith('.node') || file === ORCAD_PROVIDER_EXEC_FILENAME) && !compatSources.has(file)
-  )
-}
-
-/** Every POSIX slot carries the provider exec helper its server launches agent CLIs through. */
-export function slotNeedsProviderExec(slot) {
-  return !slot.startsWith('win32-')
+  return targetFilenames.filter((file) => file.endsWith('.node') && !compatSources.has(file))
 }
 
 export function isCompatSlot(slot) {
@@ -206,13 +194,11 @@ export function findSlotProblems(manifest, prebuildsDir, requiredSlots) {
       problems.push(`${slot}: not built`)
       continue
     }
-    const required = [
-      ...(isCompatSlot(slot) ? Object.keys(COMPAT_SLOT_ADDONS) : []),
-      ...(slotNeedsProviderExec(slot) ? [ORCAD_PROVIDER_EXEC_SLOT_FILE] : [])
-    ]
-    for (const file of required) {
-      if (!Object.hasOwn(entry.files ?? {}, file)) {
-        problems.push(`${slot}/${file}: not built`)
+    if (isCompatSlot(slot)) {
+      for (const addon of Object.keys(COMPAT_SLOT_ADDONS)) {
+        if (!Object.hasOwn(entry.files ?? {}, addon)) {
+          problems.push(`${slot}/${addon}: not built`)
+        }
       }
     }
     for (const [file, expected] of Object.entries(entry.files ?? {})) {

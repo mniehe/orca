@@ -1,4 +1,4 @@
-import { DEFAULT_APP_FONT_FAMILY } from '../../../../../../shared/app-lifecycle/appearance/app-font-family'
+import { DEFAULT_APP_FONT_FAMILY } from '../../../../../../shared/constants'
 
 export function mergeFontSuggestions(
   systemFonts: readonly string[],

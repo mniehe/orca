@@ -2,7 +2,7 @@ import type {
   BitbucketConnectArgs,
   BitbucketConnectResult,
   BitbucketConnectionStatus
-} from '../../../shared/bitbucket/bitbucket-credentials'
+} from '../../../shared/bitbucket-credentials'
 import type {
   CreateHostedReviewArgs,
   CreateHostedReviewResult,

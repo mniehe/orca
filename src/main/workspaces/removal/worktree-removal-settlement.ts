@@ -1,7 +1,4 @@
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
-} from '../../../shared/execution-host/execution-host'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../shared/execution-host'
 import type { RemoveWorktreeResult } from '../../../shared/worktree/create-types'
 import type { WorktreeRemovalRecord } from './worktree-removal-records'
 import { pendingWorktreeRemovals } from './worktree-removal-table'

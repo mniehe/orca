@@ -6,7 +6,7 @@ import {
 import {
   getWorktreeExecutionHostId,
   type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+} from '../../../../../../shared/execution-host'
 
 import type { Worktree } from '../../../../../../shared/worktree/types'
 import {

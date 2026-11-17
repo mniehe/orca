@@ -9,10 +9,7 @@ import {
   hostStableKey,
   isSameAutomationOwner
 } from '../../../../../shared/automations/ownership/automation-owner-key'
-import {
-  getRepoSshConnectionId,
-  parseExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { getRepoSshConnectionId, parseExecutionHostId } from '../../../../../shared/execution-host'
 import type { Repo } from '../../../../../shared/repository/repo-types'
 import type {
   AutomationCatalogHydrationEvidence,

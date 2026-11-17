@@ -3,7 +3,7 @@ import {
   normalizeExecutionHostId,
   toSshExecutionHostId,
   type ExecutionHostId
-} from '../execution-host/execution-host'
+} from '../execution-host'
 import type { WorkspaceCleanupCandidate } from './workspace-cleanup'
 
 /** Host evidence a cleanup row carries; `worktreeId` alone repeats across hosts. */

@@ -13,7 +13,6 @@ import {
 } from './codex-structured-session-state'
 import type { StructuredAgentSessionEndedEvent } from '../../../native-chat/agent-session-wire/providers/structured-agent-session-adapter'
 import type { StructuredAgentSessionLogger } from '../../../native-chat/agent-session-wire/host/structured-agent-session-logger'
-import { providerOutcomeLost } from '../../../provider-process/provider-process-exit-status'
 
 export function handleCodexSessionExit(input: {
   sessions: Map<string, CodexSession>
@@ -41,10 +40,9 @@ export function handleCodexSessionExit(input: {
     reason: ((input.closedByOrca && session.orcaClose?.reason) || input.error).message,
     // Orca-initiated closes are host faults, regardless of the exit report. No spawn ENOENT reaches
     // here: a session registers only after the CLI answered thread/start, so the acquire path owns it.
-    failure:
-      input.closedByOrca || providerOutcomeLost(input.error)
-        ? agentSessionFailureFact('hostFault')
-        : agentSessionFailureFact('providerExited', { detail: providerDiagnosticOf(input.error) }),
+    failure: input.closedByOrca
+      ? agentSessionFailureFact('hostFault')
+      : agentSessionFailureFact('providerExited', { detail: providerDiagnosticOf(input.error) }),
     cause: session.orcaClose?.requested ? 'requested-close' : 'unexpected-exit',
     ...(input.closedByOrca && input.connection?.closeResult
       ? {

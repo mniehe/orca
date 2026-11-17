@@ -265,28 +265,21 @@ describe('reconcileCodexHooks', () => {
     expect(readHooks().Stop).toEqual([{ hooks: [buildCodexManagedHook(command(), 'Stop')] }])
   })
 
-  it.each(['managed chat', 'terminal pane'] as const)(
-    'never makes a %s launch wait for startAfter',
-    async (launch) => {
-      writeHooks({ Stop: [olderBuildStop()] })
-      startCodexHooks({
-        isEnabled: () => enabled,
-        resolveLaunchHome: () => null,
-        pathReady: Promise.resolve(),
-        startAfter: new Promise<void>(() => {})
-      })
+  it('never makes a launch wait for startAfter', async () => {
+    writeHooks({ Stop: [olderBuildStop()] })
+    startCodexHooks({
+      isEnabled: () => enabled,
+      resolveLaunchHome: () => null,
+      pathReady: Promise.resolve(),
+      startAfter: new Promise<void>(() => {})
+    })
 
-      if (launch === 'terminal pane') {
-        scheduleCodexHookReconcile()
-        await _internals.settledForTesting()
-      } else {
-        await reconcileCodexHooksForLaunch()
-      }
+    await reconcileCodexHooksForLaunch()
 
-      // The launch takes the startup run, so app start's conversion still happens.
-      expect(readHooks().Stop).toEqual([{ hooks: [buildCodexManagedHook(command(), 'Stop')] }])
-    }
-  )
+    expect(mocks.realHomeRuns).toBe(1)
+    // The launch takes the startup run, so app start's conversion still happens.
+    expect(readHooks().Stop).toEqual([{ hooks: [buildCodexManagedHook(command(), 'Stop')] }])
+  })
 
   it('rechecks a spawn that lands while a run is still finding Codex, which may miss a fresh install', async () => {
     const installed = mocks.codexPath

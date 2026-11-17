@@ -1,6 +1,6 @@
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
-import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../../../shared/agent-status/presentation/agent-activity-display-mode'
+import { DEFAULT_AGENT_ACTIVITY_DISPLAY_MODE } from '../../../../../../shared/constants'
 
 export function useWorktreeAgentDisplay() {
   return useAppStore(

@@ -1,7 +1,7 @@
 import {
   resolveTerminalTabTitle,
   resolveUnifiedTabLabel
-} from '../../../../../../shared/workspace-layout/tab-groups/tab-title-resolution'
+} from '../../../../../../shared/tab-title-resolution'
 import { getEditorDisplayLabel } from '@/components/editor/panel/header/editor-labels'
 import { buildPaletteTabDocument } from '../../../../../../shared/palette-match/tab-document'
 import {
@@ -16,8 +16,7 @@ import {
 } from '../../display/worktree-default-display-name'
 import {
   buildAgentMetadataTabIndex,
-  collectAgentMetadataFromIndex,
-  type AgentMetadataTabIndex
+  collectAgentMetadataFromIndex
 } from './workspace-tab-agent-metadata'
 import {
   findAmbiguousWorktreeIds,
@@ -31,51 +30,41 @@ import { isWorkspaceTabContentType } from './workspace-tab-palette-content-type'
 import { getActiveUnifiedTabId, isCurrentWorkspaceTab } from './workspace-tab-palette-current-tab'
 import { projectedStructuredChatTabName } from '@/runtime/native-chat/naming/structured-chat-tab-name'
 import { agentTypeToIconAgent } from '../../../../../../shared/agent-status/presentation/agent-type-icon-agent'
-import type { Tab } from '../../../../../../shared/workspace-layout/tab-groups/tab-types'
+import type { Tab } from '../../../../../../shared/tab-types'
 import type {
   BuildSearchableWorkspaceTabsOptions,
   SearchableWorkspaceTab,
   WorkspaceTabContentType
 } from './workspace-tab-search-types'
 import type { OpenFile } from '@/store/slices/editor/types/open-file'
-import type { PaletteTabDocumentInput } from '../../../../../../shared/palette-match/tab-document'
-import type { PaletteDocument } from '../../../../../../shared/palette-match/palette-document'
 import type { TerminalTab } from '../../../../../../shared/workspace-layout/terminal-tab-types'
 
-export type WorkspaceTabPaletteBuildContext = {
-  agentIndex: AgentMetadataTabIndex
-  document: (identity: string, input: PaletteTabDocumentInput) => PaletteDocument
-}
-
-export function buildSearchableWorkspaceTabEntries(
-  {
-    worktrees,
-    ownershipWorktrees,
-    repoMap,
-    repoMapByHostIdentity,
-    worktreeOrder,
-    unifiedTabsByWorktree,
-    tabsByWorktree,
-    openFiles,
-    agentStatusByPaneKey,
-    sleepingAgentSessionsByPaneKey,
-    activeGroupIdByWorktree,
-    groupsByWorktree,
-    activeWorktreeId,
-    activeWorkspaceExecutionHostId,
-    activeTabType,
-    activeTabId,
-    activeTabIdByWorktree,
-    activeFileId,
-    activeFileIdByWorktree,
-    activeTabTypeByWorktree,
-    generatedTitlesEnabled,
-    chatNames,
-    terminalLayoutsByTabId,
-    paneForegroundAgentByPaneKey
-  }: BuildSearchableWorkspaceTabsOptions,
-  context?: WorkspaceTabPaletteBuildContext
-): SearchableWorkspaceTab[] {
+export function buildSearchableWorkspaceTabEntries({
+  worktrees,
+  ownershipWorktrees,
+  repoMap,
+  repoMapByHostIdentity,
+  worktreeOrder,
+  unifiedTabsByWorktree,
+  tabsByWorktree,
+  openFiles,
+  agentStatusByPaneKey,
+  sleepingAgentSessionsByPaneKey,
+  activeGroupIdByWorktree,
+  groupsByWorktree,
+  activeWorktreeId,
+  activeWorkspaceExecutionHostId,
+  activeTabType,
+  activeTabId,
+  activeTabIdByWorktree,
+  activeFileId,
+  activeFileIdByWorktree,
+  activeTabTypeByWorktree,
+  generatedTitlesEnabled,
+  chatNames,
+  terminalLayoutsByTabId,
+  paneForegroundAgentByPaneKey
+}: BuildSearchableWorkspaceTabsOptions): SearchableWorkspaceTab[] {
   const entries: SearchableWorkspaceTab[] = []
   const seenTabIdentities = new Set<string>()
   const openFilesById = new Map<string, OpenFile[]>()
@@ -87,15 +76,10 @@ export function buildSearchableWorkspaceTabEntries(
       openFilesById.set(file.id, [file])
     }
   }
-  const agentIndex =
-    context?.agentIndex ??
-    buildAgentMetadataTabIndex({
-      agentStatusByPaneKey,
-      sleepingAgentSessionsByPaneKey
-    })
-  const documentFor =
-    context?.document ??
-    ((_identity: string, input: PaletteTabDocumentInput) => buildPaletteTabDocument(input))
+  const agentIndex = buildAgentMetadataTabIndex({
+    agentStatusByPaneKey,
+    sleepingAgentSessionsByPaneKey
+  })
   const ambiguousWorktreeIds = findAmbiguousWorktreeIds(ownershipWorktrees ?? worktrees)
 
   for (const worktree of worktrees) {
@@ -194,7 +178,7 @@ export function buildSearchableWorkspaceTabEntries(
           titleSearchText: title,
           secondarySearchTexts: [],
           typeSearchAliases: ['terminal tab', 'terminal'],
-          document: documentFor(tabIdentity, {
+          document: buildPaletteTabDocument({
             id: tab.id,
             title,
             secondaryTexts: [],
@@ -232,7 +216,7 @@ export function buildSearchableWorkspaceTabEntries(
           titleSearchText: title,
           secondarySearchTexts: [],
           typeSearchAliases: ['chat'],
-          document: documentFor(tabIdentity, {
+          document: buildPaletteTabDocument({
             id: tab.id,
             title,
             secondaryTexts: [],
@@ -270,7 +254,7 @@ export function buildSearchableWorkspaceTabEntries(
         secondaryText: file.relativePath,
         titleSearchText: title,
         secondarySearchTexts: [file.relativePath, file.filePath],
-        document: documentFor(tabIdentity, {
+        document: buildPaletteTabDocument({
           id: tab.id,
           title,
           secondaryTexts: [file.relativePath, file.filePath],

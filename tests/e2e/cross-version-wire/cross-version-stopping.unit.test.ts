@@ -11,8 +11,7 @@ const PRE_CHANGE_REF = 'v1.4.214'
 const SUITE_TIMEOUT_MS = 180_000
 const STATUS_FOLD = 'src/shared/structured-agent-session-agent-status.ts'
 // Both builds load a copy in the checkout cache, out of reach of `mobile/tsconfig.json`.
-// Releases cut before the agent-lineage/ move load it from where they define it.
-const PHONE_ROW_READER = 'mobile/src/worktree/agent-lineage/agent-row-display.ts'
+const PHONE_ROW_READER = 'mobile/src/worktree/agent-row-display.ts'
 
 const WORKTREE_ID = 'repo::/worktree'
 const NOW = 1_000_000
@@ -102,7 +101,7 @@ async function loadBuild(ref: string | null): Promise<Build> {
   if (ref === null) {
     const [fold, display, sources, rows] = await Promise.all([
       import('../../../src/shared/agent-session/view/structured-agent-session-agent-status'),
-      importWorkingTreeModuleCopy(PHONE_ROW_READER),
+      importWorkingTreeModuleCopy('mobile/src/worktree/agent-lineage/agent-row-display.ts'),
       import('../../../src/main/runtime/workspaces/process-listing/runtime-worktree-agent-sources'),
       import('../../../src/main/runtime/workspaces/process-listing/runtime-worktree-agent-rows')
     ])

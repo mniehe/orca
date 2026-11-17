@@ -3,12 +3,7 @@ import type {
   ClaudeManagedAccountSummary,
   ClaudeRateLimitAccountsState
 } from '../../../shared/agent-accounts/managed-account-types'
-import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
-import {
-  getManagedAccountDisplayName,
-  normalizeManagedAccountDisplayName,
-  withManagedAccountDisplayName
-} from '../../../shared/agent-accounts/managed-account-display-names'
+import type { GlobalSettings } from '../../../shared/global-settings-types'
 import type { RateLimitService } from '../../rate-limits/service/rate-limit-service'
 import { claudeStateFile, readClaudeFolderLogin } from '../sign-in/claude-account-folder'
 import { readClaudeOAuthCredentials } from '../../rate-limits/providers/claude/claude-oauth-credentials'
@@ -38,7 +33,6 @@ export type ClaudeAccountSettings = Pick<
   | 'claudeManagedAccounts'
   | 'activeClaudeManagedAccountId'
   | 'activeClaudeManagedAccountIdsByRuntime'
-  | 'managedAccountDisplayNames'
 >
 
 export type ClaudeAccountStore = {
@@ -134,15 +128,9 @@ export class ClaudeAccountSelection {
   }
 
   private savedSummary(account: ClaudeManagedAccount): ClaudeManagedAccountSummary {
-    const displayName = getManagedAccountDisplayName(
-      this.store.getSettings().managedAccountDisplayNames,
-      'claude',
-      account.id
-    )
     return {
       id: account.id,
       email: account.email,
-      ...(displayName ? { displayName } : {}),
       managedAuthRuntime: account.managedAuthRuntime ?? 'host',
       wslDistro: account.wslDistro ?? null,
       authMethod: account.authMethod ?? 'unknown',
@@ -177,39 +165,15 @@ export class ClaudeAccountSelection {
       console.warn('[claude-accounts] Could not delete the account folder:', error)
       throw new Error(CLAUDE_ACCOUNT_FOLDER_IN_USE_MESSAGE)
     }
-    // Re-read after the folder delete: a rename may have landed meanwhile.
-    const remaining = this.store.getSettings()
-    const names = withManagedAccountDisplayName(
-      remaining.managedAccountDisplayNames,
-      'claude',
-      accountId,
-      null
-    )
     this.saveSettings({
-      claudeManagedAccounts: remaining.claudeManagedAccounts.filter(
-        (entry) => entry.id !== accountId
-      ),
-      ...(names ? { managedAccountDisplayNames: names } : {})
+      claudeManagedAccounts: this.store
+        .getSettings()
+        .claudeManagedAccounts.filter((entry) => entry.id !== accountId)
     })
     // Removing the last account also removes the selection file.
     await this.runtimeAuth.syncForCurrentSelection(target)
     this.rateLimits.evictInactiveClaudeCache(accountId)
     this.refreshUsage(wasSelected ? accountId : undefined, target)
-    return this.list()
-  }
-
-  /** Names only; the account's record, sign-in and selection stay untouched. */
-  rename(accountId: string, displayName: string | null): ClaudeRateLimitAccountsState {
-    this.requireAccount(accountId)
-    const names = withManagedAccountDisplayName(
-      this.store.getSettings().managedAccountDisplayNames,
-      'claude',
-      accountId,
-      normalizeManagedAccountDisplayName(displayName)
-    )
-    if (names) {
-      this.saveSettings({ managedAccountDisplayNames: names })
-    }
     return this.list()
   }
 

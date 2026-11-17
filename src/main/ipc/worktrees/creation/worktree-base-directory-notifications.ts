@@ -17,14 +17,10 @@ import {
   cachedWorktreePathsForScope
 } from './worktree-head-identity-cached-paths'
 import { invalidateGitStatusReads } from '../../../git/source-control/git-read-cache-invalidation'
-import {
-  notifyWorktreeGitStatusMetadataChanged,
-  notifyWorktreesChanged
-} from '../../worktree-remote'
+import { notifyWorktreeGitStatusMetadataChanged } from '../../worktree-remote'
 import {
   notifyGitStatusChangedForRemoteClients,
-  notifyWatchedWorktreeCatalogChanged,
-  notifyWatchedWorktreeHeadsMoved
+  notifyWatchedWorktreeCatalogChanged
 } from '../../watched-worktree-catalog-notification'
 
 export type WorktreeBaseNotificationWatch = WorktreeBaseWatchTarget & {
@@ -33,12 +29,9 @@ export type WorktreeBaseNotificationWatch = WorktreeBaseWatchTarget & {
   pendingStructureRepoIds: Set<string>
   pendingGitStatusRepoIds: Set<string>
   pendingHeadIdentityRepoIds: Set<string>
-  pendingHeadMoveRepoIds: Set<string>
   pendingHeadIdentityScope: WorktreeHeadIdentityScope
   pendingGitStatusScope: WorktreeHeadIdentityScope
   headIdentityRefresh: WorktreeHeadIdentityRefreshState
-  // The renderer ignores head-identity events under a runtime environment; its local rows refresh only by re-list.
-  isRuntimeEnvironmentActive: () => boolean
   disposed: boolean
 }
 
@@ -48,22 +41,12 @@ export function clearPendingWorktreeBaseNotifications(watch: WorktreeBaseNotific
   watch.pendingStructureRepoIds.clear()
   watch.pendingGitStatusRepoIds.clear()
   watch.pendingHeadIdentityRepoIds.clear()
-  watch.pendingHeadMoveRepoIds.clear()
   watch.pendingHeadIdentityScope = EMPTY_HEAD_IDENTITY_SCOPE
   watch.pendingGitStatusScope = EMPTY_HEAD_IDENTITY_SCOPE
 }
 
 export function supportsWorktreeHeadIdentityRefresh(watch: WorktreeBaseNotificationWatch): boolean {
   return watch.kind === 'git-common'
-}
-
-// HEAD-only bursts can patch heads from spawn-free reads only where those reads reach the renderer's rows.
-function headMovesNeedListing(watch: WorktreeBaseNotificationWatch): boolean {
-  return (
-    !supportsWorktreeHeadIdentityRefresh(watch) ||
-    watch.isRuntimeEnvironmentActive() ||
-    [...watch.repos.values()].some((config) => config.headMovesNeedListing === true)
-  )
 }
 
 // Structural and unattributed bursts may touch any checkout of this common dir, but no other repo's.
@@ -99,9 +82,6 @@ export function scheduleWorktreeBaseNotification(
   for (const repoId of changes.headIdentityRepoIds ?? []) {
     watch.pendingHeadIdentityRepoIds.add(repoId)
   }
-  for (const repoId of changes.headMoveRepoIds ?? []) {
-    watch.pendingHeadMoveRepoIds.add(repoId)
-  }
   // Unattributed bursts lose knowledge; widen to all heads rather than narrowing to none.
   watch.pendingHeadIdentityScope = mergeHeadIdentityScopes(
     watch.pendingHeadIdentityScope,
@@ -121,15 +101,7 @@ export function scheduleWorktreeBaseNotification(
       clearPendingWorktreeBaseNotifications(watch)
       return
     }
-    if (watch.pendingHeadMoveRepoIds.size > 0 && headMovesNeedListing(watch)) {
-      for (const repoId of watch.pendingHeadMoveRepoIds) {
-        watch.pendingStructureRepoIds.add(repoId)
-      }
-    }
     const pendingStructure = [...watch.pendingStructureRepoIds]
-    const headMoveRepoIds = [...watch.pendingHeadMoveRepoIds].filter(
-      (repoId) => !watch.pendingStructureRepoIds.has(repoId)
-    )
     const hasHeadIdentity = watch.pendingHeadIdentityRepoIds.size > 0
     const sourceControlRepoIds = new Set(
       [...watch.pendingGitStatusRepoIds, ...watch.pendingHeadIdentityRepoIds].filter(
@@ -161,10 +133,6 @@ export function scheduleWorktreeBaseNotification(
       notifyWorktreeGitStatusMetadataChanged(watch.mainWindow, repoId, gitStatusWorktreePaths)
       notifyGitStatusChangedForRemoteClients(repoId, gitStatusWorktreePaths)
     }
-    // Owners and remote clients re-read listed heads; the local renderer patches them from the identity read.
-    for (const repoId of headMoveRepoIds) {
-      notifyWatchedWorktreeHeadsMoved(repoId)
-    }
     if (
       supportsWorktreeHeadIdentityRefresh(watch) &&
       (pendingStructure.length > 0 || hasHeadIdentity)
@@ -173,15 +141,7 @@ export function scheduleWorktreeBaseNotification(
         watch,
         watch.headIdentityRefresh,
         emitHeadIdentities,
-        headIdentityScope,
-        headMoveRepoIds.length > 0
-          ? () => {
-              // Owners and remote clients were already told; the local renderer re-lists unpublished heads.
-              for (const repoId of headMoveRepoIds) {
-                notifyWorktreesChanged(watch.mainWindow, repoId)
-              }
-            }
-          : undefined
+        headIdentityScope
       )
     }
   }, WATCH_DEBOUNCE_MS)

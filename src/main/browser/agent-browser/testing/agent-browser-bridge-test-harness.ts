@@ -35,7 +35,6 @@ export function mockBrowserManager(
     getGuestWebContentsId: vi.fn(() => null),
     getSessionProfileIdForTab: vi.fn(() => null),
     getBrowserPageLoadError: vi.fn(() => null),
-    getInFlightNavigationUrl: () => null,
     getBrowserPageCertificateFailure: vi.fn(() => null),
     unregisterGuest: vi.fn(),
     holdPaintForCapture: () => () => {},
@@ -73,7 +72,6 @@ export type MockWebContents = {
   getTitle: () => string
   loadURL: Mock<(nextUrl: string) => Promise<void>>
   isLoading: Mock<() => boolean>
-  isWaitingForResponse: Mock<() => boolean>
   on: Mock<(event: string, listener: MockEmitterListener) => void>
   removeListener: Mock<(event: string, listener: MockEmitterListener) => void>
   isDestroyed: () => boolean
@@ -101,7 +99,6 @@ export function mockWebContents(
       currentUrl = nextUrl
     }),
     isLoading: vi.fn(() => false),
-    isWaitingForResponse: vi.fn(() => false),
     on: vi.fn(),
     removeListener: vi.fn(),
     isDestroyed: () => false,

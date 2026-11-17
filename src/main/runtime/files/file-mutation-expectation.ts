@@ -1,7 +1,7 @@
 import {
   getSshTargetIdForExecutionHost,
   type ExecutionHostId
-} from '../../../shared/execution-host/execution-host'
+} from '../../../shared/execution-host'
 import {
   assertSshMutationExpectation,
   getSshConnectionGeneration

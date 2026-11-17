@@ -2,7 +2,7 @@ import {
   isCaseInsensitiveRuntimeRoot,
   isWindowsAbsolutePathLike,
   relativePathInsideRoot
-} from '../../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../../shared/cross-platform-path'
 import {
   fileUriToFilesystemPath,
   filesystemPathToFileUri

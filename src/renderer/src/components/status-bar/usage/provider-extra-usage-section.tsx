@@ -15,11 +15,9 @@ import { formatUsagePercentageLabel } from './usage-percentage-label'
 import { getUsageHealthTone, PLAIN_USAGE_BAR_CLASS, usageBarClass } from './usage-health-tone'
 
 // Why no green: this is overage spend against a money cap, not an allowance; only warn near the cap.
-type SpendBarTone = 'plain' | 'warning' | 'urgent'
-
-function getSpendBarTone(spentPct: number): SpendBarTone {
+function spendBarColor(spentPct: number): string {
   const tone = getUsageHealthTone(spentPct)
-  return tone === 'healthy' ? 'plain' : tone
+  return tone === 'healthy' ? PLAIN_USAGE_BAR_CLASS : usageBarClass(spentPct)
 }
 
 export function getExtraUsageLabel(
@@ -136,19 +134,14 @@ export function ProviderExtraUsageSection({
   }
 
   const spentPct = clampUsedPercent(balance.spentPercent ?? 0)
-  const tone = getSpendBarTone(spentPct)
   const spent = formatCurrencyAmount(balance.spent ?? 0, balance.currencyCode)
   const limit = formatCurrencyAmount(balance.spendLimit ?? 0, balance.currencyCode)
   return (
     <div className="space-y-1">
       <div className={`font-medium ${textClass}`}>{label}</div>
-      <div
-        data-usage-bar
-        data-usage-tone={tone}
-        className={`h-[6px] w-full overflow-hidden rounded-full ${emptyBarClass}`}
-      >
+      <div className={`h-[6px] w-full overflow-hidden rounded-full ${emptyBarClass}`}>
         <div
-          className={`h-full rounded-full ${tone === 'plain' ? PLAIN_USAGE_BAR_CLASS : usageBarClass(spentPct)} transition-all duration-300`}
+          className={`h-full rounded-full ${spendBarColor(spentPct)} transition-all duration-300`}
           style={{ width: `${getDisplayedUsagePercentage(spentPct, usagePercentageDisplay)}%` }}
         />
       </div>

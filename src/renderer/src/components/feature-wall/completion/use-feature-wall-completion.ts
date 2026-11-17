@@ -6,7 +6,6 @@ import type { ReviewStepId } from '../../../../../shared/feature-education/explo
 import type { FeatureWallTourDepthSummary } from '../../../../../shared/feature-education/explore/feature-wall-tour-depth'
 import {
   getCommitMessageAgentCapability,
-  isNamingOnlyTextAgent,
   isCustomAgentId,
   resolveCommitMessageAgentChoice
 } from '../../../../../shared/source-control/ai/generation/commit-message-agent-spec'
@@ -65,8 +64,7 @@ export function useFeatureWallCompletion(
     (isCustomAgentId(resolvedCommitMessageAgent)
       ? (commitMessageAi.customAgentCommand ?? '').trim().length > 0
       : resolvedCommitMessageAgent
-        ? getCommitMessageAgentCapability(resolvedCommitMessageAgent) !== undefined &&
-          !isNamingOnlyTextAgent(resolvedCommitMessageAgent)
+        ? getCommitMessageAgentCapability(resolvedCommitMessageAgent) !== undefined
         : false)
 
   const [hasUsageAccount, setHasUsageAccount] = useState(false)

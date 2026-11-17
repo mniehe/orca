@@ -1,7 +1,4 @@
-import type {
-  DiffComment,
-  DiffCommentSource
-} from '../../../../../../shared/file-review/diff-comment-types'
+import type { DiffComment, DiffCommentSource } from '../../../../../../shared/diff-comment-types'
 
 export function getDiffCommentSource(comment: Pick<DiffComment, 'source'>): DiffCommentSource {
   return comment.source === 'markdown' ? 'markdown' : 'diff'

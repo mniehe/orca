@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import { z } from 'zod'
-import { isDefinitiveAbsence } from '../../../../shared/errors/definitive-filesystem-absence'
+import { isDefinitiveAbsence } from '../../../../shared/definitive-filesystem-absence'
 import { readActiveClaudeKeychainCredentialsStrict } from '../../../claude-accounts/runtime-auth/keychain'
 import type { ClaudeRuntimeAuthPreparation } from '../../../claude-accounts/runtime-auth/runtime-auth-types'
 import { readUserClaudeConfigDir } from '../../../claude-accounts/profiles/claude-profile-paths'
@@ -18,8 +18,6 @@ export type ClaudeOAuthCredentialReadResult = {
   hasRefreshableCredentials: boolean
   /** Epoch ms; Claude Code 2.1.x records it beside the refresh token. */
   refreshTokenExpiresAt?: number
-  /** Last plan Claude Code wrote beside this token, e.g. "pro" or "max_20x"; not live billing. */
-  planType?: string
   source: ClaudeOAuthCredentialSource
   keychainUnavailable?: boolean
   unavailable?: boolean
@@ -35,10 +33,7 @@ const schema = z.object({
     .object({
       accessToken: z.string().optional(),
       refreshToken: z.string().optional(),
-      refreshTokenExpiresAt: z.unknown().optional(),
-      // Plan metadata never decides whether the token is usable.
-      subscriptionType: z.unknown().optional(),
-      rateLimitTier: z.unknown().optional()
+      refreshTokenExpiresAt: z.unknown().optional()
     })
     .optional()
 })
@@ -48,7 +43,6 @@ export function parseClaudeOAuthCredentialsJson(
 ): ClaudeOAuthCredentialReadResult {
   try {
     const oauth = schema.parse(JSON.parse(raw)).claudeAiOauth
-    const planType = readClaudePlanType(oauth?.subscriptionType, oauth?.rateLimitTier)
     // The usage server, not stored expiresAt, decides token validity.
     return {
       token: oauth?.accessToken || null,
@@ -56,22 +50,11 @@ export function parseClaudeOAuthCredentialsJson(
       ...(typeof oauth?.refreshTokenExpiresAt === 'number'
         ? { refreshTokenExpiresAt: oauth.refreshTokenExpiresAt }
         : {}),
-      ...(planType ? { planType } : {}),
       source
     }
   } catch {
     return { ...emptyClaudeOAuthCredentialReadResult(), unavailable: true }
   }
-}
-// The tier only refines Max ("default_claude_max_20x" → "max_20x"); it never names a plan alone.
-function readClaudePlanType(subscription: unknown, tier: unknown): string | undefined {
-  const plan = typeof subscription === 'string' ? subscription.trim() : ''
-  if (!plan) {
-    return undefined
-  }
-  const multiplier = typeof tier === 'string' ? /(?:^|_)max_(\d+x)$/i.exec(tier.trim())?.[1] : null
-  // Other values keep the spelling Claude Code wrote.
-  return plan.toLowerCase() === 'max' && multiplier ? `max_${multiplier.toLowerCase()}` : plan
 }
 export function emptyClaudeOAuthCredentialReadResult(): ClaudeOAuthCredentialReadResult {
   return { token: null, hasRefreshableCredentials: false, source: 'none' }

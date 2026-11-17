@@ -1,4 +1,4 @@
-import { extractLeadingEnvAssignments } from '../../shell/launch/command-environment'
+import { extractLeadingEnvAssignments } from '../../command-environment'
 import {
   tokenizeCustomCommandTemplate,
   type CommandTemplateBackslash

@@ -1,5 +1,5 @@
 import type { StructuredAgentResolutionOperation } from '../agent-launch/structured-agent-command-resolution'
-import type { AgentModelCatalogListingAdmission } from './agent-model-catalog-admission'
+import type { PrioritySemaphore } from '../../../shared/concurrency/priority-semaphore'
 import { startSpan } from '../../observability/tracer'
 import {
   AgentModelCatalogListingStoppedError,
@@ -39,7 +39,7 @@ export type AgentModelCatalogListingBudget = {
   signal?: AbortSignal
   /** Service shutdown retires the listing immediately, without the holder release grace. */
   lifetime?: AbortSignal
-  admission?: AgentModelCatalogListingAdmission
+  admission?: PrioritySemaphore
 }
 
 export type InFlightListing = {

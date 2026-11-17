@@ -1,5 +1,4 @@
-import { useNativeChatPaneLifetimeEffect } from '../pane/ownership/native-chat-pane-lifetime'
-import { useCallback, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { NATIVE_CHAT_QUESTION_AUTO_ADVANCE_MS } from '../../../../../shared/native-chat/input/questions/native-chat-question-auto-advance'
 
 /** One cancellable delayed step: a single-select pick shows as chosen before the card moves on. */
@@ -13,13 +12,6 @@ export function useNativeChatQuestionAutoAdvance(disabled = false): {
     cancel()
     timerRef.current = setTimeout(step, NATIVE_CHAT_QUESTION_AUTO_ADVANCE_MS)
   }
-  useNativeChatPaneLifetimeEffect(
-    useCallback(() => {
-      if (disabled) {
-        clearTimeout(timerRef.current)
-      }
-      return () => clearTimeout(timerRef.current)
-    }, [disabled])
-  )
+  useEffect(() => () => clearTimeout(timerRef.current), [disabled])
   return { schedule, cancel }
 }

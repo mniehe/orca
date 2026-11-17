@@ -32,23 +32,15 @@ export function translateWslOutputPaths(
   originalCwd: string,
   options: { wslDistro?: string } = {}
 ): string {
-  return output.replace(/(?<=worktree )(\/.+)$/gm, (linuxPath: string) =>
-    translateWslOutputPath(linuxPath, originalCwd, options)
-  )
-}
-
-/** One absolute Linux path from WSL Git output, as a path Node can open on Windows. */
-export function translateWslOutputPath(
-  linuxPath: string,
-  originalCwd: string,
-  options: { wslDistro?: string } = {}
-): string {
   const wsl = parseWslPath(originalCwd)
   const distro = wsl?.distro ?? options.wslDistro
-  if (!distro || !linuxPath.startsWith('/')) {
-    return linuxPath
+  if (!distro) {
+    return output
   }
+
   // A repo saved under the distro's view of a drive keeps that spelling: its worktree ids use it.
   const toWindows = wsl && isDrvfsLinuxPath(wsl.linuxPath) ? toWindowsWslUncPath : toWindowsWslPath
-  return toWindows(linuxPath, distro)
+  return output.replace(/(?<=worktree )(\/.+)$/gm, (_match, linuxPath: string) =>
+    toWindows(linuxPath, distro)
+  )
 }

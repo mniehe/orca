@@ -1,7 +1,7 @@
 import {
   isWindowsAbsolutePathLike,
   relativePathInsideRoot
-} from '../../../shared/file-access/cross-platform-path'
+} from '../../../shared/cross-platform-path'
 
 function stripTrailingSeparators(path: string): string {
   return path.replace(/[\\/]+$/, '')

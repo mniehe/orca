@@ -2,7 +2,7 @@ import type { ArtifactWriteRequest } from '../../../../../shared/artifacts/artif
 import {
   getConnectionExecutionHostId,
   toRuntimeExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+} from '../../../../../shared/execution-host'
 import type { DocPreviewGrantOwner } from '../../../../../preload/api/document-preview/doc-preview-api'
 import { ArtifactPublishButton } from '@/components/artifacts/ArtifactPublishButton'
 import { ArtifactPublishPreparationError } from '@/components/artifacts/artifact-publish-flow'
@@ -19,7 +19,7 @@ import {
   isWindowsAbsolutePathLike,
   normalizeRuntimePathForComparison,
   relativePathInsideRoot
-} from '../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../shared/cross-platform-path'
 import type { RuntimeFilePreviewResult } from '../../../../../shared/file-content/runtime-file-read'
 import {
   acquireTerminalArtifactGrant,

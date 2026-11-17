@@ -1,4 +1,4 @@
-import type { ExecutionHostId } from '../../../../../shared/execution-host/execution-host'
+import type { ExecutionHostId } from '../../../../../shared/execution-host'
 
 type SelectionState = {
   activeWorktreeId?: string | null

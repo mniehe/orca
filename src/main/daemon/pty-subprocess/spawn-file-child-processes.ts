@@ -2,7 +2,7 @@ import type { IPty } from 'node-pty'
 import {
   getCommandTokenPathBasename,
   getFirstCommandToken
-} from '../../../shared/shell/command-resolution/command-token-scanner'
+} from '../../../shared/command-token-scanner'
 import {
   collectDescendantsFromIndex,
   getProcessTableIndex

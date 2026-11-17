@@ -3,7 +3,6 @@ import type {
   CodexRateLimitAccountsState,
   CodexSystemDefaultIdentity
 } from '../../../shared/agent-accounts/managed-account-types'
-import type { GlobalSettings } from '../../../shared/settings/global-settings-types'
 import { parseWslUncPath } from '../../../shared/file-access/wsl-paths'
 import type { Store } from '../../persistence/loading-store/store'
 import type { RateLimitService } from '../../rate-limits/service/rate-limit-service'
@@ -13,10 +12,6 @@ import type { CodexAuthIdentity as ResolvedCodexIdentity } from '../credentials/
 import { codexAuthIdentityContradictsAccount } from '../credentials/codex-auth-identity'
 import type { CodexAccountServiceLifecycle } from './codex-account-service-types'
 import { toCodexManagedAccountSummary } from './codex-account-service-types'
-import {
-  normalizeManagedAccountDisplayName,
-  withManagedAccountDisplayName
-} from '../../../shared/agent-accounts/managed-account-display-names'
 import {
   getCodexSelectionTargetForAccount,
   getSelectedCodexAccountIdForTarget,
@@ -59,9 +54,7 @@ export class CodexAccountSelection {
     const settings = this.dependencies.store.getSettings()
     return {
       accounts: settings.codexManagedAccounts
-        .map((account) =>
-          toCodexManagedAccountSummary(account, settings.managedAccountDisplayNames)
-        )
+        .map(toCodexManagedAccountSummary)
         .sort((a, b) => b.updatedAt - a.updatedAt),
       activeAccountId: normalizeCodexRuntimeSelection(settings).host,
       activeAccountIdsByRuntime: normalizeCodexRuntimeSelection(settings),
@@ -89,18 +82,11 @@ export class CodexAccountSelection {
     )
     const nextActiveId =
       settings.activeCodexManagedAccountId === accountId ? null : nextSelection.host
-    const names = withManagedAccountDisplayName(
-      settings.managedAccountDisplayNames,
-      'codex',
-      accountId,
-      null
-    )
 
-    this.saveSettings({
+    this.dependencies.store.updateSettings({
       codexManagedAccounts: nextAccounts,
       activeCodexManagedAccountId: nextActiveId,
-      activeCodexManagedAccountIdsByRuntime: nextSelection,
-      ...(names ? { managedAccountDisplayNames: names } : {})
+      activeCodexManagedAccountIdsByRuntime: nextSelection
     })
     this.dependencies.runtimeHome.syncForCurrentSelection()
     if (account.managedHomeRuntime === 'host' && nextSelection.host === null) {
@@ -122,21 +108,6 @@ export class CodexAccountSelection {
         : undefined,
       accountTarget
     )
-    return this.snapshot()
-  }
-
-  /** Names only; the account's record, home and selection stay untouched. */
-  rename(accountId: string, displayName: string | null): CodexRateLimitAccountsState {
-    this.requireAccount(accountId)
-    const names = withManagedAccountDisplayName(
-      this.dependencies.store.getSettings().managedAccountDisplayNames,
-      'codex',
-      accountId,
-      normalizeManagedAccountDisplayName(displayName)
-    )
-    if (names) {
-      this.saveSettings({ managedAccountDisplayNames: names })
-    }
     return this.snapshot()
   }
 
@@ -166,7 +137,7 @@ export class CodexAccountSelection {
       accountId,
       effectiveTarget
     )
-    this.saveSettings({
+    this.dependencies.store.updateSettings({
       activeCodexManagedAccountId:
         effectiveTarget?.runtime === 'wsl' ? nextSelection.host : accountId,
       activeCodexManagedAccountIdsByRuntime: nextSelection
@@ -182,11 +153,6 @@ export class CodexAccountSelection {
 
     this.startQuotaRefresh(outgoingAccountId, effectiveTarget)
     return this.snapshot()
-  }
-
-  // Notify every window of changes made by the CLI, paired clients, or other windows.
-  saveSettings(patch: Partial<GlobalSettings>): void {
-    this.dependencies.store.updateSettings(patch, { notifyListeners: true })
   }
 
   // A `codex login` run inside a managed home swaps its account; label the row with what actually runs (#22284).

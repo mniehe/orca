@@ -1,10 +1,7 @@
 import type { ProjectGroup } from '../../../../shared/project/groups/project-group-types'
 import type { Repo } from '../../../../shared/repository/repo-types'
 import { getProjectGroupSubtreeIds } from '../../../../shared/project/groups/project-groups'
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { catalogOwnsHost } from './project-group-owner-routing'
 
 export type ProjectGroupRemovalProject = { id: string; hostId: ExecutionHostId }

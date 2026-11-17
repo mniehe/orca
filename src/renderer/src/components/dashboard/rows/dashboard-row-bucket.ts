@@ -3,7 +3,7 @@ import {
   dashboardCardBaseDisplayState,
   type DashboardBucket,
   type DashboardCardDotState
-} from '../../../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../../../shared/dashboard-snapshot'
 import { dashboardBucketForDotState } from '../snapshot/dashboard-card-bucket'
 import type { AgentRowState } from '../../../../../shared/agent-status/presentation/agent-row-decay-state'
 import {

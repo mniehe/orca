@@ -9,7 +9,6 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { PassThrough } from 'node:stream'
-import type { PipedProcessSpawner, PipedProcessSpec } from '@orca/process-host/process-spec'
 import { afterEach, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { createFakePipedChild } from '../../shared/__fixtures__/fake-spawned-child'
@@ -34,10 +33,6 @@ import {
   completeAntigravityChatSignIn,
   startAntigravityChatSignIn
 } from './antigravity-chat-sign-in'
-
-vi.mock('../provider-process/provider-process-spawn', () => ({
-  spawnProviderProcess: (spec: PipedProcessSpec, spawn: PipedProcessSpawner) => spawn(spec)
-}))
 
 vi.mock('../provider-process/provider-process-teardown', () => ({
   terminateProviderProcessTree: vi.fn<typeof terminateProviderProcessTree>(

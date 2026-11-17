@@ -4,11 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useTranslate } from '@/i18n/use-translate'
 import { useAppStore } from '@/store/index'
-import { resolveCliChatResumeSource } from '../../tab-bar/session-actions/cli-chat-resume-source'
-import {
-  runCliChatResume,
-  useCliChatResumePending
-} from '../../tab-bar/session-actions/cli-chat-resume-run'
+import { resolveCliChatResumeSource } from '../../tab-bar/cli-chat-resume-source'
+import { runCliChatResume, useCliChatResumePending } from '../../tab-bar/cli-chat-resume-run'
 
 export function TerminalPaneResumeInChatButton({
   tabId,

@@ -5,11 +5,8 @@ import type { AgentChildDisplayState } from '../child-work/agent-status-child-wo
 import { formatAgentTypeLabel } from './agent-type-label'
 import { formatAgentToolPreviewLine } from './agent-tool-preview'
 import { agentNoUpdateLabel } from './agent-row-decay-state'
-import type { BackgroundTaskSay } from './background-tasks/background-task-copy'
-import {
-  backgroundTaskStateReason,
-  backgroundTaskStateWord
-} from './background-tasks/background-task-roster'
+import type { BackgroundTaskSay } from '../../background-task-copy'
+import { backgroundTaskStateReason, backgroundTaskStateWord } from '../../background-task-roster'
 
 /** The words each surface supplies: desktop translates them, mobile reads English. */
 export type AgentChildRowCopy = {

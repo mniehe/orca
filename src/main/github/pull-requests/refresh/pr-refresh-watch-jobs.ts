@@ -10,7 +10,7 @@ import {
   reviewRefreshIntervalMs,
   scaleReviewRefreshInterval,
   type PRAutoRefreshCadence
-} from '../../../../shared/source-control/hosted-review/review-refresh-policy'
+} from '../../../../shared/review-refresh-policy'
 import type { PRRefreshQueue, PRRefreshQueueEntry } from './pr-refresh-queue'
 import type { PRRefreshRetryState } from './pr-refresh-retry-state'
 

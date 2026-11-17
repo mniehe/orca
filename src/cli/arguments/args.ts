@@ -7,7 +7,7 @@ import {
   CLI_GLOBAL_FLAGS,
   CLI_GLOBAL_VALUE_FLAGS,
   findCliCommandIndex
-} from '../../shared/cli/cli-argument-boundary'
+} from '../../shared/cli-argument-boundary'
 
 export type ParsedArgs = {
   commandPath: string[]

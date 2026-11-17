@@ -6,11 +6,10 @@ import type { PRRefreshOutcome } from '../../../../shared/github/pull-requests/r
 import type { RuntimeHostedReviewCommands } from './runtime-hosted-review-commands'
 import type { RpcContext } from '../../rpc/core'
 
-const mocks: { resolve: Mock; account: Mock; gate: Mock; recordCreated: Mock } = vi.hoisted(() => ({
+const mocks: { resolve: Mock; account: Mock; gate: Mock } = vi.hoisted(() => ({
   resolve: vi.fn(),
   account: vi.fn(),
-  gate: vi.fn(),
-  recordCreated: vi.fn()
+  gate: vi.fn()
 }))
 export { mocks }
 vi.mock('../../../github/accounts/github-project-account', () => ({
@@ -70,7 +69,6 @@ beforeEach(async () => {
   mocks.resolve.mockReset().mockImplementation(async () => found())
   mocks.account.mockReset().mockReturnValue(null)
   mocks.gate.mockReset().mockResolvedValue(null)
-  mocks.recordCreated.mockReset()
   // Resolve the real handler before fake-clock assertions begin.
   await import('../../rpc/methods/source-control/github/github-pull-request-methods')
   const { RuntimeHostedReviewCommands: Commands } = await import('./runtime-hosted-review-commands')
@@ -86,7 +84,7 @@ beforeEach(async () => {
     resolveRepo: async () => repo,
     resolveTarget: async () => ({ repo, repoPath: repo.path }),
     getExecutionOptions: () => undefined,
-    recordCreated: mocks.recordCreated
+    recordCreated: () => {}
   })
 })
 afterEach(() => {

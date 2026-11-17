@@ -1,7 +1,7 @@
 import type {
   LocalhostWorktreeLabelResult,
   LocalhostWorktreeLabelRoute
-} from '../../../shared/workspace/ports/localhost-worktree-labels'
+} from '../../../shared/localhost-worktree-labels'
 import type {
   WorkspacePortAdvertisedUrlChangedEvent,
   WorkspacePortKillRequest,

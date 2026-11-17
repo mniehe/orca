@@ -168,6 +168,5 @@ export function structuredAgentSessionThreadGoalReport(
   if (hostChangesGoal) {
     return { threadGoal: { current, ...contextFloor } }
   }
-  // Sent without a goal too, so a goal the agent sets mid-turn shows from its first journal row.
-  return { reportedThreadGoal: { current, ...contextFloor } }
+  return current ? { reportedThreadGoal: { current, ...contextFloor } } : {}
 }

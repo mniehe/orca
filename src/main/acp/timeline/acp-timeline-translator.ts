@@ -6,7 +6,6 @@ import {
   type AcpSessionEvent
 } from '../protocol/acp-session-events'
 import { AcpContextTimeline } from './acp-context-usage'
-import { AcpThreadGoalTimeline } from './acp-thread-goal-timeline'
 import { AcpBackgroundTaskTimeline } from './acp-background-task-timeline'
 import {
   GENERIC_ACP_DIALECT,
@@ -51,7 +50,6 @@ export class AcpTimelineTranslator {
   private readonly failures: AcpTurnFailures
   private loading = false
   private readonly context = new AcpContextTimeline()
-  private readonly threadGoal = new AcpThreadGoalTimeline()
   protected activeTurn?: string
 
   constructor(private readonly options: AcpTimelineTranslatorOptions) {
@@ -230,7 +228,6 @@ export class AcpTimelineTranslator {
     if (extension?.usage) {
       events.push(...this.context.update(extension.usage, join))
     }
-    events.push(...this.threadGoal.update(extension?.threadGoal, join, at))
     if (settledCommand || this.prompts.absorbCompaction(owner.turn, extension, update)) {
       return events
     }

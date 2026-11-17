@@ -4,7 +4,6 @@ import {
   CUSTOM_AGENT_ID,
   getCommitMessageAgentCapability,
   isCustomAgentId,
-  isNamingOnlyTextAgent,
   listCommitMessageAgentCapabilities,
   resolveCommitMessageAgentChoice
 } from '../../../../../shared/source-control/ai/generation/commit-message-agent-spec'
@@ -74,8 +73,7 @@ export function useAiCommitPrSettings(): AiCommitPrSettingsViewModel {
       discoveredModelsByAgent: legacyModels,
       discoveredModelsByAgentByHost: { [LOCAL_COMMIT_MESSAGE_HOST_KEY]: legacyHostModels }
     }
-    // This legacy agent choice runs both commit messages and PR details.
-    return listCommitMessageAgentCapabilities('commitMessage').map((capability) => ({
+    return listCommitMessageAgentCapabilities().map((capability) => ({
       ...capability,
       models: getTextGenerationModels(
         capability.models,
@@ -145,7 +143,7 @@ export function useAiCommitPrSettings(): AiCommitPrSettingsViewModel {
       settings?.defaultTuiAgent,
       settings?.disabledTuiAgents
     )
-    if (!seedAgentId || isNamingOnlyTextAgent(seedAgentId)) {
+    if (!seedAgentId) {
       writeConfig({ enabled: true, agentId: null })
       return
     }

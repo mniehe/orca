@@ -155,11 +155,7 @@ const NonGitFolderDialog = React.memo(function NonGitFolderDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className="max-w-sm sm:max-w-sm"
-        showCloseButton={false}
-        onInteractOutside={(event) => event.preventDefault()}
-      >
+      <DialogContent className="max-w-sm sm:max-w-sm" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-sm">
             {t('auto.components.sidebar.NonGitFolderDialog.e52454b7f6', 'Open as Folder')}

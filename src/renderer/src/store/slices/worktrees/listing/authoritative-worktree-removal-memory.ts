@@ -1,7 +1,4 @@
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../../../shared/execution-host'
 import { AUTHORITATIVE_REMOVAL_MEMORY_LIMIT } from './worktree-slice-constants'
 
 // Bridge async durable SSH-metadata deletion with session suppression; reloads rely on actual metadata retirement.

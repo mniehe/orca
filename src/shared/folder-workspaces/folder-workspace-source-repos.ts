@@ -1,10 +1,10 @@
-import { isPathInsideOrEqual } from '../file-access/cross-platform-path'
+import { isPathInsideOrEqual } from '../cross-platform-path'
 import {
   getConnectionExecutionHostId,
   getRepoExecutionHostId,
   normalizeExecutionHostId,
   type ExecutionHostId
-} from '../execution-host/execution-host'
+} from '../execution-host'
 import { getProjectGroupSubtreeIds } from '../project/groups/project-groups'
 import { isGitRepoKind } from '../repository/repo-kind'
 

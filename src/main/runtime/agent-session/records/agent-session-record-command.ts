@@ -65,7 +65,6 @@ export type AgentSessionRecordCommand =
       args: WithoutRecord<typeof releaseAgentSessionOwnerAfterSurfaceClose>
     }
   | { kind: 'cancel-continue'; cut: UsageLimitContinueIdentity }
-  | { kind: 'skip-async-questions'; itemId: string }
   | { kind: 'last-turn'; lastTurn?: AgentSessionLastTurn }
   | { kind: 'rewind'; fence: number; rewind: AgentSessionRewindRecord }
   | { kind: 'sleep'; now: number; fence: number }
@@ -164,9 +163,6 @@ export function applyAgentSessionRecordCommand(
       break
     case 'cancel-continue':
       next = cancelAgentSessionUsageLimitContinue(record, command.cut)
-      break
-    case 'skip-async-questions':
-      next = { ...record, asyncQuestionsSkippedThrough: command.itemId }
       break
     case 'last-turn': {
       const { lastTurn: previous, ...rest } = record

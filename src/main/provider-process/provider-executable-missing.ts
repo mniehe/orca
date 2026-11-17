@@ -1,9 +1,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { isAbsolute } from 'node:path'
-import { isDefinitiveAbsence } from '../../shared/errors/definitive-filesystem-absence'
+import { isDefinitiveAbsence } from '../../shared/definitive-filesystem-absence'
 import { findInErrorChain } from './provider-error-chain'
-
-export { isDefinitiveAbsence }
 
 /** What a spawn's ENOENT proves absent: the provider's executable or the folder it ran in. */
 export type ProviderSpawnAbsence = 'executable' | 'launchFolder'
@@ -28,10 +26,6 @@ export function providerSpawnAbsence(
   command: string,
   cwd?: string
 ): ProviderSpawnAbsence | null {
-  if (typeof error === 'object' && error !== null && 'providerSpawnAbsence' in error) {
-    const absence = error.providerSpawnAbsence
-    return absence === 'executable' || absence === 'launchFolder' ? absence : null
-  }
   if (
     typeof error !== 'object' ||
     error === null ||
@@ -95,14 +89,6 @@ export function providerLaunchFolderMissing(error: unknown): boolean {
       'providerLaunchFolderMissing' in inner && inner.providerLaunchFolderMissing === true
         ? true
         : undefined
-    ) ?? false
-  )
-}
-
-export function providerLaunchFailed(error: unknown): boolean {
-  return (
-    findInErrorChain(error, (inner) =>
-      'providerLaunchFailed' in inner && inner.providerLaunchFailed === true ? true : undefined
     ) ?? false
   )
 }

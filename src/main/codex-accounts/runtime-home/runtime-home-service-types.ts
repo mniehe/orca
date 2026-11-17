@@ -1,5 +1,4 @@
 import type { CodexManagedAccount } from '../../../shared/agent-accounts/managed-account-types'
-import type { UsageReadingAccount } from '../../../shared/agent-usage/rate-limits/rate-limit-types'
 
 export type CodexHomeLaunchOptions = {
   unavailableManagedHomePath?: string
@@ -64,6 +63,5 @@ export type CodexMirroredHomeStatus =
 
 /** Result used by quota polling, where `skip` means no process should be spawned. */
 export type CodexRateLimitHomeResolution =
-  /** `readingAccount`: the saved account whose own home this is; absent for System default and the shared mirror. */
-  | { kind: 'ready'; codexHomePath: string | null; readingAccount?: UsageReadingAccount }
+  | { kind: 'ready'; codexHomePath: string | null }
   | { kind: 'skip' }

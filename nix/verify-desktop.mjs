@@ -87,9 +87,7 @@ async function stop(process) {
 try {
   assert.equal(run(path.join(packagePath, 'bin/orca-ide'), ['--version']), expectedVersion)
   assert(!fs.existsSync(path.join(packagePath, 'bin/orca')), 'Do not shadow the Orca screen reader')
-  for (const helper of ['orca-provider-exec', 'orca-wayland-clipboard']) {
-    run(path.join(resources, 'bin', helper), ['--help'], {}, 64)
-  }
+  run(path.join(resources, 'bin/orca-wayland-clipboard'), ['--help'], {}, 64)
   run(path.join(packagePath, 'lib/orca/chrome_crashpad_handler'), ['--version'])
   const node = JSON.parse(
     run(path.join(resources, 'node-runtime/bin/node'), [nativeProbe, resources])

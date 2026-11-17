@@ -122,7 +122,7 @@ async function runBrowseCommand(
   // Fence startup stdout so login banners cannot become resolved paths.
   const fence = options?.wrapCommand === false ? null : buildPosixStdoutFence(command, 'SSH')
   const remoteCommand = fence?.command ?? command
-  const channel = await conn.execWithClosedStdin(remoteCommand, options)
+  const channel = options ? await conn.exec(remoteCommand, options) : await conn.exec(remoteCommand)
 
   return new Promise((resolve, reject) => {
     let stdout = ''

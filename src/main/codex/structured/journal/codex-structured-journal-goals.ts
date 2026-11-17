@@ -1,4 +1,3 @@
-import { AGENT_SESSION_THREAD_GOAL_ACCOUNTING_REVISION_SECONDS } from '../../../../shared/agent-session/agent-session-thread-goal'
 import { unhandledProviderFrameJournalItem } from '../../../native-chat/agent-session-wire/providers/unhandled-provider-frame'
 import type { StructuredAgentSessionEventSink } from '../../../native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink'
 import {
@@ -26,6 +25,9 @@ type GoalThreadState = {
   accounting: CodexGoalAccounting | null
 }
 
+// Throttle persisted accounting revisions; readers extrapolate while the turn runs.
+const GOAL_ACCOUNTING_REVISION_SECONDS = 30
+
 function accountingOutgrew(
   previous: CodexGoalAccounting | null,
   next: CodexGoalAccounting
@@ -33,8 +35,7 @@ function accountingOutgrew(
   return (
     previous === null ||
     previous.tokenBudget !== next.tokenBudget ||
-    Math.abs(next.timeUsedSeconds - previous.timeUsedSeconds) >=
-      AGENT_SESSION_THREAD_GOAL_ACCOUNTING_REVISION_SECONDS
+    Math.abs(next.timeUsedSeconds - previous.timeUsedSeconds) >= GOAL_ACCOUNTING_REVISION_SECONDS
   )
 }
 

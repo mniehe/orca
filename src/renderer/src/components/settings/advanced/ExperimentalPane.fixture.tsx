@@ -1,5 +1,5 @@
 import { defineFixture } from '../../../component-fixtures/component-fixture'
-import { getDefaultSettings } from '../../../../../shared/orca-profiles/constants'
+import { getDefaultSettings } from '../../../../../shared/constants'
 import { ExperimentalPane } from './ExperimentalPane'
 
 const settings = {

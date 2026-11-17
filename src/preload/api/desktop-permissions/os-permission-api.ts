@@ -3,13 +3,13 @@ import type {
   ComputerUsePermissionResetResult,
   ComputerUsePermissionSetupResult,
   ComputerUsePermissionStatusResult
-} from '../../../shared/computer/computer-use-permissions-types'
+} from '../../../shared/computer-use-permissions-types'
 import type {
   DeveloperPermissionId,
   DeveloperPermissionRequestResult,
   DeveloperPermissionState,
   LocalNetworkConnectionTestResult
-} from '../../../shared/app-lifecycle/permissions/developer-permissions-types'
+} from '../../../shared/developer-permissions-types'
 import type {
   NotificationAttentionAcknowledgement,
   NotificationDeliveryProbeResult,
@@ -19,7 +19,7 @@ import type {
   NotificationPermissionStatusResult,
   NotificationSoundResult,
   StructuredNotificationRead
-} from '../../../shared/notifications/notification-settings-types'
+} from '../../../shared/notification-settings-types'
 import type { AgentSessionExecutionLocation } from '../../../shared/agent-session/lifecycle/agent-session-record'
 
 export type NotificationsApi = {

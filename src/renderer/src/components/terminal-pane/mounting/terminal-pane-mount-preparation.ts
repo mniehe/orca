@@ -5,7 +5,10 @@ import { useAppStore } from '@/store/index'
 import { getConnectionId } from '@/lib/workspace/ownership/connection-context'
 import { httpLinkActionDestinationsFor } from '@/lib/browser/navigation/http-link-destinations'
 import '@/lib/browser/workspace/workspace-browser-tab-open'
-import { canOpenRemoteLinkInWorkspaceBrowser } from '@/lib/browser/workspace/workspace-browser-route-eligibility'
+import {
+  canOpenWorkspaceBrowserTabOnRuntime,
+  canOpenWorkspaceBrowserTabOnSsh
+} from '@/lib/browser/workspace/workspace-browser-route-eligibility'
 import { resolvePaneWslDistro } from '../host-state/terminal-pane-wsl-distro'
 import {
   resolveTerminalHttpLinkSourceOwner,
@@ -109,12 +112,24 @@ export function prepareTerminalPaneMount(
     paneId: number
   ): ReturnType<typeof resolveTerminalHttpLinkSourceOwner> =>
     resolveTerminalHttpLinkSourceOwner(paneTransports.get(paneId))
-  const canOpenOwnedBrowserForPane = (paneId: number): boolean =>
-    canOpenRemoteLinkInWorkspaceBrowser(
-      useAppStore.getState(),
-      deps.worktreeId,
-      getHttpLinkSourceOwnerForPane(paneId)
+  const canOpenOwnedBrowserForPane = (paneId: number): boolean => {
+    const sourceOwner = getHttpLinkSourceOwnerForPane(paneId)
+    if (sourceOwner.kind === 'runtime') {
+      return canOpenWorkspaceBrowserTabOnRuntime(
+        useAppStore.getState(),
+        deps.worktreeId,
+        sourceOwner.runtimeEnvironmentId
+      )
+    }
+    return (
+      sourceOwner.kind === 'ssh' &&
+      canOpenWorkspaceBrowserTabOnSsh(
+        useAppStore.getState(),
+        deps.worktreeId,
+        sourceOwner.connectionId
+      )
     )
+  }
   const getHttpLinkActionDestinations = (paneId: number): TerminalHttpLinkActionDestinations =>
     httpLinkActionDestinationsFor(
       deps.settingsRef.current,

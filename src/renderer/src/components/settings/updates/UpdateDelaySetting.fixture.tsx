@@ -1,5 +1,5 @@
 import { defineFixture } from '../../../component-fixtures/component-fixture'
-import { getDefaultSettings } from '../../../../../shared/orca-profiles/constants'
+import { getDefaultSettings } from '../../../../../shared/constants'
 import type { UpdateStatus } from '../../../../../shared/updater/update-status-types'
 import { GeneralUpdateSettingsSection } from './GeneralUpdateSettingsSection'
 

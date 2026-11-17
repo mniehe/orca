@@ -4,7 +4,7 @@ import { runtimeEnvironmentIdForWorkspaceOwner } from '@/lib/workspace/ownership
 import {
   isWindowsAbsolutePathLike,
   relativePathInsideRoot
-} from '../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../shared/cross-platform-path'
 import {
   restoreRecentlyClosedTabPosition,
   type RecentlyClosedTabPosition

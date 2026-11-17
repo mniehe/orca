@@ -1,7 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  LOCAL_EXECUTION_HOST_ID
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, LOCAL_EXECUTION_HOST_ID } from '../../../../shared/execution-host'
 import { isFolderRepo } from '../../../../shared/repository/repo-kind'
 import {
   setWorktreeCatalogRouteResolver,

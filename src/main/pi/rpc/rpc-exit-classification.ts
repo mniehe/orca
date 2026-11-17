@@ -16,16 +16,9 @@ import {
 } from '../../provider-process/provider-executable-missing'
 import { JsonlRpcResponseError } from '../../jsonl-rpc/peer-reply'
 import type { PiRpcConnection } from './rpc-session'
-import {
-  providerOutcomeLost,
-  withLostProviderOutcome
-} from '../../provider-process/provider-process-exit-status'
 
 /** How an unexpected Pi exit reads; a Pi that never ran names its missing CLI or folder. */
 export function piExitFailure(error: Error, cause: Error): SubmissionRejectionFact {
-  if (providerOutcomeLost(error) || providerOutcomeLost(cause)) {
-    return agentSessionFailureFact('hostFault')
-  }
   if (providerSpawnAbsent(error)) {
     return providerStartupFailureFact(error)
   }
@@ -42,7 +35,7 @@ export function piExitFailure(error: Error, cause: Error): SubmissionRejectionFa
 /** What a failed Pi start throws once its close settled; null while the root's exit is unproven. */
 export function piStartExitError(
   error: unknown,
-  connection: Pick<PiRpcConnection, 'processless' | 'spawnAbsence' | 'outcomeLost'>,
+  connection: Pick<PiRpcConnection, 'processless' | 'spawnAbsence'>,
   result: Awaited<ReturnType<PiRpcConnection['close']>> | null
 ): Error | null {
   if (result?.killDelivered && result.root !== 'exited') {
@@ -56,7 +49,6 @@ export function piStartExitError(
     error instanceof Error ? error : new Error(String(error)),
     connection.spawnAbsence
   )
-  withLostProviderOutcome(cause, connection)
   return connection.processless
     ? new AgentSessionAcquisitionExitProvenError(cause)
     : new AgentSessionAcquisitionRootExitObservedError(cause)

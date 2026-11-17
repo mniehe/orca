@@ -17,7 +17,6 @@ in
         ../native/wayland-clipboard/x11-clipboard-publisher.c
         ../native/wayland-clipboard/x11-clipboard-publisher.h
         ../native/wayland-clipboard/protocol_test.py
-        ../native/provider-exec/provider-exec.c
       ];
     };
 
@@ -32,17 +31,14 @@ in
         -D_FORTIFY_SOURCE=2 -fPIE -pie -Wl,-z,relro,-z,now)
       $CC "''${flags[@]}" wayland-clipboard/wayland-clipboard.c \
         wayland-clipboard/x11-clipboard-publisher.c -ldl -o orca-wayland-clipboard
-      $CC -std=c11 "''${flags[@]}" provider-exec/provider-exec.c -o orca-provider-exec
       runHook postBuild
     '';
 
     installPhase = ''
       runHook preInstall
-      for helper in orca-wayland-clipboard orca-provider-exec; do
-        install -Dm755 "$helper" "$out/bin/$helper"
-        patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
-          --set-rpath ${pkgs.lib.getLib pkgs.glibc}/lib "$out/bin/$helper"
-      done
+      install -Dm755 orca-wayland-clipboard "$out/bin/orca-wayland-clipboard"
+      patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+        "$out/bin/orca-wayland-clipboard"
       patchelf --set-rpath ${pkgs.lib.makeLibraryPath [pkgs.glibc pkgs.wayland pkgs.gtk3]} \
         "$out/bin/orca-wayland-clipboard"
       strip --strip-unneeded "$out/bin/"*

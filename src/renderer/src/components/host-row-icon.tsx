@@ -1,10 +1,7 @@
 import React from 'react'
 import { Monitor, Server } from 'lucide-react'
 
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
-} from '../../../shared/execution-host/execution-host'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../shared/execution-host'
 
 /** The local machine isn't a server — a monitor glyph reads as "this computer". */
 export function HostRowIcon({

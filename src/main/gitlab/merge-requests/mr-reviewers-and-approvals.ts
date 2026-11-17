@@ -1,7 +1,4 @@
-import type {
-  GitLabAssignableUser,
-  GitLabMRApprovalState
-} from '../../../shared/gitlab/gitlab-types'
+import type { GitLabAssignableUser, GitLabMRApprovalState } from '../../../shared/gitlab-types'
 import { mapGitLabUser, type GitLabRawUser } from '../projects/gitlab-assignable-user-mapping'
 import { encodedProject } from '../projects/project-path-encoding'
 import { glabHostnameArgs, glabRepoExecOptions } from '../projects/gitlab-project-ref-resolution'

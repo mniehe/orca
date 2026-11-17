@@ -11,6 +11,7 @@ import {
   isAgentSessionCreateAdmissionRefusal
 } from '../../../../../src/shared/agent-session/failures/agent-session-definitive-refusal'
 import {
+  createStructuredAgentSessionId,
   structuredAgentSessionCreateParams,
   type StructuredAgentSessionCreateParams,
   type StructuredAgentSessionForkSource
@@ -24,7 +25,6 @@ import {
   structuredAgentSupportProbe
 } from './mobile-structured-create-operations'
 import { randomV4Uuid } from '../../../platform/random-v4-uuid'
-import { createOrcaSessionId } from '../../../../../src/shared/agent-session/identity/orca-session-address'
 import { rememberMobileCreatedStructuredSession } from './mobile-created-structured-sessions'
 
 // Partial: the reply is read before it is checked.
@@ -50,7 +50,7 @@ function createParamsFor(
   tabPlacement: StructuredAgentSessionCreateParams['tabPlacement']
 ): StructuredAgentSessionCreateParams {
   return structuredAgentSessionCreateParams({
-    sessionId: createOrcaSessionId(randomV4Uuid),
+    sessionId: createStructuredAgentSessionId(agent, randomV4Uuid),
     worktree,
     agent,
     ...(forkFrom ? { forkFrom } : {}),

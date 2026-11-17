@@ -14,10 +14,7 @@ import {
   branchRefLabels,
   probedDefaultBranchRef
 } from '../../../../shared/git/refs/branch-ref-label'
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 
 type BaseRefPickerProps = {
   repoId: string

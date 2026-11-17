@@ -173,16 +173,14 @@ export abstract class BrowserManagerGuestPopupPolicy extends BrowserManagerNavig
   requestExternalAppLaunch(
     guest: Electron.WebContents,
     rawUrl: string | undefined,
-    requestingUrl: () => string | null,
-    pageInitiated?: boolean
+    requestingUrl: () => string | null
   ): boolean {
     // Credit the requesting frame, not the trusted top-level site.
     return requestBrowserExternalAppLaunch({
       requester: guest,
       target: this.resolvePagePromptTarget(guest),
       rawUrl,
-      requestingUrl,
-      pageInitiated
+      requestingUrl
     })
   }
 

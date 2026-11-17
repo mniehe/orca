@@ -903,6 +903,9 @@
     },
     "followSymlinkedDirectories": "Sembolik bağlantılı dizinleri takip et",
     "followSymlinkedDirectoriesDescription": "Hızlı Aç'ta bağlantılı klasörlerde arama yapın ve Dosya Gezgini'nde yerel bağlantılı klasörleri genişletin.",
+    "accounts": {
+      "claudeRemoveFolder": "Orca, bu hesabın Claude klasörünü ve oturum açma bilgilerini bu bilgisayardan siler. Sistem varsayılanı ile paylaşılan sohbet geçmişi korunur. Bu hesap seçiliyse bir sonraki Claude başlatılışında Sistem varsayılanı kullanılır."
+    },
     "sourceControl": {
       "gitOperationInAnotherWorkspace": "Git işlemi başka yerde çalışıyor",
       "remoteOperationInAnotherWorkspace": "Başka bir çalışma alanında Git işlemi (push, pull veya force push gibi) çalışıyor. İşlemlerin çakışmaması için bitmesini bekleyip bu eylemi kullanın.",
@@ -5038,8 +5041,7 @@
             "detailedTooltip": "Çubuklar, etiketler ve yüzdelerle tam kullanım",
             "compactTooltip": "Özet kullanım: sağlayıcı başına tek özet",
             "footerDetailAria": "Kullanım altbilgi ayrıntısı",
-            "notChecked": "Kontrol edilmedi",
-            "modelWeeklyLimit": "{{model}} haftalık sınırı: {{usage}}"
+            "notChecked": "Kontrol edilmedi"
           },
           "RemoteServerUpdateStatusSegment": {
             "updating": "{{value0}}/{{value1}} güncelleniyor",
@@ -7578,6 +7580,7 @@
           "locationSaveFailed": "Hesap konumu kaydedilemedi. Tekrar deneyin.",
           "dbb9626ed1": "İptal",
           "63843e37e2": "Claude Hesabı Kaldırılsın mı?",
+          "380a7736cc": "Bu hesabı kaldırmak, içinde depolanan tüm Codex oturum geçmişi ve MCP girişleri dahil olmak üzere yönetilen Codex ana dizinini kalıcı olarak siler. Bu işlem geri alınamaz. Hesap şu anda etkinse Orca, sistem varsayılan Codex girişine geri döner.",
           "0d47394635": "Codex Hesabı Kaldırılsın mı?",
           "ae3b21eb6c": "opencode.ai/workspace/wrk_…/go",
           "51c9104e13": "opencode.ai'ye giriş yaptıktan sonra bunu URL'de bulun (örn.",
@@ -13205,7 +13208,9 @@
           }
         },
         "PluginUpdateAllDialog": {
+          "review": "İncele",
           "previewError": "Bu güncelleme okunamadı",
+          "newAccess": "Yeni: {{value0}}",
           "failed": "{{value0}} güncellenemedi. Diğerleri güncellendi.",
           "cancel": "İptal",
           "updateOne": "1 eklentiyi güncelle",
@@ -13216,31 +13221,23 @@
           "updated": "Güncellendi",
           "needsOrca": "Orca {{value0}} veya üzeri gerekir",
           "current": "Zaten yüklü",
+          "sourceMoved": "Yeni kaynak: {{value0}} (önceki: {{value1}})",
           "newShortcuts": "Klavye kısayolları",
           "newCommands": "Komutlar",
-          "newPanels": "Paneller ekler",
-          "newEvents": "Daha fazla Orca olayına tepki verir",
+          "newPanels": "Paneller",
+          "newEvents": "Daha fazla olay",
           "newRecipes": "Makine tarifleri",
           "newContributions": "Sizin adınıza işlem yapan özellikler",
           "allAccess": "Tüm erişimi gör",
-          "update": "Güncelle",
-          "newFileTypes": "Hangi dosyaları açtığını değiştirir",
-          "newHooks": "Orca'nın ve ajanlarınızın yaptıklarını değiştirebilir veya durdurabilir",
-          "newSettings": "Bir ayarlar sayfası",
-          "newStatusBarItems": "Durum çubuğu öğeleri",
-          "opensFileTypes": "Yeni dosya türlerini açar: {{value0}}",
-          "becomesDefaultEditor": "{{value0}} için varsayılan düzenleyici olur",
-          "needApproval": "Onayınızı bekliyor",
-          "readyToUpdate": "Güncellemeye hazır",
-          "movedRepository": "Farklı bir depodan geliyor"
+          "update": "Güncelle"
         },
         "PluginUpdateReview": {
           "title": "{{value0}} güncellemesini incele",
+          "back": "Geri",
           "approve": "Onayla ve güncelle",
-          "uncompared": "Orca bu sürümü onayladığınız sürümle karşılaştıramadı. Güncellemeden önce nelere erişebildiğini kontrol edin.",
-          "newInVersion": "Bu sürümde yeni:",
-          "titleMany": "{{value0}} güncellemeyi incele",
-          "history": "Değişiklikleri GitHub’da gör"
+          "explain": "Bu güncelleme, onayladığınız sürümden daha fazlasını istiyor. Yalnızca burada onaylarsanız yüklenir.",
+          "before": "Önce",
+          "after": "Sonra"
         },
         "PluginNotOfficialWarning": {
           "unknownPublisher": "yayıncı",
@@ -13248,8 +13245,7 @@
           "update": "Güncellemeden önce {{value0}} tarafına güvendiğinizden emin olun. Bu eklenti, yayıncının kodunu Orca içinde çalıştırır.",
           "installed": "{{value0}} tarafına güvendiğinizden emin olun. Bu eklenti, yayıncının kodunu Orca içinde çalıştırır.",
           "label": "Resmi bir eklenti değil:",
-          "translations": "Çeviriler Orca içindeki her metni değiştirebilir. {{value0}} tarafına güvendiğinizden emin olun.",
-          "community": "Topluluk eklentisi"
+          "translations": "Çeviriler Orca içindeki her metni değiştirebilir. {{value0}} tarafına güvendiğinizden emin olun."
         },
         "PluginCardAction": {
           "installed": "Yüklendi",
@@ -13338,7 +13334,7 @@
           "catalog": "Katalog",
           "clear": "Filtreleri temizle",
           "themes": "Temalar",
-          "codeLanguages": "Diller",
+          "codeLanguages": "Programlama dilleri",
           "translations": "Çeviriler",
           "icons": "Simgeler",
           "commands": "Komutlar ve paneller",
@@ -13453,15 +13449,11 @@
           "movedTitle": "{{value0}} {{value1}} farklı bir depodan geliyor",
           "accessTitle": "{{value0}} {{value1}} daha fazla erişim istiyor",
           "manyTitle": "{{value0}} eklenti güncellemesi incelemenizi bekliyor",
+          "oneDescription": "Yayıncı: {{value0}}. Siz inceleyene kadar güncellenmeyecek.",
+          "manyDescription": "Siz inceleyene kadar güncellenmeyecekler.",
+          "review": "İncele",
           "dismiss": "Kapat",
-          "movedInstalled": "Siz inceleyene kadar kapalı kalır.",
-          "approveAll": "Tümünü onayla ve güncelle",
-          "approveOne": "Onayla ve güncelle",
-          "details": "Ayrıntılar",
-          "failed": "{{value0}} güncellenemedi",
-          "morePlugins": "ve {{value0}} eklenti daha",
-          "uncompared": "Orca bunu onayladığınız sürümle karşılaştıramadı.",
-          "held": "{{value0}} incelemenizden sonra değişti, bu yüzden Ayarlar → Eklentiler bölümünde incelemenizi bekliyor."
+          "movedInstalled": "Siz inceleyene kadar kapalı kalır."
         },
         "PluginThemeUseNow": {
           "assignedLight": "{{value0}} açık temanız olarak ayarlandı",
@@ -22616,13 +22608,21 @@
     "language": {
       "back": "Diller",
       "requestPrompt": "Orca'nın hangi dili desteklemesini istersiniz?",
+      "requestSuccess": "Dil isteği kaydedildi. İlk kuruluma devam edebilirsiniz.",
       "requestError": "İsteğiniz kaydedilemedi. Tekrar deneyin.",
       "retry": "Yeniden dene",
       "requestAction": "Dil iste",
       "title": "Görüntüleme dili",
+      "device": "Sistem dili: {{language}}",
+      "unsupported": "Sistem dili: {{language}}. Bu dil henüz desteklenmiyor.",
+      "unknown": "Sistem diliniz algılanamadı. Aşağıdan bir dil seçin.",
+      "loadError": "Bu dil yüklenemedi. Tekrar deneyin.",
+      "saveError": "Dil tercihiniz kaydedilemedi. Tekrar deneyin.",
+      "other": "Başka bir dil…",
       "settingsError": "Ayarlarınız yüklenemedi.",
       "loadingSettings": "Ayarlar yükleniyor…",
-      "loading": "Dil yükleniyor…"
+      "loading": "Dil yükleniyor…",
+      "saving": "Dil kaydediliyor…"
     }
   },
   "resourceManager": {

@@ -9,7 +9,7 @@ import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   toSshExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+} from '../../../../../shared/execution-host'
 
 type PlaceholderOwner = Pick<Worktree, 'hostId' | 'runtimeOwnerEnvironmentId'>
 

@@ -1,7 +1,7 @@
 import type {
   DashboardRevealAgentArgs,
   DashboardSnapshot
-} from '../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../shared/dashboard-snapshot'
 import type {
   TerminalPreviewConnectResult,
   TerminalPreviewDataPayload

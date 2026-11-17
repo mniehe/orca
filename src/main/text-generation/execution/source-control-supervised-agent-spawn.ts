@@ -1,10 +1,12 @@
+import { spawnProcess } from '@orca/process-host'
 import {
   pathEnvRelativeTo,
   withCliRuntimeOnPath
 } from '../../../shared/shell/command-resolution/node-cli-command-resolution'
 import { resolveGuestNativeAgentCommand } from '../../codex-cli/command'
 import { createProviderSpawnSpec } from '../../provider-process/provider-process-supervisor'
-import { spawnProviderProcess } from '../../provider-process/provider-process-spawn'
+import { guardSupervisedProviderGroup } from '../../provider-process/provider-group-orphan-guard'
+import { SOURCE_CONTROL_KILL_SITE } from './source-control-agent-termination'
 import { guestNativeSpawnEnv } from '../../ipc/wsl-guest-windows-drive-path'
 import type {
   SourceControlAgentSpawnInput,
@@ -32,6 +34,17 @@ export function spawnSupervisedAgent(
     process.platform,
     { lifetime: 'one-shot' }
   )
-  const child = spawnProviderProcess(spec)
+  const child = spawnProcess({
+    program: spec.program,
+    args: spec.args,
+    env: spec.env,
+    cwd: spec.cwd,
+    detached: spec.detached,
+    stdio: ['pipe', 'pipe', 'pipe', ...spec.groupReportStdio]
+  })
+  guardSupervisedProviderGroup(child, {
+    site: SOURCE_CONTROL_KILL_SITE,
+    supervised: spec.supervised
+  })
   return Object.assign(child, { supervised: spec.supervised })
 }

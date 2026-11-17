@@ -63,6 +63,8 @@ export abstract class CodexRuntimeHomeState {
     account: CodexManagedAccount,
     unavailableManagedHomePath?: string
   ): string | null
+  protected abstract startSelfContainedSessionBridgeForLaunch(perAccountHome: string): void
+  protected abstract getSelfContainedSessionBridgeSourceHomes(): string[]
   protected abstract syncSelfContainedManagedSelection(account: CodexManagedAccount): void
   protected abstract resolveSelfContainedManagedHome(
     account: CodexManagedAccount
@@ -77,10 +79,10 @@ export abstract class CodexRuntimeHomeState {
   protected abstract invalidateBackfillAfterManagedSystemDefaultLaunch(
     launchEnv?: NodeJS.ProcessEnv
   ): boolean | null
-  protected abstract prepareWslAccountHistory(
+  protected abstract startWslSessionBridgeForLaunch(
     target: CodexAccountSelectionTarget,
     runtimeHomePath: string | null
-  ): Promise<void>
+  ): void
 
   abstract getHostCodexHomePathsForSessionDiscovery(): string[]
   abstract getSelectedHostAccountCodexHomePath(): string | null
@@ -130,10 +132,9 @@ export abstract class CodexRuntimeHomeState {
   protected abstract getWslManagedHomeIdentity(
     account: CodexManagedAccount | null
   ): { distro: string; linuxHomePath: string } | null
-  protected abstract getPreparedWslRateLimitHome(
-    target: CodexAccountSelectionTarget,
-    pinnedWslDistro?: string
-  ): CodexRateLimitHomeResolution
+  protected abstract getPreparedWslRateLimitHomePath(
+    target: CodexAccountSelectionTarget
+  ): string | null
   protected abstract getWslCodexHomePathForSelection(
     target: CodexAccountSelectionTarget
   ): string | null

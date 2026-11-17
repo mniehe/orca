@@ -26,6 +26,22 @@ export const NESTED_TOGGLE_MARKDOWN = [
   ''
 ].join('\n')
 
+// Unsupported nested attributes require byte-preserving passthrough for the whole block.
+export const UNSUPPORTED_NESTED_TOGGLE_MARKDOWN = [
+  '<details class="orca-details" open>',
+  '<summary>outer</summary>',
+  '',
+  '<details id="not-a-toggle">',
+  '<summary>inner</summary>',
+  '',
+  'Body',
+  '',
+  '</details>',
+  '',
+  '</details>',
+  ''
+].join('\n')
+
 export type RenderedToggles = {
   toggleCount: number
   nestedToggleCount: number
@@ -65,6 +81,12 @@ export async function expectEditableNestedToggles(page: Page): Promise<void> {
       variants: ['heading-3', null],
       passthroughBlockCount: 0
     })
+}
+
+export async function expectPassthroughFallback(page: Page): Promise<void> {
+  const passthrough = page.locator('.rich-markdown-editor [data-raw-markdown-html-block]')
+  await expect(passthrough).toHaveCount(1, { timeout: TOGGLE_RENDER_TIMEOUT_MS })
+  await expect(passthrough).toContainText('<details id="not-a-toggle">')
 }
 
 async function selectionIsInsideNestedToggleBody(page: Page): Promise<boolean> {

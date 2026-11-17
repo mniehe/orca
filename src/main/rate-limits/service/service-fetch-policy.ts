@@ -177,8 +177,6 @@ export abstract class RateLimitServiceFetchPolicy extends RateLimitServiceFetchT
     }
     // Kept snapshots can outlive a reset; never relabel a past-reset window as live.
     const inherited = previous ? withoutResetWindows(previous, now) : null
-    // Statusline posts carry no plan; keep the one read for this same login, with its account.
-    const sameLogin = inherited?.usageMetadata?.authProvenance === snapshot.provenance
     // Partial statusline payloads leave unreported windows unchanged.
     const session = freshSession ?? inherited?.session ?? null
     const weekly = freshWeekly ?? inherited?.weekly ?? null
@@ -230,7 +228,6 @@ export abstract class RateLimitServiceFetchPolicy extends RateLimitServiceFetchT
         // Statusline lacks Fable scope and credits; retain the latest OAuth values.
         fableWeekly: inherited?.fableWeekly ?? null,
         extraUsage: inherited?.extraUsage ?? null,
-        ...(sameLogin && inherited.planType ? { planType: inherited.planType } : {}),
         updatedAt: Date.now(),
         error: null,
         status: 'ok',
@@ -239,10 +236,7 @@ export abstract class RateLimitServiceFetchPolicy extends RateLimitServiceFetchT
           lastSuccessfulSource: 'live-session',
           credentialSource: previous?.usageMetadata?.credentialSource,
           retryAtMs: previous?.usageMetadata?.retryAtMs,
-          authProvenance: snapshot.provenance,
-          ...(sameLogin && inherited.usageMetadata?.readingAccount
-            ? { readingAccount: inherited.usageMetadata.readingAccount }
-            : {})
+          authProvenance: snapshot.provenance
         }
       }
     })

@@ -6,7 +6,7 @@ import {
   getRepoExecutionHostId,
   getRepoSshConnectionId,
   toSshExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+} from '../../../../../../shared/execution-host'
 import {
   authorityKey,
   parseHostAuthorityKey,

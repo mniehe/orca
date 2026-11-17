@@ -12,7 +12,7 @@ import {
   isDescendantOrEqualExact,
   isENOENT,
   normalizeExistingPath
-} from '../../../filesystem/local-file-io/filesystem-path-containment'
+} from './filesystem-path-containment'
 import {
   ensureAuthorizedRootsCache,
   isPathAllowedByCanonicalRegisteredRoot,

@@ -100,17 +100,10 @@ export function useMobileAsyncQuestionHides(
   const hidden = useSyncExternalStore(dismissals.subscribe, () => dismissals.readAsync(storeKey))
   return {
     hidden,
-    /** With the host's save, Skip reaches every device; one the host refused shows the card again. */
-    capture:
-      (ids: readonly string[], newestRow?: string, save?: (itemId: string) => Promise<unknown>) =>
-      () => {
-        if (active.current !== owner) {
-          return
-        }
+    capture: (ids: readonly string[]) => () => {
+      if (active.current === owner) {
         dismissals.hideAsync(storeKey, ids)
-        if (save && newestRow !== undefined) {
-          void save(newestRow).catch(() => dismissals.forgetAsync(storeKey, ids))
-        }
       }
+    }
   }
 }

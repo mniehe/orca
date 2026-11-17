@@ -4,7 +4,7 @@ import type {
   AgentJournalThreadGoal
 } from '../../../../../../shared/agent-session/journal/agent-session-journal-types'
 import {
-  agentOwnedThreadGoalCommand,
+  AGENT_OWNED_THREAD_GOAL_CLEAR_COMMAND,
   agentSessionThreadGoalReport
 } from '../../../../../../shared/agent-session/agent-session-thread-goal-report'
 import type { AgentSessionOptionsResult } from '../../../../../../shared/agent-session/options/protocol/agent-session-options-result'
@@ -12,7 +12,6 @@ import type {
   AgentSessionThreadGoalChange,
   AgentSessionThreadGoalResult
 } from '../../../../../../shared/agent-session/agent-session-thread-goal-wire'
-import { getNativeChatAgentProfile } from '../../../../../../shared/native-chat/native-chat-agent-profiles'
 import type { StructuredAgentSessionMutate } from '../structured/writes/use-structured-agent-session-mutate'
 
 export type StructuredAgentSessionThreadGoal = {
@@ -20,8 +19,6 @@ export type StructuredAgentSessionThreadGoal = {
   pending: boolean
   /** False for agent-owned /goal: clear uses a command and pause is unavailable. */
   hostChanges: boolean
-  /** An agent-owned goal resumes through the agent's `/goal resume`. */
-  agentResumes: boolean
   /** Resolves false when the change was refused or not sent; the error surfaces separately. */
   change: (change: AgentSessionThreadGoalChange) => Promise<boolean>
 }
@@ -35,10 +32,8 @@ export function useStructuredAgentSessionThreadGoal(args: {
   mutate: StructuredAgentSessionMutate
   /** Sends the agent a command, for a goal only its own `/goal` changes. */
   send: (text: string) => boolean | 'queued'
-  agent: string
 }): StructuredAgentSessionThreadGoal | null {
   const { journalItems, mutate, support, reported, journalEpoch, send } = args
-  const agentResumes = getNativeChatAgentProfile(args.agent)?.resumesOwnGoal === true
   const [pendingCount, setPendingCount] = useState(0)
   const report = useMemo(
     () => agentSessionThreadGoalReport({ journalItems, support, reported, journalEpoch }),
@@ -48,8 +43,7 @@ export function useStructuredAgentSessionThreadGoal(args: {
   const change = useCallback(
     async (next: AgentSessionThreadGoalChange): Promise<boolean> => {
       if (!hostChanges) {
-        const command = agentOwnedThreadGoalCommand(next, agentResumes)
-        return command !== null && send(command) !== false
+        return next.kind === 'clear' && send(AGENT_OWNED_THREAD_GOAL_CLEAR_COMMAND) !== false
       }
       setPendingCount((count) => count + 1)
       try {
@@ -63,10 +57,10 @@ export function useStructuredAgentSessionThreadGoal(args: {
         setPendingCount((count) => count - 1)
       }
     },
-    [agentResumes, hostChanges, mutate, send]
+    [hostChanges, mutate, send]
   )
   if (report === null) {
     return null
   }
-  return { goal: report.goal, pending: pendingCount > 0, hostChanges, agentResumes, change }
+  return { goal: report.goal, pending: pendingCount > 0, hostChanges, change }
 }

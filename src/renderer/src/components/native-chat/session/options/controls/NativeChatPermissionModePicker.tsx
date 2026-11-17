@@ -31,11 +31,10 @@ import { runSessionOptionSurfaceCall } from './native-chat-session-option-surfac
 export function NativeChatPermissionModeName(props: {
   mode: AgentChatPermissionMode
   truncate?: boolean
-  label?: string
 }): React.JSX.Element {
   const t = useTranslate()
   const Icon = NATIVE_CHAT_PERMISSION_MODE_ICONS[props.mode]
-  const label = props.label ?? nativeChatPermissionModeLabel(props.mode, t)
+  const label = nativeChatPermissionModeLabel(props.mode, t)
   const body = (
     <>
       <Icon className="size-3.5 shrink-0" aria-hidden />
@@ -93,7 +92,6 @@ export type NativeChatPermissionModePickerProps = {
   agent?: string | null
   disabled?: boolean
   currentLabel?: string
-  activeValue?: string
   onSelect: (mode: AgentChatPermissionMode) => void
 }
 
@@ -103,29 +101,16 @@ function NativeChatPermissionModePickerInner({
   agent,
   disabled = false,
   onSelect,
-  currentLabel,
-  activeValue
+  currentLabel
 }: NativeChatPermissionModePickerProps): React.JSX.Element {
   const t = useTranslate()
   useUiLanguageRevision()
   const title = nativeChatPermissionPickerTitle(t)
-  const selectedLabel = isAgentChatPermissionMode(current)
+  const label = isAgentChatPermissionMode(current)
     ? nativeChatPermissionModeLabel(current, t)
     : current === 'own'
       ? t('settings.agents.permissionOwnAll', "Agents' own settings")
       : (currentLabel ?? title)
-  const activeLabel = isAgentChatPermissionMode(activeValue)
-    ? nativeChatPermissionModeLabel(activeValue, t)
-    : activeValue === 'own'
-      ? t('settings.agents.permissionOwnAll', "Agents' own settings")
-      : null
-  const label = activeLabel
-    ? t(
-        'components.native-chat.composer.permissionAppliesNextMessage',
-        '{{saved}} applies to your next message; running {{active}}',
-        { saved: selectedLabel, active: activeLabel }
-      )
-    : selectedLabel
   // `shrink` overrides the button's shrink-0 so a narrow composer truncates the mode name.
   return (
     <DropdownMenu>
@@ -144,7 +129,7 @@ function NativeChatPermissionModePickerInner({
               className="max-w-40 min-w-0 shrink"
             >
               {isAgentChatPermissionMode(current) ? (
-                <NativeChatPermissionModeName mode={current} label={label} truncate />
+                <NativeChatPermissionModeName mode={current} truncate />
               ) : (
                 <>
                   <Settings2 className="size-3.5 shrink-0" aria-hidden />
@@ -158,7 +143,7 @@ function NativeChatPermissionModePickerInner({
           </DropdownMenuTrigger>
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={4}>
-          {label}
+          {title}
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="start" side="top" collisionPadding={8} className="w-72">
@@ -204,7 +189,7 @@ export function NativeChatComposerPermissionPicker({
     <NativeChatPermissionModePicker
       current={current}
       modes={modes}
-      activeValue={descriptor.valueSource === 'dispatched' ? descriptor.activeValue : undefined}
+      currentLabel={descriptor.description}
       agent={agent ?? null}
       disabled={!descriptor.settable}
       onSelect={(mode) => {

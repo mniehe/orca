@@ -1,7 +1,7 @@
 import {
   normalizeRuntimePathForComparison,
   relativePathInsideRoot
-} from '../../../../shared/file-access/cross-platform-path'
+} from '../../../../shared/cross-platform-path'
 import {
   EMPTY_HEAD_IDENTITY_SCOPE,
   FULL_HEAD_IDENTITY_SCOPE,
@@ -22,8 +22,6 @@ export type WorktreeBaseChangeClass = {
   gitStatusRepoIds: string[]
   // Head moves refresh status plus head identity; index churn must stay status-only.
   headIdentityRepoIds: string[]
-  // Linked HEAD leaf writes: listed heads moved without structure; identity reads replace the local re-list.
-  headMoveRepoIds: string[]
   // Every classification states its scope; EMPTY proves no head moved.
   headIdentityScope: WorktreeHeadIdentityScope
   // Attribute status to worktrees; FULL means the change cannot be narrowed.
@@ -36,8 +34,6 @@ export type WorktreeBaseRepoWatchConfig = {
   repoId: string
   repoName: string
   nestWorkspaces: boolean
-  // WSL-mirrored gitdir paths need not match listed rows, so identity patches cannot replace a re-list.
-  headMovesNeedListing?: boolean
 }
 
 export type WorktreeBaseWatchTarget = {
@@ -112,9 +108,9 @@ const GIT_COMMON_PRIMARY_STRUCTURAL_SCOPES = new Map<string, WorktreeHeadIdentit
   ['packed-refs', FULL_HEAD_IDENTITY_SCOPE],
   ['config.worktree', EMPTY_HEAD_IDENTITY_SCOPE]
 ])
-const GIT_COMMON_LINKED_STRUCTURAL_FILES = new Set(['gitdir', 'locked', 'config.worktree'])
-// gitdir affects identity; locked/config.worktree change structure without moving heads.
-const GIT_COMMON_LINKED_HEAD_SOURCE_FILES = new Set(['gitdir'])
+const GIT_COMMON_LINKED_STRUCTURAL_FILES = new Set(['HEAD', 'gitdir', 'locked', 'config.worktree'])
+// HEAD/gitdir affect identity; locked/config.worktree change structure without moving heads.
+const GIT_COMMON_LINKED_HEAD_SOURCE_FILES = new Set(['HEAD', 'gitdir'])
 const GIT_COMMON_LINKED_STATUS_FILES = new Set(['index'])
 
 // logs/HEAD captures amend/reset moves without index/HEAD leaf writes; status-only churn never appends it.
@@ -145,7 +141,6 @@ const NO_CHANGE: WorktreeBaseChangeClass = {
   structureRepoIds: [],
   gitStatusRepoIds: [],
   headIdentityRepoIds: [],
-  headMoveRepoIds: [],
   headIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
   gitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE
 }
@@ -158,7 +153,6 @@ function structuralChange(
     structureRepoIds: repoIds,
     gitStatusRepoIds: [],
     headIdentityRepoIds: [],
-    headMoveRepoIds: [],
     headIdentityScope,
     gitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE
   }
@@ -172,7 +166,6 @@ function gitStatusChange(
     structureRepoIds: [],
     gitStatusRepoIds: repoIds,
     headIdentityRepoIds: [],
-    headMoveRepoIds: [],
     headIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
     gitStatusScope
   }
@@ -180,14 +173,12 @@ function gitStatusChange(
 
 function headIdentityChange(
   repoIds: string[],
-  headIdentityScope: WorktreeHeadIdentityScope,
-  headMoveRepoIds: string[] = []
+  headIdentityScope: WorktreeHeadIdentityScope
 ): WorktreeBaseChangeClass {
   return {
     structureRepoIds: [],
     gitStatusRepoIds: [],
     headIdentityRepoIds: repoIds,
-    headMoveRepoIds,
     headIdentityScope,
     // Shared branch moves can change any checkout's local upstream; refs/heads are not polled directly.
     gitStatusScope: FULL_HEAD_IDENTITY_SCOPE
@@ -242,12 +233,6 @@ function classifyGitCommonEvent(
         )
   }
   if (parts.length === 3) {
-    if (parts[2] === 'HEAD') {
-      // A vanished HEAD may be a removal in progress; only writes keep the entry listed.
-      return event.type === 'delete'
-        ? structuralChange(repoIds, headIdentityScopeForEntry(parts[1]))
-        : headIdentityChange(repoIds, headIdentityScopeForEntry(parts[1]), repoIds)
-    }
     if (GIT_COMMON_LINKED_STRUCTURAL_FILES.has(parts[2])) {
       return structuralChange(
         repoIds,

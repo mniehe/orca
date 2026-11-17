@@ -1,8 +1,5 @@
 import type { Repo } from '../../../../../shared/repository/repo-types'
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../../shared/execution-host'
 import {
   createRepoExecutionHostLookup,
   type ExecutionHostOwnerLookup

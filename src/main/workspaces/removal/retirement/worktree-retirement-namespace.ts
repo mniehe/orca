@@ -1,7 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../shared/execution-host'
 import {
   mergeRetiredNameRegistries,
   type RetiredNameRegistry

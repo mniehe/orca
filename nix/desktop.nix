@@ -132,8 +132,6 @@ in
           "commit = process.env.ORCA_BUILD_COMMIT || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()"
         substituteInPlace src/shared/skills/installation/agent-feature-install-commands.ts \
           --replace-fail 'https://github.com/stablyai/orca' 'https://github.com/mniehe/orca'
-        substituteInPlace config/scripts/native-build/posix/build-provider-exec.mjs \
-          --replace-fail 'function providerExecFingerprint(' 'export function providerExecFingerprint('
         # Patch only the staged, already hash-verified Node, never the raw download cache.
         substituteInPlace config/scripts/desktop-distribution/linux/appimage-node-runtime.cjs \
           --replace-fail '  chmodSync(destination, 0o755)' \
@@ -179,7 +177,7 @@ in
           fs.writeFileSync(path.join(electronPackage, "path.txt"), "electron");
         '
         node config/scripts/workspace-package-build/build-workspace-packages.mjs
-        node nix/prepare-desktop-native.mjs host ${desktopNative}
+        node nix/prepare-desktop-native.mjs ${desktopNative}
         node config/scripts/native-build/node-addons/ensure-native-runtime.mjs --runtime=node --force
         node config/scripts/native-build/node-addons/ensure-native-runtime.mjs --runtime=electron
         node config/scripts/cli-build/build-cli.mjs
@@ -188,7 +186,6 @@ in
         pnpm run verify:built-skills-cli
         pnpm run build:web-from-renderer
         pnpm run build:mobile-web
-        node nix/prepare-desktop-native.mjs docker ${desktopNative}
         pnpm exec electron-builder --config config/electron-builder.config.cjs \
           --linux --x64 --dir --publish never \
           -c.electronDist=${electron.dist} -c.electronVersion=${electron.version}

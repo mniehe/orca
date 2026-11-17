@@ -10,10 +10,7 @@ export {
   waitForWorktreeRemovalAcceptance,
   finishAcceptedWorktreeRemoval
 } from './worktree-removal-settlement'
-import {
-  LOCAL_EXECUTION_HOST_ID,
-  type ExecutionHostId
-} from '../../../shared/execution-host/execution-host'
+import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../shared/execution-host'
 import type { RemoveWorktreeResult } from '../../../shared/worktree/create-types'
 import type { GitWorktreeInfo } from '../../../shared/worktree/types'
 import { normalizeLocalBranchRef } from '../../git/worktrees/worktree-operation-options'

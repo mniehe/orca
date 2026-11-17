@@ -3,7 +3,7 @@ import {
   CONNECTOR_PATHS,
   ConnectorReplyResponse,
   type ConnectorConversation
-} from '../../shared/connectors/connector-cloud-contract'
+} from '../../shared/connector-cloud-contract'
 import type { ConnectorResult } from './connector-cloud-request'
 import type { ConnectorTransport } from './connector-machine'
 import { connectorRetryDelayMs } from './connector-outbox'

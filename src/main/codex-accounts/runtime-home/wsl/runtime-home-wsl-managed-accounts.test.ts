@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type * as LegacyWslRuntimeAuthDrain from '../../legacy-wsl-auth-drain/legacy-wsl-runtime-auth-drain'
-import type * as WslCodexAccountHistory from '../../../codex/history/shared-store/wsl-codex-account-history'
+import type * as WslCodexSessionBridge from '../../../codex/history/bridges/wsl-codex-session-bridge'
 import { createSettings } from '../runtime-home-settings-test-fixtures'
 import {
   createCodexAuthJson,
@@ -23,17 +23,10 @@ vi.mock('../../legacy-wsl-auth-drain/legacy-wsl-runtime-auth-drain', async (impo
   ...(await importOriginal<typeof LegacyWslRuntimeAuthDrain>()),
   startLegacyWslRuntimeAuthDrain: async () => {}
 }))
-vi.mock(
-  '../../../codex/history/shared-store/wsl-codex-account-history',
-  async (importOriginal) => ({
-    ...(await importOriginal<typeof WslCodexAccountHistory>()),
-    WslCodexAccountHistoryLaunches: class {
-      run(): Promise<void> {
-        return Promise.resolve()
-      }
-    }
-  })
-)
+vi.mock('../../../codex/history/bridges/wsl-codex-session-bridge', async (importOriginal) => ({
+  ...(await importOriginal<typeof WslCodexSessionBridge>()),
+  startWslCodexSessionBridgeInBackground: async () => {}
+}))
 vi.mock('electron', () => ({
   app: {
     getPath: () => testState.userDataDir
@@ -119,8 +112,7 @@ describe('CodexRuntimeHomeService', () => {
       })
       expect(service.prepareForRateLimitFetch({ runtime: 'wsl', wslDistro: 'Ubuntu' })).toEqual({
         kind: 'ready',
-        codexHomePath: wslManagedHomePath,
-        readingAccount: { accountId: 'account-1', runtime: 'wsl', wslDistro: 'Ubuntu' }
+        codexHomePath: wslManagedHomePath
       })
     } finally {
       if (originalPlatform) {

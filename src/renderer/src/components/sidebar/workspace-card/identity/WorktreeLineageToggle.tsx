@@ -16,7 +16,9 @@ const STATUS_ORDER: readonly WorktreeStatus[] = [
   'working',
   'monitoring',
   'unconfirmed',
-  'interrupted'
+  'interrupted',
+  'done',
+  'active'
 ]
 
 export function WorktreeLineageToggle({

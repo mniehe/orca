@@ -2,7 +2,7 @@ import type {
   GitLabAssignableUser,
   GitLabWorkItem,
   GitLabWorkItemDetails
-} from '../../../shared/gitlab/gitlab-types'
+} from '../../../shared/gitlab-types'
 import type { IssueSourcePreference } from '../../../shared/repository/repo-types'
 import {
   derivePipelineStatus,

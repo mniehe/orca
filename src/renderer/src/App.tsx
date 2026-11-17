@@ -1,4 +1,3 @@
-import { PluginUpdateReviewHost } from './components/plugins/dialogs/PluginUpdateReviewHost'
 import { useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Toaster } from '@/components/ui/sonner'
@@ -125,7 +124,6 @@ function App(): React.JSX.Element {
         )}
         <PlainSshTerminalPanels />
         <PluginShotReplayMount />
-        <PluginUpdateReviewHost />
       </TooltipProvider>
       <SkillFreshnessNudge />
       <WorktreeBaseFallbackDialog />

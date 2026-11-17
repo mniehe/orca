@@ -2,7 +2,6 @@ import type {
   CodexRateLimitResetOutcome,
   ProviderRateLimits
 } from '../../../../shared/agent-usage/rate-limits/rate-limit-types'
-import { withCodexReadingAccount } from './codex-reading-account'
 import { isCodexAuthError } from '../../../../shared/agent-accounts/codex/codex-auth-errors'
 import {
   buildWslExecArgs,
@@ -23,7 +22,7 @@ import {
   startCodexStateDbBackfillRecoveryInBackground
 } from '../../../codex/history/index/codex-state-db-backfill-recovery'
 import { spawnProcessOnWorkerThread } from '../../../worker-thread-child-process/worker-thread-child-process'
-import { buildConfiguredProxyEnv } from '../../../../shared/network/network-proxy'
+import { buildConfiguredProxyEnv } from '../../../../shared/network-proxy'
 import { getMainHttpClient } from '../../../network/http-client'
 import { probeCodexAuthPresence } from './codex-auth-presence'
 import {
@@ -165,12 +164,6 @@ async function fetchBackendUsage(
 }
 
 export async function fetchCodexRateLimits(
-  options?: CodexRateLimitFetchOptions
-): Promise<ProviderRateLimits> {
-  return withCodexReadingAccount(await readCodexRateLimits(options), options?.readingAccount)
-}
-
-async function readCodexRateLimits(
   options?: CodexRateLimitFetchOptions
 ): Promise<ProviderRateLimits> {
   if (options?.signal?.aborted) {

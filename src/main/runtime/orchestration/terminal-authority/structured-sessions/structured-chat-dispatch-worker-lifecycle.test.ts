@@ -223,11 +223,7 @@ describe("a chat assignee's liveness, stop and close", () => {
 
       const read = await call('orchestration.workerRead', { dispatch: dispatchId })
 
-      expect(read).toMatchObject({
-        source: 'transcript',
-        status: { liveness: 'live' },
-        projection: { dispatchId }
-      })
+      expect(read).toMatchObject({ source: 'transcript', status: { liveness: 'live' } })
       expect(JSON.stringify(read.transcript)).toContain('working on it')
     } finally {
       await server.stop()

@@ -8,13 +8,13 @@ import {
   getRepoSshConnectionId,
   getWorktreeExecutionHostId,
   parseExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+} from '../../../../../../shared/execution-host'
 import {
   canInspectLocalMcpConfigRoot,
   inspectMcpConfigContent,
   MCP_CONFIG_CANDIDATES,
   MCP_STARTER_CONFIG
-} from '../../../../../../shared/mcp/configuration/mcp-config'
+} from '../../../../../../shared/mcp-config'
 import { useAppStore } from '../../../../store/index'
 import { selectRuntimeAwareSshStatus } from '../../../../store/slices/ssh/runtime-environment-ssh-selectors'
 import {

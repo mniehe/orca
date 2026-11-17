@@ -1,7 +1,6 @@
 // Derive attention edges on the host so background chats work without a renderer reader.
 // Completion and prompt events are live-only; late subscribers receive no replay.
 
-import { structuredAgentSessionAwaitsAnswer } from '../../../../shared/agent-session/view/structured-agent-session-async-questions'
 import type { AgentSessionRecord } from '../../../../shared/agent-session/lifecycle/agent-session-record'
 import type {
   AgentSessionTurnCompletion,
@@ -51,8 +50,6 @@ export type StructuredAgentSessionTurnCompletionFeedDeps = {
     journal?: AgentSessionJournal
   ) => Promise<StructuredAgentSessionStatusState | null>
   readChildWork: (sessionId: string) => readonly AgentChildWorkLivenessCandidate[] | undefined
-  /** The person's Skip on the chat's async questions, saved on its record. */
-  readAsyncQuestionsSkippedThrough?: (sessionId: string) => string | undefined
 }
 
 type RequestMark = Pick<StructuredAgentSessionLatestRequest, 'kind' | 'id'>
@@ -242,13 +239,7 @@ export class StructuredAgentSessionTurnCompletionFeed {
       return false
     }
     // An open async question pauses the goal on the user, so it is news now.
-    if (
-      state.goalContinues &&
-      !structuredAgentSessionAwaitsAnswer(
-        state.summary.openAsyncQuestion,
-        this.deps.readAsyncQuestionsSkippedThrough?.(sessionId)
-      )
-    ) {
+    if (state.goalContinues && state.summary.awaitsAnswer !== true) {
       return true
     }
     const held = foldAgentLeadStatus({

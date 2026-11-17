@@ -2,8 +2,7 @@ import type { TuiAgent } from '../../../../../shared/agent-launch/catalog/tui-ag
 import {
   AI_TEXT_ACTION_IDS,
   SOURCE_CONTROL_TEXT_ACTION_IDS,
-  type AiActionId,
-  type AiTextActionId
+  type AiActionId
 } from '../../../../../shared/source-control/ai/recipes/source-control-ai-actions'
 import {
   CUSTOM_AGENT_ID,
@@ -19,14 +18,9 @@ import type { Translate } from '@/i18n/use-translate'
 
 export const AI_TEXT_ACTION_ID_SET = new Set<string>(AI_TEXT_ACTION_IDS)
 export const SOURCE_CONTROL_TEXT_ACTION_ID_SET = new Set<string>(SOURCE_CONTROL_TEXT_ACTION_IDS)
-
-function isAiTextActionId(actionId: AiActionId): actionId is AiTextActionId {
-  return AI_TEXT_ACTION_ID_SET.has(actionId)
-}
-
-function textGenerationAgentIds(actionId: AiTextActionId): Set<string> {
-  return new Set(listCommitMessageAgentCapabilities(actionId).map((capability) => capability.id))
-}
+const TEXT_GENERATION_AGENT_ID_SET = new Set(
+  listCommitMessageAgentCapabilities().map((capability) => capability.id)
+)
 
 export const getActionDescriptions = createLocalizedCatalog((): Record<AiActionId, string> => ({
   conversationName: translate(
@@ -71,6 +65,9 @@ export const getActionDescriptions = createLocalizedCatalog((): Record<AiActionI
   )
 }))
 
+// Their CLIs can't take the read-only tool policy, so they run only naming tasks (source-control-read-only-policy.ts).
+const NAMING_ONLY_TEXT_AGENT_IDS = new Set<string>(['amp', 'muse'])
+
 const FALLBACK_AGENT_ARGS_PLACEHOLDER = '--model sonnet'
 
 const AGENT_ARGS_PLACEHOLDER_OVERRIDES: Partial<Record<TuiAgent, string>> = {
@@ -114,16 +111,20 @@ export function getAgentCatalogForAction(
   actionId: AiActionId,
   selectedAgent: TuiAgent | CustomAgentId | null | undefined
 ): AgentCatalogEntry[] {
-  if (!isAiTextActionId(actionId)) {
+  if (!AI_TEXT_ACTION_ID_SET.has(actionId)) {
     return getAgentCatalog()
   }
-  const agentIds = textGenerationAgentIds(actionId)
-  return getAgentCatalog().filter((agent) => agentIds.has(agent.id) || agent.id === selectedAgent)
+  return getAgentCatalog().filter(
+    (agent) =>
+      (TEXT_GENERATION_AGENT_ID_SET.has(agent.id) &&
+        !(actionId === 'dictationCleanup' && NAMING_ONLY_TEXT_AGENT_IDS.has(agent.id))) ||
+      agent.id === selectedAgent
+  )
 }
 
-function formatSupportedAgentLabels(actionId: AiTextActionId, t: Translate = translate): string {
+function formatSupportedAgentLabels(t: Translate = translate): string {
   return [
-    ...listCommitMessageAgentCapabilities(actionId).map((capability) => capability.label),
+    ...listCommitMessageAgentCapabilities().map((capability) => capability.label),
     t(
       'auto.components.settings.source.control.action.recipe.options.customCommand',
       'Custom command'
@@ -135,13 +136,13 @@ export function getSourceControlActionAgentSupportText(
   actionId: AiActionId,
   t: Translate = translate
 ): string | null {
-  if (!isAiTextActionId(actionId)) {
+  if (!AI_TEXT_ACTION_ID_SET.has(actionId)) {
     return null
   }
   return t(
     'auto.components.settings.source.control.action.recipe.options.supportedAgents',
     'Supported agents for this recipe: {{value0}}.',
-    { value0: formatSupportedAgentLabels(actionId, t) }
+    { value0: formatSupportedAgentLabels(t) }
   )
 }
 
@@ -150,12 +151,12 @@ export function getSourceControlActionAgentWarningText(
   selectedAgent: TuiAgent | CustomAgentId | null | undefined,
   t: Translate = translate
 ): string | null {
-  if (!isAiTextActionId(actionId)) {
+  if (!AI_TEXT_ACTION_ID_SET.has(actionId)) {
     return null
   }
 
   if (selectedAgent && !isCustomAgentId(selectedAgent)) {
-    if (textGenerationAgentIds(actionId).has(selectedAgent)) {
+    if (TEXT_GENERATION_AGENT_ID_SET.has(selectedAgent)) {
       return null
     }
     const agentLabel = getAgentCatalog().find((agent) => agent.id === selectedAgent)?.label

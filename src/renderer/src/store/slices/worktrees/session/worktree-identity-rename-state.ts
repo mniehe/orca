@@ -41,7 +41,6 @@ const WORKTREE_ID_KEYED_MAP_KEYS = [
   'explorerDisplayRootByWorktree',
   'showDotfilesByWorktree',
   'gitGraphFiltersByWorktree',
-  'notificationsMutedByWorktree',
   'expandedDirs',
   'defaultTerminalTabsAppliedByWorktreeId',
   'recentlyClosedTabKindsByWorktree'

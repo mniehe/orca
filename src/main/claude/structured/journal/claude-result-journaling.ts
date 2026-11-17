@@ -1,5 +1,4 @@
 import { writeClaudeTerminalFailure } from './claude-terminal-failure'
-import { endClaudeStreams } from './claude-open-stream-endings'
 import { claudeResultEndedStepEarly, claudeResultOutcome } from '../turns/claude-result-outcome'
 import { writeClaudeStopReadings } from '../../claude-stop-readings'
 import { journalClaudeGoal } from '../../claude-goal-journaling'
@@ -102,13 +101,9 @@ export function journalClaudeResult(
   ) {
     // The steer continues this open turn, so only the cut-off step's streamed output ends here.
     corrections.abandon()
-    endClaudeStreams(
-      streamedThinking,
-      streamedText,
-      streamedBlocks,
-      String(message.session_id),
-      observedAt
-    )
+    streamedText.finishRoot({ completedAt: observedAt })
+    streamedBlocks.clearScope(String(message.session_id), null)
+    streamedThinking.finishRoot(String(message.session_id), observedAt)
     turn.holdForSteer(claudeTurnEndForResult(message, observedAt))
     return
   }

@@ -9,8 +9,7 @@ import {
 const PRE_CHANGE_REF = 'v1.4.212'
 const SUITE_TIMEOUT_MS = 180_000
 // Both builds load a copy in the checkout cache, out of reach of `mobile/tsconfig.json`.
-// Releases cut before the agent-lineage/ move load it from where they define it.
-const PHONE_ROW_READER = 'mobile/src/worktree/agent-lineage/agent-row-display.ts'
+const PHONE_ROW_READER = 'mobile/src/worktree/agent-row-display.ts'
 
 const WORKTREE_ID = 'repo::/worktree'
 const NOW = 1_000_000
@@ -125,7 +124,7 @@ async function loadBuild(ref: string | null): Promise<Build> {
     const [sources, rows, display] = await Promise.all([
       import('../../../src/main/runtime/workspaces/process-listing/runtime-worktree-agent-sources'),
       import('../../../src/main/runtime/workspaces/process-listing/runtime-worktree-agent-rows'),
-      importWorkingTreeModuleCopy(PHONE_ROW_READER)
+      importWorkingTreeModuleCopy('mobile/src/worktree/agent-lineage/agent-row-display.ts')
     ])
     return {
       label: 'current',
@@ -162,7 +161,9 @@ let agentRowTimeAt: (row: AgentRow) => number
 
 beforeAll(async () => {
   ;[oldBuild, newBuild] = await Promise.all([loadBuild(PRE_CHANGE_REF), loadBuild(null)])
-  const display = await importWorkingTreeModuleCopy(PHONE_ROW_READER)
+  const display = await importWorkingTreeModuleCopy(
+    'mobile/src/worktree/agent-lineage/agent-row-display.ts'
+  )
   // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: the rows are JSON the current host published, so the current reader's row type holds.
   agentRowTimeAt = display.agentRowTimeAt as unknown as (row: AgentRow) => number
 }, SUITE_TIMEOUT_MS)

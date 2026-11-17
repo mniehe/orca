@@ -46,7 +46,6 @@ export function setWorktreeGitStatusRefWatch(
 function createActiveWatch(
   target: WorktreeBaseWatchTarget,
   mainWindow: BrowserWindow,
-  store: Store,
   subscription: ActiveWatch['subscription'],
   gitStatusRefPaths: Set<string>
 ): ActiveWatch {
@@ -58,12 +57,9 @@ function createActiveWatch(
     pendingStructureRepoIds: new Set(),
     pendingGitStatusRepoIds: new Set(),
     pendingHeadIdentityRepoIds: new Set(),
-    pendingHeadMoveRepoIds: new Set(),
     pendingHeadIdentityScope: EMPTY_HEAD_IDENTITY_SCOPE,
     pendingGitStatusScope: EMPTY_HEAD_IDENTITY_SCOPE,
     headIdentityRefresh: createWorktreeHeadIdentityRefreshState(),
-    isRuntimeEnvironmentActive: () =>
-      Boolean(store.getSettings().activeRuntimeEnvironmentId?.trim()),
     gitStatusRefPaths,
     watcherFailureRefresh: new WorktreeWatcherFailureRefreshCooldown(),
     disposed: false
@@ -72,8 +68,7 @@ function createActiveWatch(
 
 async function subscribeTarget(
   target: WorktreeBaseWatchTarget,
-  mainWindow: BrowserWindow,
-  store: Store
+  mainWindow: BrowserWindow
 ): Promise<ActiveWatch> {
   let activeWatch: ActiveWatch | null = null
   const gitStatusRefPaths = new Set<string>()
@@ -107,7 +102,7 @@ async function subscribeTarget(
       }
     }
   )
-  activeWatch = createActiveWatch(target, mainWindow, store, subscription, gitStatusRefPaths)
+  activeWatch = createActiveWatch(target, mainWindow, subscription, gitStatusRefPaths)
   if (supportsWorktreeHeadIdentityRefresh(activeWatch)) {
     // Baseline at subscribe time so the first later head signal cannot silently skip an external commit.
     void refreshWorktreeHeadIdentities(activeWatch, activeWatch.headIdentityRefresh, false)
@@ -118,7 +113,6 @@ async function subscribeTarget(
 async function replaceWatch(
   target: WorktreeBaseWatchTarget,
   mainWindow: BrowserWindow,
-  store: Store,
   generation: number
 ): Promise<void> {
   const previous = activeWatches.get(target.key)
@@ -129,7 +123,7 @@ async function replaceWatch(
     return
   }
   try {
-    const activeWatch = await subscribeTarget(target, mainWindow, store)
+    const activeWatch = await subscribeTarget(target, mainWindow)
     if (generation !== syncGeneration) {
       activeWatch.disposed = true
       await activeWatch.subscription.unsubscribe().catch((error) => {
@@ -184,7 +178,7 @@ export async function syncWorktreeBaseDirectoryWatchers(
     if (generation !== syncGeneration) {
       return
     }
-    await replaceWatch(target, mainWindow, store, generation)
+    await replaceWatch(target, mainWindow, generation)
     if (generation !== syncGeneration) {
       return
     }

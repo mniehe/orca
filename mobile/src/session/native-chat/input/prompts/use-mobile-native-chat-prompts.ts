@@ -1,10 +1,8 @@
 import {
   aggregateAsyncQuestions,
-  newestShownAsyncQuestionRow,
   scanPendingAsks
 } from '../../../../../../src/shared/native-chat/input/native-chat-ask'
 import { useMemo } from 'react'
-import { asyncQuestionsAfterSkip } from '../../../../../../src/shared/agent-session/view/structured-agent-session-async-questions'
 import type { AgentStatusEntry } from '../../../../../../src/shared/agent-status/contracts/agent-status-types'
 import type { AskPrompt } from '../../../../../../src/shared/native-chat/input/questions/native-chat-ask-types'
 import {
@@ -27,8 +25,6 @@ export type MobileNativeChatPrompts = {
   waitStartedAt: number | null
   /** Set in a structured chat, whose ask is answered by a send rather than a terminal write. */
   structuredAnswer: ReturnType<typeof useMobileStructuredAsyncQuestion>['answer']
-  /** A structured chat's newest shown question row, which its host saves Skip through. */
-  newestAsyncQuestionRow?: string
 }
 
 export function useMobileNativeChatPrompts(args: {
@@ -49,20 +45,15 @@ export function useMobileNativeChatPrompts(args: {
   )
   const queuedCards = structured?.queued?.cards
   const queuedTexts = useMemo(() => queuedCards?.map((card) => card.text), [queuedCards])
-  const skippedThrough = structured?.asyncQuestionSkip?.skippedThrough
-  const contributors = useMemo(
-    () => asyncQuestionsAfterSkip(scan?.contributors ?? [], skippedThrough),
-    [scan, skippedThrough]
-  )
   const pendingAsk = useMemo(
     () =>
       aggregateAsyncQuestions(
-        contributors,
+        scan?.contributors ?? [],
         args.asyncSourceScope,
         args.hiddenAsyncIds,
         queuedTexts
       ),
-    [contributors, args.asyncSourceScope, args.hiddenAsyncIds, queuedTexts]
+    [scan, args.asyncSourceScope, args.hiddenAsyncIds, queuedTexts]
   )
   const transcriptAsk = scan?.blocking ?? pendingAsk
   const interactivePrompt = status?.interactivePrompt
@@ -91,12 +82,7 @@ export function useMobileNativeChatPrompts(args: {
       ask: enabled ? structuredAsk.ask : null,
       answerPending: scan?.answerPending === true,
       waitStartedAt: null,
-      structuredAnswer: structuredAsk.answer,
-      newestAsyncQuestionRow: newestShownAsyncQuestionRow(
-        contributors,
-        args.asyncSourceScope,
-        pendingAsk
-      )
+      structuredAnswer: structuredAsk.answer
     }
   }
   // An approval needs no resolved chat; an ask waits for one.

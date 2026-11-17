@@ -27,13 +27,7 @@ export const removeControlSocketPathMock = vi.fn<(socketPath: string) => void>()
 export const spawnSystemSshMock =
   vi.fn<(target: SshTarget, options?: SystemSshBuildArgsOptions) => MockSystemSshProcess>()
 export const spawnSystemSshCommandMock =
-  vi.fn<
-    (
-      target: SshTarget,
-      command: string,
-      options?: SystemSshCommand.SystemSshCommandOptions
-    ) => MockSystemCommandChannel | SystemSshCommand.SystemSshCommandChannel
-  >()
+  vi.fn<(target: SshTarget, command: string, options?: unknown) => MockSystemCommandChannel>()
 export const downloadFileViaSystemSshMock = vi.fn<(...args: unknown[]) => Promise<void>>()
 export const uploadDirectoryViaSystemSshMock = vi.fn<(...args: unknown[]) => Promise<void>>()
 export const uploadFileViaSystemSshMock = vi.fn<(...args: unknown[]) => Promise<void>>()

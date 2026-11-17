@@ -7,7 +7,7 @@ import {
   type DashboardCard,
   type DashboardCardSubagent,
   type DashboardSnapshot
-} from '../../../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../../../shared/dashboard-snapshot'
 import { dashboardBucketForDotState } from '../../dashboard/snapshot/dashboard-card-bucket'
 import { dashboardCardDotState } from '../../dashboard/rows/dashboard-row-bucket'
 import { isAgentTurnUnacknowledged } from '@/attention/agent-attention-acknowledgement'

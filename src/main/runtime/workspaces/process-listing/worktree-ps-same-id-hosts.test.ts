@@ -14,7 +14,7 @@ import {
   applyRuntimeWorktreePsSessionActivity,
   applyRuntimeWorktreePsTerminalActivity
 } from './runtime-worktree-ps-activity'
-import { getDefaultWorkspaceSession } from '../../../../shared/orca-profiles/constants'
+import { getDefaultWorkspaceSession } from '../../../../shared/constants'
 
 const ID = 'repo-a::/srv/app'
 

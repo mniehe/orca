@@ -2,7 +2,7 @@ import {
   createNormalizedPathInsideOrEqualMatcher,
   isRuntimePathAbsolute,
   normalizeRuntimePathForComparison
-} from '../../file-access/cross-platform-path'
+} from '../../cross-platform-path'
 import type {
   BuiltInWorktreeVisibilitySourceId,
   CustomWorktreeVisibilitySource,

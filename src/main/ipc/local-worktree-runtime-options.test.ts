@@ -55,5 +55,10 @@ describe('getLocalRepoForRegisteredWorktree', () => {
         getLocalRepoForRegisteredWorktree(onlyRemote.store, '/wt/one', '/wt/one')
       ).toBeUndefined()
     })
+
+    it('matches the resolved path spelling as well as the raw one', () => {
+      const { store } = makeStore(repos, [worktreeId('middle', '/wt/one')])
+      expect(getLocalRepoForRegisteredWorktree(store, '/wt/other', '/wt/one')?.id).toBe('middle')
+    })
   })
 })

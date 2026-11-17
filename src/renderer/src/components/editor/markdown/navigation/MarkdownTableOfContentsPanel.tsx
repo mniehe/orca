@@ -17,7 +17,7 @@ import {
   MARKDOWN_TOC_PANEL_MIN_WIDTH,
   clampMarkdownTocPanelWidth,
   computeMaxMarkdownTocPanelWidth
-} from '../../../../../../shared/editor/markdown/markdown-toc-panel-width'
+} from '../../../../../../shared/markdown-toc-panel-width'
 
 type MarkdownTableOfContentsPanelProps = {
   virtualized?: boolean

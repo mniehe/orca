@@ -1,4 +1,4 @@
-import { retryAcpRequest } from '../protocol/acp-request-retry'
+import { setTimeout as delay } from 'node:timers/promises'
 import { observeAcpForkSupport } from '../capabilities/acp-fork-support'
 import {
   assertStructuredAgentResolutionCurrent,
@@ -39,14 +39,18 @@ async function startListingSession(
   workspace: string,
   operation?: StructuredAgentResolutionOperation
 ): Promise<AcpSessionStarted> {
-  return retryAcpRequest(
-    () => connection.start({ cwd: workspace, mcpServers: [] }),
-    {
-      signal: operation?.signal,
-      assertCurrent: () => assertStructuredAgentResolutionCurrent(operation)
-    },
-    (error) => error instanceof AcpAgentError && error.code === -32603
-  )
+  for (const backoffMs of [250, 500]) {
+    try {
+      return await connection.start({ cwd: workspace, mcpServers: [] })
+    } catch (error) {
+      if (!(error instanceof AcpAgentError && error.code === -32603)) {
+        throw error
+      }
+    }
+    await delay(backoffMs, undefined, { signal: operation?.signal })
+    assertStructuredAgentResolutionCurrent(operation)
+  }
+  return connection.start({ cwd: workspace, mcpServers: [] })
 }
 
 /** Lists models from a disposable session, learning menus for the models it starts on or switches to. */

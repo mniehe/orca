@@ -11,7 +11,6 @@ import type {
 import { launchPreparationFailure } from '../../../native-chat/agent-session-wire/providers/structured-agent-session-adapter-errors'
 import {
   closeFailedCodexAcquisition,
-  codexAcquisitionExitFailure,
   stopSupersededCodexAcquisition
 } from './codex-structured-acquisition-lifecycle'
 import { CodexSubagentExecutions } from '../background-work/codex-subagent-executions'
@@ -24,6 +23,12 @@ import {
   handleCodexSessionExit
 } from '../session-lifecycle/codex-structured-session-close'
 import { openCodexStructuredSession } from '../session-lifecycle/codex-structured-session-start'
+import {
+  agentSessionFailureFact,
+  providerDiagnosticOf
+} from '../../../../shared/agent-session/failures/agent-session-failure'
+import { providerSpawnAbsent } from '../../../provider-process/provider-executable-missing'
+import { providerStartupFailureFact } from '../../../native-chat/agent-session-wire/startup/structured-agent-session-failure-text'
 import {
   assertCodexConnectionOpen,
   mintCodexAcquisitionGeneration,
@@ -195,7 +200,13 @@ export async function acquireCodexStructuredSession(input: {
                   attempt.cancelled && attempt.requestedClose !== false
                     ? 'requested-close'
                     : 'unexpected-exit',
-                failure: codexAcquisitionExitFailure(error, attempt.cancelled),
+                failure: attempt.cancelled
+                  ? agentSessionFailureFact('hostFault')
+                  : providerSpawnAbsent(error)
+                    ? providerStartupFailureFact(error)
+                    : agentSessionFailureFact('providerExited', {
+                        detail: providerDiagnosticOf(error)
+                      }),
                 observedAt: deps.now?.() ?? Date.now()
               })
             }

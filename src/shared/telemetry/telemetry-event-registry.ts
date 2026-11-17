@@ -119,10 +119,6 @@ import {
 import { sshRemoteRuntimeResolvedSchema } from './schemas/telemetry-ssh-runtime-event-schemas'
 import { wslUsageSnapshotSchema } from './schemas/telemetry-wsl-usage-event-schemas'
 import {
-  worktreeCardsIntroActionSchema,
-  worktreeCardStyleChangedSchema
-} from './schemas/telemetry-worktree-card-event-schemas'
-import {
   sshHostServerConversionSchema,
   sshHostServerDecidedSchema,
   sshHostServerDeployFailedSchema,
@@ -184,8 +180,6 @@ export const eventSchemas = {
   codex_trust_grant: codexTrustGrantSchema,
 
   settings_changed: settingsChangedSchema,
-  worktree_card_style_changed: worktreeCardStyleChangedSchema,
-  worktree_cards_intro_action: worktreeCardsIntroActionSchema,
 
   native_chat_toggled: nativeChatToggledSchema,
   native_chat_message_sent: nativeChatMessageSentSchema,

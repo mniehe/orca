@@ -303,12 +303,15 @@ function runWindowsCommandWithoutStdin(
 ): Promise<void> {
   const channel = spawnSystemSshCommand(target, command, {
     wrapCommand: false,
-    closeStdin: true,
     ...getSystemSshBuildArgsFromOperationOptions(options)
   })
-  return awaitWithSystemSshAbort(
+  const closePromise = awaitWithSystemSshAbort(
     options.signal,
     () => channel.close(),
     waitForChannelClose(channel, label, WINDOWS_STDIN_WRITE_TIMEOUT_MS)
   )
+  if (!options.signal?.aborted) {
+    channel.stdin.end()
+  }
+  return closePromise
 }

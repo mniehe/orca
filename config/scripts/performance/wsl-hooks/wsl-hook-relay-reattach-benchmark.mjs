@@ -325,7 +325,7 @@ async function main() {
       '../../../../src/shared/file-access/wsl-paths.ts'
     )
     const { FLOATING_TERMINAL_WORKTREE_ID } = await jiti.import(
-      '../../../../src/shared/workspace/identity/floating-workspace-id.ts'
+      '../../../../src/shared/constants.ts'
     )
 
     // Assert singleton identity so patched manager is the one ensureWslHookRelayForReattach actually closes over.

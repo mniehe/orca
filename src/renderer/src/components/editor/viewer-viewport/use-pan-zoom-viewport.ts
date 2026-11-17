@@ -13,7 +13,7 @@ import {
   getPanZoomViewOffset,
   panView,
   zoomViewAt
-} from '../../../../../shared/document-preview/pan-zoom-view'
+} from '../../../../../shared/pan-zoom-view'
 
 type ZoomStep = (zoom: number, fitScale: number) => number
 

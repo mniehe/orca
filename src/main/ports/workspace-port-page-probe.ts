@@ -5,7 +5,7 @@ import {
   LOOPBACK_LOCALHOST_HOSTS,
   connectableLoopbackHost,
   normalizeLocalhostHostname
-} from '../../shared/workspace/ports/localhost-worktree-labels'
+} from '../../shared/localhost-worktree-labels'
 import type {
   WorkspacePortPageProbeRequest,
   WorkspacePortPageProbeResult

@@ -57,15 +57,6 @@ export function useNativeChatComposerRevealFocus({
   const sourceOverlaysRef = useRef<readonly HTMLElement[]>([])
   const [reclaimCount, setReclaimCount] = useState(0)
 
-  useLayoutEffect(
-    () => () => {
-      claimedRef.current = false
-      explicitRef.current = false
-      sourceOverlaysRef.current = []
-    },
-    []
-  )
-
   useLayoutEffect(() => {
     mountedComposers.add(composerRef)
     return () => {

@@ -17,19 +17,13 @@ import type { agentSessionFailureWords } from '../../../src/shared/agent-session
 import type { createClaudeJournalTranslator } from '../../../src/main/claude/structured/journal/claude-structured-journal-translation'
 import type { createCodexJournalTranslator } from '../../../src/main/codex/structured/journal/codex-structured-journal-translation'
 import type { createDeferredStructuredAgentSessionEventSink } from '../../../src/main/native-chat/agent-session-wire/journal-ingress/structured-agent-session-event-sink'
-import type {
-  ReleasedChat,
-  ReleasedJournal,
-  ReleasedOpener,
-  ReleasedReader
-} from './released-chat-journal'
+import type { ReleasedCard, ReleasedJournal, ReleasedOpener } from './released-chat-journal'
 import {
   importReleaseCheckoutModule,
   materializeReleaseCheckout,
   releaseModuleExport
 } from './release-checkout'
 import { queueReleasedCards } from './released-chat-queue'
-import { provideReleasedSqlWorkers } from './released-journal-sql-workers.test-fixture'
 
 // A released build's own writers, for a chat as its host writes one: its translators fed its own
 // captured provider streams, sends with their dispatch results, queue edits, Stop and Resume, a
@@ -56,7 +50,6 @@ export const identityOf = (agent: Agent): AgentSessionJournalIdentity => ({
 
 async function released(ref: string) {
   const checkout = await materializeReleaseCheckout(ref)
-  const sqlBacked = await provideReleasedSqlWorkers(checkout.root)
   const load = async <T>(path: string, name: string): Promise<T> =>
     releaseModuleExport<T>(await importReleaseCheckoutModule(checkout, path), name)
   const fact = await load<typeof agentSessionFailureFact>(
@@ -67,12 +60,6 @@ async function released(ref: string) {
     'src/shared/agent-session/failures/agent-session-failure-words.ts',
     'agentSessionFailureWords'
   )
-  const readSnapshot = sqlBacked
-    ? await load<(journal: ReleasedJournal) => Promise<AgentJournalSnapshot>>(
-        `${JOURNAL}/journal-observation.test-support.ts`,
-        'readTestJournalSnapshot'
-      )
-    : async (journal: ReleasedJournal) => journal.snapshot()
   return {
     root: checkout.root,
     opener: await load<() => ReleasedOpener>(
@@ -91,10 +78,6 @@ async function released(ref: string) {
       'src/main/native-chat/agent-session-wire/structured-agent-session-event-sink.ts',
       'createDeferredStructuredAgentSessionEventSink'
     ),
-    read: async (journal: ReleasedJournal): Promise<ReleasedChat> => ({
-      snapshot: await readSnapshot(journal),
-      cards: [...(await journal.queuedMessages.list())]
-    }),
     queueFull: () => words(fact('queueFull'), { surface: 'rejection' }),
     /** Releases before Stop events record only the interrupted turn. */
     stopEvents: existsSync(join(checkout.root, JOURNAL, 'journal-stop-marks.ts'))
@@ -287,7 +270,7 @@ export async function writeReleasedChat(
   ref: string,
   agent: Agent,
   stateDirectory: string
-): Promise<ReleasedChat & { now: () => number }> {
+): Promise<{ snapshot: AgentJournalSnapshot; cards: ReleasedCard[]; now: () => number }> {
   const release = await released(ref)
   const clock = { at: 1_000 }
   const journals = release.opener()
@@ -304,14 +287,17 @@ export async function writeReleasedChat(
     await sendsAndQueue(journal, release)
     await stream(release, agent, journal, clock)
     await stopAndRemove(journal, release, clock)
-    return { ...(await release.read(journal)), now: () => clock.at }
+    return {
+      snapshot: journal.snapshot(),
+      cards: [...journal.queuedMessages.list()],
+      now: () => clock.at
+    }
   } finally {
     await journals.closeAll()
   }
 }
 
-/** The release's own journal opener and read, to open a chat as that release would. */
-export async function releasedJournalReader(ref: string): Promise<ReleasedReader> {
-  const release = await released(ref)
-  return { ...release.opener(), read: release.read }
+/** The release's own journal opener, to carry a chat on as that release would. */
+export async function releasedJournalOpener(ref: string): Promise<ReleasedOpener> {
+  return (await released(ref)).opener()
 }

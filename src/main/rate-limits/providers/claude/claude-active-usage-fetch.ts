@@ -60,21 +60,7 @@ export async function fetchActiveClaudeRateLimits(
     )
   }
   try {
-    const usage = await fetchClaudeOAuthUsage(credentials.token, options?.signal)
-    // Name the login a reading came from so its plan never follows another account's reading.
-    return usage.status === 'ok'
-      ? {
-          ...usage,
-          ...(credentials.planType ? { planType: credentials.planType } : {}),
-          usageMetadata: {
-            ...usage.usageMetadata,
-            ...metadata,
-            ...(options?.authPreparation?.readingAccount
-              ? { readingAccount: options.authPreparation.readingAccount }
-              : {})
-          }
-        }
-      : usage
+    return await fetchClaudeOAuthUsage(credentials.token, options?.signal)
   } catch (error) {
     const { failureKind } = classifyClaudeOAuthUsageError(error)
     if (failureKind === 'stale-token' && !canClaudeRenewLogin(credentials, error)) {

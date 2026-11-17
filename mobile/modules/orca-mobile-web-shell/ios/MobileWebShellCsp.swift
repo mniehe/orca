@@ -19,8 +19,7 @@ enum MobileWebShellCsp {
     // Media previews play bytes downloaded through authenticated RPC, never a network URL.
     "media-src blob:",
     "object-src 'none'",
-    // Admits the chat visual frame; the shell document refuses framing and nothing else served is a page.
-    "frame-src 'self'",
+    "frame-src 'none'",
     "child-src 'none'",
     "worker-src 'none'",
     // Preserve srcdoc’s about: base/in-page links without admitting network bases.

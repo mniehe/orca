@@ -22,11 +22,6 @@ export function registerClaudeAccountHandlers(claudeAccounts: ClaudeAccountServi
     claudeAccounts.removeAccount(args.accountId)
   )
   ipcMain.handle(
-    'claudeAccounts:rename',
-    (_event, args: { accountId: string; displayName: string | null }) =>
-      claudeAccounts.renameAccount(args.accountId, args.displayName)
-  )
-  ipcMain.handle(
     'claudeAccounts:select',
     (_event, args: { accountId: string | null } & ClaudeAccountSelectionTarget) =>
       args.runtime

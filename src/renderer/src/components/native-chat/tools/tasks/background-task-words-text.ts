@@ -6,7 +6,7 @@ import {
   type BackgroundTaskCopyId,
   type BackgroundTaskCopyValues,
   type BackgroundTaskSay
-} from '../../../../../../shared/agent-status/presentation/background-tasks/background-task-copy'
+} from '../../../../../../shared/background-task-copy'
 
 const PIECES: Record<BackgroundTaskCopyId, (values?: BackgroundTaskCopyValues) => string> = {
   monitoring: () => translate('components.native-chat.backgroundTasks.monitoring', COPY.monitoring),

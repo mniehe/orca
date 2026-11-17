@@ -2,7 +2,7 @@ import {
   LOCAL_EXECUTION_HOST_ID,
   parseExecutionHostId,
   type ExecutionHostId
-} from '../execution-host/execution-host'
+} from '../execution-host'
 import { workspaceSessionPartitionHostId } from './workspace-session-partition-owner'
 
 export function sessionPartitionHostFor(hostId: ExecutionHostId): ExecutionHostId {

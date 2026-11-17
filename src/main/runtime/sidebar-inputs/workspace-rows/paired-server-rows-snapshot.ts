@@ -1,8 +1,5 @@
 import { describePairedServerHosts } from '../../../../shared/remote-runtime/host-catalog/paired-server-hosts'
-import {
-  toRuntimeExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { toRuntimeExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import {
   normalizePairedServerRow,
   type PairedServerRowsSnapshot

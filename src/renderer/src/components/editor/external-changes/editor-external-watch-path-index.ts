@@ -8,7 +8,7 @@ import {
   getLocalWindowsWslPathIdentity,
   normalizeRuntimePathForComparison,
   type LocalWindowsWslPathIdentity
-} from '../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../shared/cross-platform-path'
 
 type WatchScope = {
   worktreeId: string

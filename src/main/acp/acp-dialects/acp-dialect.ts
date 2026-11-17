@@ -1,10 +1,7 @@
 import type { AgentSessionAccountKind } from '../../../shared/agent-session/agent-session-availability'
 import type { AgentSessionContextUsage } from '../../../shared/agent-session/agent-session-context-usage'
 import type { AgentSessionUsageLimit } from '../../../shared/agent-session/failures/agent-session-usage-limit'
-import type {
-  AgentJournalThreadGoal,
-  AgentJournalToolCallItem
-} from '../../../shared/agent-session/journal/agent-session-journal-types'
+import type { AgentJournalToolCallItem } from '../../../shared/agent-session/journal/agent-session-journal-types'
 import type { AgentSessionPromptResponse } from '../../../shared/agent-session/agent-session-question-answer'
 import type {
   NativeChatBackgroundTaskBlock,
@@ -80,16 +77,6 @@ export type AcpChildSessionReport = {
   update?: SessionNotification
 }
 
-/** The agent's own goal as it reported it; null means cleared. */
-export type AcpThreadGoalReport = {
-  goal:
-    | ({ id: string } & Pick<
-        AgentJournalThreadGoal,
-        'objective' | 'status' | 'tokenBudget' | 'tokensUsed' | 'timeUsedSeconds'
-      >)
-    | null
-}
-
 export type AcpDialectNotification =
   | { disposition: 'ignore' }
   | {
@@ -105,7 +92,6 @@ export type AcpDialectNotification =
       backgroundTasks?: AcpBackgroundTaskUpdate[]
       subagents?: AcpSubagentUpdate[]
       child?: AcpChildSessionReport
-      threadGoal?: AcpThreadGoalReport
     }
 
 /** Hook denial completes the turn rather than recording a user Stop. */

@@ -135,20 +135,17 @@ export async function supplementCodexUsageWindows(
       return limits
     }
     const rateLimitResetCredits = backend.rateLimitResetCredits ?? limits.rateLimitResetCredits
-    const planType = backend.planType ?? limits.planType
     if (!backend.session) {
       const monthly = limits.weekly ? null : backend.monthly
-      return !monthly &&
-        rateLimitResetCredits === limits.rateLimitResetCredits &&
-        planType === limits.planType
+      return !monthly && rateLimitResetCredits === limits.rateLimitResetCredits
         ? limits
-        : { ...limits, monthly, rateLimitResetCredits, planType }
+        : { ...limits, monthly, rateLimitResetCredits }
     }
     return {
       ...limits,
       session: backend.session,
       weekly: backend.weekly ?? limits.weekly,
-      planType,
+      planType: backend.planType ?? limits.planType,
       ...(rateLimitResetCredits !== undefined ? { rateLimitResetCredits } : {}),
       updatedAt: backend.updatedAt
     }

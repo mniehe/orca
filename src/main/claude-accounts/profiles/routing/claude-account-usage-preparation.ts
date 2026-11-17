@@ -18,7 +18,6 @@ export function claudeAccountUsagePreparation(
   return {
     configDir: home,
     envPatch: { CLAUDE_CONFIG_DIR: home },
-    provenance: `profile:${accountId}`,
-    readingAccount: { accountId, runtime: 'host', wslDistro: null }
+    provenance: `profile:${accountId}`
   }
 }

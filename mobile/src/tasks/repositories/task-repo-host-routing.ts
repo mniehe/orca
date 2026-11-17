@@ -1,7 +1,4 @@
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../src/shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../src/shared/execution-host'
 import {
   routeRpcClientCalls,
   scopeRpcClientToExecutionHost

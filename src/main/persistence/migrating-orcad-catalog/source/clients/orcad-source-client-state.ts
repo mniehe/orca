@@ -9,7 +9,7 @@ import type {
 import type {
   PersistedMobileClientTabSelection,
   PersistedState
-} from '../../../../../shared/orca-profiles/persisted-state-types'
+} from '../../../../../shared/persisted-state-types'
 import type { WorkspaceSessionState } from '../../../../../shared/workspace-session/workspace-session-state-types'
 import { sessionPartitions } from '../sessions/orcad-source-workspace-session-fragments'
 import { collectCloseIntents } from './orcad-source-client-browser-intents'

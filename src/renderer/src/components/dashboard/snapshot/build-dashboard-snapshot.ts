@@ -8,7 +8,7 @@ import {
   type DashboardCard,
   type DashboardSnapshot,
   type DashboardWorkspace
-} from '../../../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../../../shared/dashboard-snapshot'
 import type { RepoIcon } from '../../../../../shared/repository/appearance/repo-icon'
 import { parsePaneKey } from '../../../../../shared/workspace-layout/stable-pane-id'
 import {

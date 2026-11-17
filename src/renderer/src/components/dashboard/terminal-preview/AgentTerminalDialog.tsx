@@ -9,7 +9,7 @@ import {
   dashboardCardDisplayState,
   type DashboardCard,
   type DashboardRevealAgentArgs as AgentRevealArgs
-} from '../../../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../../../shared/dashboard-snapshot'
 import { AgentTerminalPreview } from './AgentTerminalPreview'
 import { AgentCardLastMessages, hasAgentCardLastMessages } from '../board/AgentCardLastMessages'
 import { terminalPreviewUnavailableMessage } from './terminal-preview-unavailable-message'

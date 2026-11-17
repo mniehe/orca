@@ -1,5 +1,5 @@
 import type { AppState } from '@/store/types'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../../shared/workspace/identity/floating-workspace-id'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../../shared/constants'
 
 type FloatingTerminalPanelState = Pick<
   AppState,

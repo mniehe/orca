@@ -1,7 +1,4 @@
-import {
-  normalizeExecutionHostId,
-  type ParsedExecutionHost
-} from '../../shared/execution-host/execution-host'
+import { normalizeExecutionHostId, type ParsedExecutionHost } from '../../shared/execution-host'
 import type { ProjectHostSetup } from '../../shared/project/project-types'
 import { hostFilterMatchesHostId, resolveHostFlagTarget } from '../hosts/execution-host-flag'
 import { findProjectSetups, setupHostId } from '../projects/project-selector'

@@ -204,8 +204,7 @@ describe('pr-refresh-coordinator', () => {
   })
 
   it('delivers a newly shown alias while automatic timers are off', async () => {
-    const policy =
-      await import('../../../../shared/source-control/hosted-review/review-refresh-policy')
+    const policy = await import('../../../../shared/review-refresh-policy')
     policy.setPRAutoRefreshCadence('off')
     const { reportVisiblePRRefreshCandidates } = await import('./pr-refresh-coordinator')
     getPRForBranchOutcomeMock.mockImplementation(async () => ({

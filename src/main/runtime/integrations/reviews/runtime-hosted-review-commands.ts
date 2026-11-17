@@ -92,12 +92,6 @@ export class RuntimeHostedReviewCommands {
   ): Promise<PRSnapshotReply> {
     const deadline = Date.now() + HOSTED_PR_COMPLETION_WAIT_MS
     const repo = await this.deps.resolveRepo(repoSelector)
-    const recordOutcome = (outcome: PRSnapshotReply): PRSnapshotReply => {
-      if ('kind' in outcome && outcome.kind === 'found') {
-        this.deps.recordCreated(repo.id, outcome.pr.number, outcome.pr.url)
-      }
-      return outcome
-    }
     const lookupOptions: GitHubPRBranchLookupOptions = {
       ...this.deps.getExecutionOptions(
         repo,
@@ -128,7 +122,7 @@ export class RuntimeHostedReviewCommands {
         lookupOptions
       )
       if (recent) {
-        return recordOutcome(recent)
+        return recent
       }
     }
     const candidate = {
@@ -153,11 +147,9 @@ export class RuntimeHostedReviewCommands {
       lookupOptions
     )
     if (reason === 'swr' && userRefresh !== true) {
-      return recordOutcome(
-        await runHostedPRSnapshot(candidate, prepared, deadline, signal, acceptRevalidationOnly)
-      )
+      return runHostedPRSnapshot(candidate, prepared, deadline, signal, acceptRevalidationOnly)
     }
-    return recordOutcome(await runHostedPRRead(candidate, prepared))
+    return runHostedPRRead(candidate, prepared)
   }
 
   async getHostedReviewForBranch(args: {

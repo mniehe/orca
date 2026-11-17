@@ -5,8 +5,6 @@ updates:
     directory: /
     schedule:
       interval: monthly
-    cooldown:
-      default-days: 3
     allow:
       - dependency-name: '@vscode/ripgrep-universal'
     open-pull-requests-limit: 1

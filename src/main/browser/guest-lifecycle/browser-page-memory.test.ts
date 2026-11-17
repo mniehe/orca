@@ -26,6 +26,7 @@ vi.mock('../../window/visibility/renderer-publication-throttle', () => ({
   rendererPublicationThrottle: { acquire: throttle }
 }))
 vi.mock('./manager/registration/browser-guest-discard-protection', () => ({
+  markInitialBrowserGuest: vi.fn(),
   readBrowserGuestDiscardProtection: () => ({ protection: 'discardable' })
 }))
 function startNavigation(guest: Electron.WebContents, url = 'https://example.test/b'): void {
@@ -102,8 +103,8 @@ it('keeps the cold identity/history, gates every consumer on load and fences ret
   expect(action).not.toHaveBeenCalled()
   expect(second.guest.navigationHistory.restore).toHaveBeenCalledWith({
     entries: [
-      { url: 'https://example.test/a', title: 'A', pageState: 'fixture-opaque-state' },
-      { url: 'https://example.test/b', title: 'B', pageState: 'fixture-opaque-state' }
+      { url: 'https://example.test/a', title: 'A' },
+      { url: 'https://example.test/b', title: 'B' }
     ],
     index: 1
   })

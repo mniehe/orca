@@ -17,7 +17,7 @@ import {
   readMemoizedCodexHookAnswer,
   readMemoizedVersionAnswer
 } from './codex-hook-trust-memo'
-import { normalizeRuntimePathForComparison as codexBinaryKey } from '../../../../shared/file-access/cross-platform-path'
+import { normalizeRuntimePathForComparison as codexBinaryKey } from '../../../../shared/cross-platform-path'
 
 // Cold hash derivation must not delay launches beyond this bound.
 export const CODEX_HOOK_LAUNCH_WAIT_MS = 3_000
@@ -38,12 +38,9 @@ const derivations = new Map<string, Promise<CodexHookAnswer>>()
 let appPathReady: Promise<unknown> | null = null
 
 /** App main only; pathReady must settle without rejecting. */
-export function startCodexHookHashLookup(
-  pathReady: Promise<unknown>,
-  maintenanceReady: Promise<unknown> = pathReady
-): void {
+export function startCodexHookHashLookup(pathReady: Promise<unknown>): void {
   appPathReady = pathReady
-  void maintenanceReady.then(() => sweepStaleCodexScratchHomes())
+  void sweepStaleCodexScratchHomes()
 }
 
 /** Reuse known answers or query Codex in app main, deduplicated per binary. */

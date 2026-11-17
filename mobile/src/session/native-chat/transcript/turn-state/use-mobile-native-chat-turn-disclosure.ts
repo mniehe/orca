@@ -30,7 +30,6 @@ import {
   nativeChatTurnBarRows
 } from '../../../../../../src/shared/native-chat/transcript/turns/native-chat-turn-grouping'
 import { useMobileNativeChatTurnStatus } from './use-mobile-native-chat-turn-status'
-import { structuredAgentTurnOpeningSendPending } from '../../../../../../src/shared/agent-session/view/structured-agent-session-turn-timing'
 
 const EMPTY_TURN_IDS: ReadonlySet<string> = new Set()
 const NO_TURN_KEYS: readonly undefined[] = []
@@ -130,9 +129,7 @@ export function useMobileNativeChatTurnDisclosure({
     turnKeys,
     liveTurnKey,
     enabled,
-    // The clock starts once the host has the opening message, as desktop's "Sending…" clears.
-    isWorking:
-      isWorking && !structuredAgentTurnOpeningSendPending(liveTurnKey, turnJournal?.submissions),
+    isWorking,
     workingStartedAt,
     settledTurns,
     thinking,

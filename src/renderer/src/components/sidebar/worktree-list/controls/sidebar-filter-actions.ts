@@ -5,10 +5,7 @@ import {
 } from '../../../../../../shared/workspace-view/workspace-row-filters'
 import { resolveVisibleWorkspaceHostIds } from '../../../../../../shared/workspace-view/workspace-host-visibility'
 import type { AppState } from '../../../../store/types'
-import type {
-  ExecutionHostId,
-  ExecutionHostScope
-} from '../../../../../../shared/execution-host/execution-host'
+import type { ExecutionHostId, ExecutionHostScope } from '../../../../../../shared/execution-host'
 
 export type SidebarFilterState = {
   showSleepingWorkspaces: boolean

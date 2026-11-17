@@ -8,8 +8,6 @@ import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { NODE_RUNTIME_PIN } from '../../../../src/shared/node-runtime/node-runtime-pin.ts'
-import { ORCAD_PROVIDER_EXEC_SLOT_FILE } from '../../../../src/shared/remote-runtime/orcad-distribution/orcad-artifacts.ts'
-import { buildProviderExec } from '../../native-build/posix/build-provider-exec.mjs'
 import {
   assertCompatSlotHost,
   findPostBaselineNodeApiNames,
@@ -21,7 +19,6 @@ import {
   readManifest,
   sha256Of,
   slotGlibcFloor,
-  slotNeedsProviderExec,
   slotSourceFiles,
   SLOT_NAPI_VERSION
 } from './orcad-prebuild-slot-contents.mjs'
@@ -256,10 +253,6 @@ async function build() {
   const compatAddons = isCompatSlot(slot)
     ? await compileCompatAddons({ slot, workDir: join(WORK_DIR, slot), nodeDir })
     : []
-  // Compiled here, with the slot's own toolchain, so it meets the same libc floor as its addons.
-  const providerExec = slotNeedsProviderExec(slot)
-    ? [[ORCAD_PROVIDER_EXEC_SLOT_FILE, buildProviderExec({ target: slot })]]
-    : []
 
   rmSync(slotDir, { recursive: true, force: true })
   const files = {}
@@ -270,8 +263,7 @@ async function build() {
       buildDir,
       nodePtyDir: sourceDir
     }),
-    ...compatAddons,
-    ...providerExec
+    ...compatAddons
   ]) {
     if (!existsSync(source)) {
       throw new Error(`[orcad-prebuilds] ${slot} needs ${relative}, but ${source} is missing`)

@@ -2,7 +2,7 @@ import type { HttpLinkSourceOwner, HttpLinkStoreState } from './http-link-routin
 import {
   parseLoopbackUrlWithPort,
   type LocalhostWorktreeLabelRoute
-} from '../../../../../shared/workspace/ports/localhost-worktree-labels'
+} from '../../../../../shared/localhost-worktree-labels'
 import type {
   WorkspacePort,
   WorkspacePortScanResult

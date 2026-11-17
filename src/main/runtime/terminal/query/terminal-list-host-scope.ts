@@ -4,10 +4,10 @@ import {
   getRepoExecutionHostId,
   parseExecutionHostId,
   toSshExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+} from '../../../../shared/execution-host'
 import type { RuntimeTerminalSummary } from '../../../../shared/terminal/runtime/runtime-terminal-contracts'
 import type { ResolvedWorktree } from '../../workspaces/catalog/runtime-worktree-path-identity'
-import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/workspace/identity/floating-workspace-id'
+import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../shared/constants'
 import { RuntimeFederationOperations } from '../../orchestration/federation/runtime-federation-operations'
 
 export abstract class TerminalListHostScope extends RuntimeFederationOperations {

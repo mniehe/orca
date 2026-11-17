@@ -16,7 +16,7 @@ import { getWorkspaceStatusVisualMeta } from '../../sidebar/workspace-status/pre
 import type {
   DashboardCard,
   DashboardFilterOptions
-} from '../../../../../shared/agent-status/presentation/dashboard-snapshot'
+} from '../../../../../shared/dashboard-snapshot'
 import {
   activeDashboardFilterCount,
   type DashboardFilters,

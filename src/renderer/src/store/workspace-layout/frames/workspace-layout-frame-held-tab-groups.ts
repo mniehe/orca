@@ -1,10 +1,6 @@
 // Held tabs outside main’s group tree move into its nearest group, preserving main’s tree after side opens or group closes.
 
-import type {
-  Tab,
-  TabGroup,
-  TabGroupLayoutNode
-} from '../../../../../shared/workspace-layout/tab-groups/tab-types'
+import type { Tab, TabGroup, TabGroupLayoutNode } from '../../../../../shared/tab-types'
 import { collectTabGroupLayoutGroupIds } from '../../../../../shared/workspace-layout/tab-groups/tab-group-moves'
 
 /** One workspace as the window draws it. */

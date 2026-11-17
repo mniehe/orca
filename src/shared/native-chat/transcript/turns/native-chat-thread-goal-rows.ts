@@ -1,7 +1,4 @@
-import {
-  AGENT_SESSION_THREAD_GOAL_PRESENTATION,
-  isAgentSessionThreadGoalFrame
-} from '../../../agent-session/agent-session-thread-goal'
+import { isAgentSessionThreadGoalFrame } from '../../../agent-session/agent-session-thread-goal'
 import type { NativeChatMessage } from '../../native-chat-types'
 
 /** Show goal transitions in the banner only; retain them in the journal. */
@@ -15,10 +12,7 @@ export function isNativeChatThreadGoalRow(message: NativeChatMessage): boolean {
   return (
     message.role === 'system' &&
     message.blocks.some(
-      (block) =>
-        block.type === 'text' &&
-        (block.presentation === AGENT_SESSION_THREAD_GOAL_PRESENTATION ||
-          isAgentSessionThreadGoalFrame(block.providerFrame))
+      (block) => block.type === 'text' && isAgentSessionThreadGoalFrame(block.providerFrame)
     )
   )
 }

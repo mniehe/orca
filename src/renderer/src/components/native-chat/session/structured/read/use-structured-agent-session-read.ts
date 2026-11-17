@@ -1,7 +1,6 @@
 import { useAppStore } from '@/store'
-import { useNativeChatPaneLifetimeEffect } from '../../../pane/ownership/native-chat-pane-lifetime'
 import { subscribeRuntimeHostContactRegained } from '@/runtime/hosts/connections/runtime-host-contact-regained'
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import { notifyStructuredAttentionView } from '@/attention/agent-subject-read-actions'
 import { structuredAttentionReadObservation } from '../../attention/structured-attention-read-observation'
 import type { RuntimeClientTarget } from '../../../../../../../shared/remote-runtime/host-catalog/runtime-client-target'
@@ -19,7 +18,6 @@ function useReadOwnerSnapshot(
     () => getStructuredAgentSessionReadOwner(sessionId, target),
     [sessionId, target]
   )
-  useNativeChatPaneLifetimeEffect(useCallback(() => owner.retain(), [owner]))
   const snapshot = useSyncExternalStore(owner.subscribe, owner.getSnapshot, owner.getSnapshot)
   return { owner, snapshot }
 }

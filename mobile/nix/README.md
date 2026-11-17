@@ -97,12 +97,17 @@ Native/bootstrap JavaScript is bundled, but the paired
 server can still supply executable web-interface assets; APK signing does not pin
 those host-supplied assets.
 
-Validated on fork revision `3ae47e04643e68806c041f9f0a4c8bc34548c20c`: frozen
+Historical validation on fork revision `3ae47e04643e68806c041f9f0a4c8bc34548c20c`
+(not the v1.4.261 baseline): frozen
 dependency installation, Expo prebuild and Gradle `assembleRelease` succeeded
 with 1,204 tasks executed in 12m 25s. The APK reports version 0.0.67/code 31,
 `dev.orca.app`, compile SDK 37, target SDK 36 and all four supported ABIs.
 `apksigner verify` and `zipalign -c -P 16 4` passed. This intermediate used the
 public Expo template certificate, not a private signer.
+
+The v1.4.261 source declares Android version 0.0.65/code 29 in `mobile/app.json`;
+its APK has not been built or validated by this packaging adaptation. Do not use
+the historical version or task counts as evidence for this release.
 
 The intermediate APK is `mobile/android/app/build/outputs/apk/release/app-release.apk`.
 Without explicit signing configuration it can carry Expo's public template key.

@@ -7,7 +7,7 @@ import type {
   MobilePushApnsEnvironment,
   MobilePushPlatform,
   MobilePushSource
-} from '../../../shared/notifications/mobile-push-contract'
+} from '../../../shared/mobile-push-contract'
 import {
   PUSH_REQUEST_DEADLINE_MS,
   readPushGatewayJson,

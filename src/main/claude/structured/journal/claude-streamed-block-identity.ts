@@ -16,7 +16,6 @@ export type StreamedBlock = { identity: AgentJournalItemIdentity; startedAt: num
 
 type StreamedMessage = {
   messageId: string | null
-  stopped: boolean
   blocks: Map<number, StreamedBlock>
   /** Await final frames in block order for both text and thinking. */
   awaitingFinal: StreamedBlock[]
@@ -51,7 +50,7 @@ export function createClaudeStreamedBlockRegistry(
   const messageFor = (scope: string): StreamedMessage => {
     let streamed = messages.get(scope)
     if (!streamed) {
-      streamed = { messageId: null, stopped: false, blocks: new Map(), awaitingFinal: [] }
+      streamed = { messageId: null, blocks: new Map(), awaitingFinal: [] }
       messages.set(scope, streamed)
     }
     return streamed
@@ -88,20 +87,9 @@ export function createClaudeStreamedBlockRegistry(
       if (event.type === 'message_start') {
         messages.set(scope, {
           messageId: claudeText(claudeRecord(event.message)?.id),
-          stopped: false,
           blocks: new Map(),
           awaitingFinal: []
         })
-        return null
-      }
-      if (event.type === 'message_stop') {
-        const streamed = messages.get(scope)
-        if (streamed) {
-          streamed.stopped = true
-          if (streamed.awaitingFinal.length === 0) {
-            messages.delete(scope)
-          }
-        }
         return null
       }
       const index = typeof event.index === 'number' ? event.index : 0
@@ -128,22 +116,14 @@ export function createClaudeStreamedBlockRegistry(
       return { ...started, text, parentToolUseId }
     },
     reconcile: (frame) => {
-      const scope = scopeKey(frame.sessionId, frame.parentToolUseId)
-      const streamed = messages.get(scope)
+      const streamed = messages.get(scopeKey(frame.sessionId, frame.parentToolUseId))
       if (
         !streamed ||
         (frame.messageId && streamed.messageId && frame.messageId !== streamed.messageId)
       ) {
         return null
       }
-      const block = streamed.awaitingFinal.shift() ?? null
-      if (
-        streamed.awaitingFinal.length === 0 &&
-        (streamed.messageId === null || streamed.stopped)
-      ) {
-        messages.delete(scope)
-      }
-      return block
+      return streamed.awaitingFinal.shift() ?? null
     },
     clearScope: (sessionId, parentToolUseId) => {
       messages.delete(scopeKey(sessionId, parentToolUseId))

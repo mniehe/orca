@@ -2,24 +2,19 @@ import type { ClaudeStreamedBlockRegistry } from './claude-streamed-block-identi
 import type { ClaudeStreamedTextCheckpoints } from './claude-streamed-text-checkpoints'
 import type { ClaudeStreamedThinking } from './claude-streamed-thinking'
 
-/** End streams no final frame will close; a hand-off preserves continuing subagent streams. */
+/** End streams no final frame will close; a steer hand-off leaves subagent text open until settle. */
 export function endClaudeStreams(
-  thinking: Pick<ClaudeStreamedThinking, 'finishOpen' | 'finishRoot'>,
-  text: Pick<ClaudeStreamedTextCheckpoints, 'finish' | 'finishRoot'>,
-  blocks: Pick<ClaudeStreamedBlockRegistry, 'clear' | 'clearScope'>,
-  sessionId: string | null,
+  thinking: Pick<ClaudeStreamedThinking, 'finishOpen'>,
+  text: Pick<ClaudeStreamedTextCheckpoints, 'finish'>,
+  blocks: Pick<ClaudeStreamedBlockRegistry, 'clear'>,
   completedAt: number,
   settles = false
 ): void {
+  thinking.finishOpen(completedAt)
+  // A superseded turn's background subagent may keep streaming the same block into the next turn.
   if (!settles) {
-    text.finishRoot({ completedAt })
-    if (sessionId !== null) {
-      blocks.clearScope(sessionId, null)
-      thinking.finishRoot(sessionId, completedAt)
-    }
     return
   }
-  thinking.finishOpen(completedAt)
   text.finish({ completedAt })
   blocks.clear()
 }

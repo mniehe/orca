@@ -2,7 +2,7 @@ import type { PRCheckAnnotation } from '../../../../../../shared/github/checks/c
 import {
   relativePathInsideRoot,
   resolveRuntimePath
-} from '../../../../../../shared/file-access/cross-platform-path'
+} from '../../../../../../shared/cross-platform-path'
 
 const WORKFLOW_PSEUDO_ANNOTATION_PATH = '.github'
 

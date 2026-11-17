@@ -1,5 +1,5 @@
 import type { AiVaultAgent, AiVaultSessionTitleKind } from './ai-vault-types'
-import type { ExecutionHostId } from '../../execution-host/execution-host'
+import type { ExecutionHostId } from '../../execution-host'
 
 export const AI_VAULT_SESSION_TITLE_REQUEST_MAX_COUNT = 64
 

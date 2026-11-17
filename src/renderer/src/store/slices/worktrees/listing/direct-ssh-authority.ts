@@ -1,7 +1,4 @@
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../../../shared/execution-host'
 import type { DirectSshAuthority } from '../../../../../../shared/remote-runtime/ssh/ssh-types'
 import type { AppState } from '../../../types'
 

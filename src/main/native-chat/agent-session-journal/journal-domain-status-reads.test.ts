@@ -11,7 +11,6 @@ import type { JournalRow } from './durable-rows/journal-row-schema'
 import { insertJournalRow, publishJournalSessionEpoch } from './durable-rows/journal-row-table'
 import { openJournalDatabase, runJournalTransaction } from './database/journal-database'
 import { migrateJournalDomainSchema } from './journal-domain-schema'
-import { JOURNAL_ASYNC_QUESTION_INDEXES } from './database/journal-async-question-index'
 import { prepareJournalDomainImport } from './journal-domain-import'
 import {
   finishJournalDomainImport,
@@ -221,7 +220,6 @@ function fixture(rows: JournalRow[]) {
   const db = new Database(':memory:')
   cleanup.push(db)
   migrateJournalDomainSchema(db)
-  db.exec(JOURNAL_ASYNC_QUESTION_INDEXES)
   runJournalTransaction(db, () => {
     for (const page of imported.pages) {
       insertJournalDomainImportPage(db, target, page)
@@ -383,7 +381,7 @@ it('reads imported attention, live execution ownership and aliased legacy opener
   expect(cleared.indicators.firstInputSubmissionKey).toBeNull()
 })
 
-it('waits on the user for a Codex async question after its turn ends, until their next message', () => {
+it('waits on the user for a Codex async question after its turn ends, until the next message', () => {
   const item = (
     itemId: string,
     body: Extract<JournalRow, { kind: 'item' }>['body']
@@ -416,19 +414,13 @@ it('waits on the user for a Codex async question after its turn ends, until thei
     })
   ]
   const waiting = readJournalSqlStatusState(fixture(asked).context())
-  expect(waiting.summary).toMatchObject({ status: 'idle', openAsyncQuestion: 'question' })
+  expect(waiting.summary).toMatchObject({ status: 'idle', awaitsAnswer: true })
   expect(waiting.pendingPromptIds).toEqual([])
-  const notice = item('notice', {
-    ...message('Coordinator: status?'),
-    from: { kind: 'agent', senders: [], orchestration: null }
-  })
-  const noticed = readJournalSqlStatusState(fixture([...asked, notice]).context())
-  expect(noticed.summary.openAsyncQuestion).toBe('question')
   const answered = readJournalSqlStatusState(
-    fixture([...asked, notice, item('answer', message('Blue'))]).context()
+    fixture([...asked, item('answer', message('Blue'))]).context()
   )
   expect(answered.summary.status).toBe('idle')
-  expect(answered.summary.openAsyncQuestion).toBeUndefined()
+  expect(answered.summary.awaitsAnswer).toBeUndefined()
 })
 
 it('keeps every outstanding input across finite pages and retains end evidence after its source item is removed', () => {

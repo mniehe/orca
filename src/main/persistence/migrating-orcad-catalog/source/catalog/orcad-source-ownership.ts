@@ -1,8 +1,5 @@
 // Export and subtraction must share repo/folder host attribution or migrated rows can remain behind.
-import {
-  getRepoExecutionHostId,
-  parseExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, parseExecutionHostId } from '../../../../../shared/execution-host'
 import {
   resolveFolderWorkspaceHost,
   type FolderWorkspaceHostState

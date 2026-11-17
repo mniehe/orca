@@ -1,7 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { isFolderRepo } from '../../../../shared/repository/repo-kind'
 import type { Repo } from '../../../../shared/repository/repo-types'
 import type { GitWorktreeInfo } from '../../../../shared/worktree/types'

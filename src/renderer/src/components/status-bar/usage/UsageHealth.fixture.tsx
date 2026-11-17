@@ -37,8 +37,7 @@ const PRESETS = {
   low: { s5: 86, wk: 72, fable: 41 },
   full: { s5: 40, wk: 100, fable: 100 },
   fable: { s5: 12, wk: 33, fable: 100 },
-  fableOnly: { s5: null, wk: null, fable: 100 },
-  fableOnlyLow: { s5: null, wk: null, fable: 40 }
+  fableOnly: { s5: null, wk: null, fable: 100 }
 } satisfies Record<string, Preset>
 
 function win(usedPercent: number, windowMinutes: number, resetsInMs: number): RateLimitWindow {
@@ -71,7 +70,7 @@ function claudeFor(preset: Preset): ProviderRateLimits {
   }
 }
 
-function roster(preset: Preset, claudeExtra?: Partial<ProviderRateLimits>): ProviderRateLimits[] {
+function roster(preset: Preset): ProviderRateLimits[] {
   return [
     {
       ...base('cursor'),
@@ -85,7 +84,7 @@ function roster(preset: Preset, claudeExtra?: Partial<ProviderRateLimits>): Prov
       session: win(18, 300, 2 * HOUR),
       weekly: win(92, 10_080, 6 * DAY + 11 * HOUR)
     },
-    { ...claudeFor(preset), ...claudeExtra },
+    claudeFor(preset),
     { ...base('antigravity'), status: 'unavailable' },
     { ...base('opencode-go'), session: win(0, 300, 4 * HOUR + 58 * MIN) }
   ]
@@ -177,10 +176,9 @@ function rosterFixture(
   preset: Preset,
   display: UsagePercentageDisplay,
   mode: StatusBarUsageMode = 'verbose',
-  width = 480,
-  claudeExtra?: Partial<ProviderRateLimits>
+  width = 480
 ) {
-  const providers = roster(preset, claudeExtra)
+  const providers = roster(preset)
   return defineFixture({
     width,
     store: { usagePercentageDisplay: display, statusBarUsageMode: mode },
@@ -384,53 +382,4 @@ export const statusBarFableOnly = defineFixture({
       )}
     </div>
   )
-})
-
-// Why: a failed refresh keeps the stored reading; the row must keep showing it.
-const REFRESH_FAILED: Partial<ProviderRateLimits> = {
-  status: 'error',
-  error: 'Network error'
-}
-export const rosterFableRefreshError = rosterFixture(
-  PRESETS.fable,
-  'used',
-  'verbose',
-  480,
-  REFRESH_FAILED
-)
-export const rosterFableOnlyRefreshError = rosterFixture(
-  PRESETS.fableOnly,
-  'used',
-  'compact',
-  480,
-  REFRESH_FAILED
-)
-
-export const rosterFableOnlyLow = rosterFixture(PRESETS.fableOnlyLow, 'used', 'compact')
-export const rosterFableOnlyLowDetailed = rosterFixture(PRESETS.fableOnlyLow, 'used', 'verbose')
-
-// Why: native title tooltips never paint in a screenshot, so print each Fable title under the roster.
-function revealFableTitles(frame: HTMLElement): void {
-  const doc = frame.ownerDocument
-  const titles = [
-    ...doc.querySelectorAll<HTMLElement>('[data-usage-scoped-only],[data-usage-scoped-urgent]')
-  ]
-    .map((element) => element.title)
-    .filter(Boolean)
-  doc.querySelector('[data-fixture-titles]')?.remove()
-  const note = doc.createElement('pre')
-  note.setAttribute('data-fixture-titles', '')
-  note.style.cssText =
-    'position:fixed;left:12px;bottom:12px;padding:6px 8px;border:1px dashed currentColor;font:12px ui-monospace,monospace;z-index:99999;background:var(--background);color:var(--foreground)'
-  note.textContent = `title: ${titles.join('\ntitle: ') || '(none)'}`
-  doc.body.appendChild(note)
-}
-
-export const rosterFableTitleUsed = defineFixture({
-  ...rosterFixture(PRESETS.fableOnly, 'used', 'compact'),
-  interact: revealFableTitles
-})
-export const rosterFableTitleLeft = defineFixture({
-  ...rosterFixture(PRESETS.fable, 'remaining', 'verbose'),
-  interact: revealFableTitles
 })

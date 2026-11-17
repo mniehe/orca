@@ -33,7 +33,6 @@ import { themedStyleSheet } from '../../../../theme/themed-styles'
 import { useMobileColorScheme } from '../../../../theme/use-mobile-color-scheme'
 import { nativeChatHostStatusCopy, nativeChatNoticeCopy } from './native-chat-notice-copy'
 import { nativeChatOrcaStopSay } from './native-chat-orca-stop-copy'
-import { nativeChatRestartNoteText } from './native-chat-restart-note-copy'
 import { nativeChatUsageLimitText } from './native-chat-usage-limit-copy'
 import { sayMobileAgentSessionFailure } from '../../agent-session/agent-session-failure-copy'
 import type { Translate } from '../../../../i18n/mobile-i18n'
@@ -87,7 +86,7 @@ function noticeLineText(
       : undefined
   return failure && surface
     ? agentSessionFailureSentence(failure, surface, context, sayMobileAgentSessionFailure)
-    : (nativeChatRestartNoteText(notice.text, t) ?? notice.text)
+    : notice.text
 }
 
 // Render system notices separately so they cannot read as the agent’s own prose.

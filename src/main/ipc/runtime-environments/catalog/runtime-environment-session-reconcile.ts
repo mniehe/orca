@@ -1,8 +1,5 @@
 /** Crashes and older unlink flows can leave runtime session partitions that listings advertise as orphaned hosts. */
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import { readEnvironmentStoreRecords } from '../../../../shared/remote-runtime/host-store/runtime-environment-registry'
 
 type SessionHostStore = {

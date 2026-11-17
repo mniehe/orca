@@ -5,7 +5,6 @@ import type {
   NativeChatSettledTurns
 } from './transcript/turns/native-chat-turn-status'
 import { isNoiseMessage } from './native-chat-noise'
-import { isNativeChatProviderTurnStart } from './transcript/turns/native-chat-provider-turn-start'
 import { shouldShowNativeChatWorking } from './native-chat-working-suppression'
 
 /** shown prompts have a card in this pane; unshown prompts require input in the agent’s terminal. */
@@ -79,13 +78,9 @@ export function nativeChatHookLatestTurnWorkedSeconds(
   return hookSilent ? null : undefined
 }
 
-/** A prompt the transcript draws, or the host's mark that the agent resumed on its own. */
-function opensTerminalTurn(message: NativeChatMessage): boolean {
-  return message.role === 'user' ? !isNoiseMessage(message) : isNativeChatProviderTurnStart(message)
-}
-
 export function nativeChatLatestTurnId(messages: readonly NativeChatMessage[]): string | null {
-  return messages.findLast(opensTerminalTurn)?.id ?? null
+  const latest = messages.findLast((message) => message.role === 'user' && !isNoiseMessage(message))
+  return latest?.id ?? null
 }
 
 /** Time finished turns within the transcript clock; ignore unrelated system rows and omit the latest or incomplete turn to preserve pane observations. */
@@ -96,7 +91,7 @@ export function nativeChatTranscriptSettledTurns(
   let turn: { id: string; startedAt: number | null; endedAt: number | null } | null = null
   for (const message of messages) {
     // A harness notice is user-role but draws no row, so it neither starts nor extends a turn.
-    if (!opensTerminalTurn(message)) {
+    if (message.role !== 'user' || isNoiseMessage(message)) {
       const agentRow =
         message.role === 'system' ? isInterruptedStatusMessage(message) : message.role !== 'user'
       if (turn && agentRow && message.timestamp != null) {

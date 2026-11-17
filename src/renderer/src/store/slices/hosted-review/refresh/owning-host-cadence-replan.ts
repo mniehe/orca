@@ -3,7 +3,7 @@ import {
   scaleReviewRefreshInterval,
   subscribePRAutoRefreshCadence,
   type PRAutoRefreshCadence
-} from '../../../../../../shared/source-control/hosted-review/review-refresh-policy'
+} from '../../../../../../shared/review-refresh-policy'
 import type { VisibleHostedReviewRefreshTarget } from './visible-hosted-review-refresh-scheduler'
 
 /** Which host's cadence governs a visible target, and what that cadence is. */

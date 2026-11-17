@@ -1,11 +1,10 @@
-import { useNativeChatPaneLifetimeEffect } from '../../pane/ownership/native-chat-pane-lifetime'
 import { currentDraftScope } from '../../drafts/native-chat-launch-draft-source'
 import type {
   UseNativeChatComposerAttachmentsArgs,
   NativeChatComposerAttachments
 } from './native-chat-composer-attachment-contract'
 
-import { useCallback, useLayoutEffect, useMemo } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import { nativeChatComposerTargetIsRemote } from '../../composer/submit/native-chat-composer-target'
 import { nativeChatLocalAttachmentUnsupportedNotice } from '../intake/native-chat-attachment-notices'
 import { captureNativeChatEditDraftDestination } from '../../drafts/native-chat-composer-draft-memory'
@@ -68,14 +67,12 @@ export function useNativeChatComposerAttachments({
   useLayoutEffect(() => {
     mountedRef.acceptsImages = acceptsImages
   }, [acceptsImages, mountedRef])
-  useNativeChatPaneLifetimeEffect(
-    useCallback(() => {
-      mountedRef.current = true
-      return () => {
-        mountedRef.current = false
-      }
-    }, [mountedRef])
-  )
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [mountedRef])
 
   const nextAttachmentId = useCallback(() => createUuidV4(), [])
   const serverOwnedPendingIds = useMemo(() => new Set<string>(), [])

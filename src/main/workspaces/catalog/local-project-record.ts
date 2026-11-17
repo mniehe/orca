@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { DEFAULT_REPO_BADGE_COLOR } from '../../../shared/repository/appearance/repo-badge-color'
+import { DEFAULT_REPO_BADGE_COLOR } from '../../../shared/constants'
 import type { Repo, RepoKind } from '../../../shared/repository/repo-types'
 
 export function createLocalProjectRecord(input: {

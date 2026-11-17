@@ -1,7 +1,4 @@
-import {
-  getRepoExecutionHostId,
-  type ExecutionHostId
-} from '../../../../shared/execution-host/execution-host'
+import { getRepoExecutionHostId, type ExecutionHostId } from '../../../../shared/execution-host'
 import type { Repo } from '../../../../shared/repository/repo-types'
 
 /** A fetched GitHub or GitLab item's link back to the repo row that returned it. */

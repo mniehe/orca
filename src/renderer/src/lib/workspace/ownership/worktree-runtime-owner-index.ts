@@ -8,10 +8,7 @@ import './repo-owner-index'
 import type { FolderWorkspace } from '../../../../../shared/folder-workspaces/folder-workspace-types'
 import type { ProjectGroup } from '../../../../../shared/project/groups/project-group-types'
 import type { Worktree } from '../../../../../shared/worktree/types'
-import {
-  parseExecutionHostId,
-  type ExecutionHostId
-} from '../../../../../shared/execution-host/execution-host'
+import { parseExecutionHostId, type ExecutionHostId } from '../../../../../shared/execution-host'
 
 type WorktreeOwnerRecord = Pick<Worktree, 'id' | 'repoId' | 'hostId' | 'runtimeOwnerEnvironmentId'>
 type DetectedWorktreeListing = { worktrees: readonly WorktreeOwnerRecord[] }

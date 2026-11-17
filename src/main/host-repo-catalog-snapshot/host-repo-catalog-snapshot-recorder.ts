@@ -51,19 +51,3 @@ export function listHostRepoCatalogSnapshots(
   }
   return result
 }
-
-/** A stopped WSL host lists its projects from this saved answer, so a removed one must leave it too. */
-export function forgetHostRepoCatalogRepo(
-  store: HostRepoCatalogSnapshotStore,
-  environmentId: string,
-  repoId: string
-): void {
-  const snapshot = hostRepoCatalogSnapshotFromRepoList(
-    store.getHostRepoCatalogSnapshots()[environmentId]
-  )
-  if (snapshot) {
-    store.setHostRepoCatalogSnapshot(environmentId, {
-      repos: snapshot.repos.filter((repo) => repo.id !== repoId)
-    })
-  }
-}
