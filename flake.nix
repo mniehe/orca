@@ -29,13 +29,13 @@
     };
     pnpmDeps = import ./nix/desktop-deps.nix {
       inherit pkgs pnpm src;
-      hash = "sha256-0nm1ijYdeEkX/+40VIn+nXJYnq/JhGo91WU9RMw9ePM=";
+      hash = "sha256-v92KF+RX5pyNT7Wz1py5NzUZNIY9A0IDpjvkZK0X9L8=";
     };
     mobilePnpmDeps = import ./nix/desktop-deps.nix {
       inherit pkgs pnpm src;
       pname = "orca-mobile";
       sourceRoot = "source/mobile";
-      hash = "sha256-n1BQTMrF4A7T9faxog6rdoApkZeTCgFHBlSvWXASHK4=";
+      hash = "sha256-6+GWsCtrJDdHAcFIxtvcOShaoZ4IehI8cssyAiwb+D0=";
     };
     desktop = import ./nix/desktop.nix {
       inherit pkgs pnpm src pnpmDeps mobilePnpmDeps desktopNative;
