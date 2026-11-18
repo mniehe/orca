@@ -18,10 +18,10 @@ Wayland/X11 clipboard C helper on Linux; it has no provider-exec helper. Nix
 prepares the clipboard cache using upstream's fingerprint and retains its ELF
 architecture, ABI-floor and protocol gates.
 
-The desktop and mobile-web dependency hashes in `flake.nix` still belong to the
-previous source baseline. They must be measured against this release by the
-authorized Nix CI build before this revision is ready to install. Evaluation
-does not validate fixed-output hashes or demonstrate a successful package build.
+The desktop and mobile-web dependency hashes in `flake.nix` match this release.
+After an upstream sync they must be measured again by the Nix CI build before
+the new revision is ready to install. Evaluation does not validate fixed-output
+hashes or demonstrate a successful package build.
 
 ## Build and run
 
