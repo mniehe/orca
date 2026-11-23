@@ -123,6 +123,9 @@ in
       ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
       CSC_IDENTITY_AUTO_DISCOVERY = "false";
       npm_config_build_from_source = "true";
+      # GCC 16 defaults x86_64 to TLS descriptors, whose GLIBC_ABI_GNU2_TLS symbol
+      # fails upstream's glibc 2.31 floor check for addons that use thread_local.
+      NIX_CFLAGS_COMPILE = "-mtls-dialect=gnu";
 
       preConfigure = ''
         export HOME="$TMPDIR/home"
