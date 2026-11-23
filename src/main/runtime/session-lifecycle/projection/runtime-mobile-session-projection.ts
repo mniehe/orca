@@ -12,7 +12,7 @@ import type {
   RuntimeMobileSessionTabsSnapshot
 } from '../../../../shared/remote-runtime/session-graph/runtime-session-contracts'
 import { isTerminalLeafId, makePaneKey } from '../../../../shared/workspace-layout/stable-pane-id'
-import { resolveTerminalTabTitle } from '../../../../shared/tab-title-resolution'
+import { resolveTerminalTabTitle } from '../../../../shared/workspace-layout/tab-groups/tab-title-resolution'
 import { indexAgentStatusRowsByPaneKey } from '../../../agent-hooks/runtime/agent-status-pane-index'
 import {
   demoteRuntimeMobileAgentStatus,
@@ -28,7 +28,7 @@ import {
   getPtyDisplayRecord,
   terminalTitleBlocksExplicitAgentStatus
 } from '../../workspaces/process-listing/runtime-worktree-status-projection'
-import { ORCA_LAYOUT_OWNER_IS_MAIN } from '../../../../shared/layout-owner-switch'
+import { ORCA_LAYOUT_OWNER_IS_MAIN } from '../../../../shared/workspace-layout/layout-owner-switch'
 import { projectRuntimeMobileSessionTitle } from './runtime-mobile-session-title-projection'
 
 export function projectRuntimeMobileSessionTabs(
@@ -196,6 +196,13 @@ export function projectRuntimeMobileSessionTabs(
       ? resolvedHostProjection.agentStatus
         ? {
             ...resolvedHostProjection.agentStatus,
+            // The hook-built projection passes a null handle and omits orchestration; paired clients nest workers by the renderer row's.
+            ...(tab.agentStatus?.terminalHandle
+              ? { terminalHandle: tab.agentStatus.terminalHandle }
+              : {}),
+            ...(tab.agentStatus?.orchestration
+              ? { orchestration: tab.agentStatus.orchestration }
+              : {}),
             updatedAt: Math.max(
               resolvedHostProjection.agentStatus.updatedAt,
               tab.agentStatus?.updatedAt ?? 0
@@ -272,6 +279,8 @@ export function projectRuntimeMobileSessionTabs(
       typeof rawTurnCompletedAt === 'number' && Number.isFinite(rawTurnCompletedAt)
         ? rawTurnCompletedAt
         : undefined
+    // A window themes its rows; without one (a server), the host's own palette does.
+    const terminalTheme = tab.terminalTheme ?? host.hostTerminalTheme?.()
     tabs.push({
       type: 'terminal',
       id: tab.id,
@@ -284,7 +293,7 @@ export function projectRuntimeMobileSessionTabs(
       ...(tab.ptyId ? { ptyId: tab.ptyId } : {}),
       // Bind identity to the handle's live owner, never a stale persisted surface.
       ...(terminalPty?.incarnationId ? { incarnationId: terminalPty.incarnationId } : {}),
-      ...(tab.terminalTheme ? { terminalTheme: tab.terminalTheme } : {}),
+      ...(terminalTheme ? { terminalTheme } : {}),
       ...(launchAgent ? { launchAgent } : {}),
       ...clientAgentStatus,
       ...(turnCompletedAt !== undefined ? { turnCompletedAt } : {}),
