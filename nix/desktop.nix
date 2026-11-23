@@ -5,7 +5,7 @@
   pnpmDeps,
   mobilePnpmDeps,
   desktopNative,
-  electronHash,
+  electronRelease,
   buildCommit,
   sourceDateEpoch ? 1,
 }: let
@@ -17,7 +17,8 @@
   # store path that evaluation without builds cannot realise.
   electron =
     pkgs.callPackage (pkgs.path + "/pkgs/development/tools/electron/binary/generic.nix") {}
-    manifest.devDependencies.electron {x86_64-linux = electronHash;};
+    electronRelease.version
+    electronRelease.hashes;
   node = pkgs.nodejs_24;
   nodeVersion = "24.22.1";
   nodeArchive = pkgs.fetchurl {
@@ -84,7 +85,7 @@
 in
   assert pkgs.stdenv.hostPlatform.system == "x86_64-linux";
   assert builtins.match "[0-9a-f]{40}" buildCommit != null;
-  assert electron.version == manifest.devDependencies.electron;
+  assert electronRelease.version == manifest.devDependencies.electron;
   assert pkgs.bun.version == manifest.devDependencies.bun;
   assert lib.versions.major node.version == manifest.engines.node;
     pkgs.stdenv.mkDerivation {
