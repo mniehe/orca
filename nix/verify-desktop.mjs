@@ -6,6 +6,11 @@ import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { setTimeout as delay } from 'node:timers/promises'
+import {
+  verifyJournalFileLock,
+  verifyProviderExec,
+  verifyX11Clipboard
+} from './verify-desktop-helpers.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.ORCA_CI_PLAYWRIGHT)
@@ -14,6 +19,10 @@ assert(packageArgument && artifactPath, 'Usage: verify-desktop <package> <artifa
 const packagePath = fs.realpathSync(packageArgument)
 const expectedVersion = process.env.ORCA_CI_EXPECTED_VERSION
 assert(expectedVersion, 'Missing expected source version')
+const expectedElectron = process.env.ORCA_CI_EXPECTED_ELECTRON
+assert(expectedElectron, 'Missing expected Electron version')
+const clipboardTests = process.env.ORCA_CI_CLIPBOARD_TESTS
+assert(clipboardTests, 'Missing the wayland-clipboard test directory')
 const artifacts = path.resolve(artifactPath)
 fs.mkdirSync(artifacts, { recursive: true })
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'orca-nix-smoke-'))
@@ -100,7 +109,30 @@ try {
     })
   )
   assert.equal(node.node, electron.node)
-  assert(electron.electron, 'Electron probe must use the packaged Electron runtime')
+  assert.equal(
+    electron.electron,
+    expectedElectron,
+    'Packaged Electron must be the declared release'
+  )
+  const helpers = {
+    providerExec: await verifyProviderExec({
+      helper: path.join(resources, 'bin/orca-provider-exec'),
+      env,
+      cwd: root
+    }),
+    journalFileLock: await verifyJournalFileLock({
+      helper: path.join(resources, 'bin/journal-file-lock'),
+      node: path.join(resources, 'node-runtime/bin/node'),
+      env,
+      directories: [root, artifacts]
+    }),
+    x11Clipboard: verifyX11Clipboard({
+      binary: path.join(resources, 'bin/orca-wayland-clipboard'),
+      tests: clipboardTests,
+      env,
+      cwd: root
+    })
+  }
   xvfb = spawn('Xvfb', [display, '-screen', '0', '1440x900x24', '-nolisten', 'tcp'], {
     env,
     stdio: ['ignore', xvfbLog, xvfbLog]
@@ -196,6 +228,7 @@ try {
     version,
     node,
     electron,
+    helpers,
     isolatedDisplay: display,
     viewport: '1440x900',
     pageErrors: errors

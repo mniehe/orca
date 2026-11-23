@@ -57,11 +57,13 @@
       meta.description = "Validate the installed Orca desktop on an isolated display";
       program = nixpkgs.lib.getExe (pkgs.writeShellApplication {
         name = "orca-verify-desktop";
-        runtimeInputs = [pkgs.nodejs_24 pkgs.xorg-server];
+        runtimeInputs = [pkgs.nodejs_24 pkgs.xorg-server pkgs.python3 pkgs.xclip];
         text = ''
           export ORCA_CI_PLAYWRIGHT=${pkgs.playwright-driver}
           export ORCA_CI_EXPECTED_VERSION=${nixpkgs.lib.escapeShellArg (builtins.fromJSON (builtins.readFile ./package.json)).version}
+          export ORCA_CI_EXPECTED_ELECTRON=${nixpkgs.lib.escapeShellArg (builtins.fromJSON (builtins.readFile ./package.json)).devDependencies.electron}
           export ORCA_CI_GSETTINGS=${pkgs.glib.bin}/bin/gsettings
+          export ORCA_CI_CLIPBOARD_TESTS=${./native/wayland-clipboard}
           exec node ${./nix}/verify-desktop.mjs "$@"
         '';
       });
