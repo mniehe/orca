@@ -3,8 +3,6 @@ name: Bot App Check
 # Weekly live probe of the Add to <bot> apps (config/scripts/bot-apps/README.md). Not a PR gate.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '23 13 * * 1'
 
 permissions:
   contents: read
