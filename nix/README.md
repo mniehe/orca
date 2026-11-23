@@ -12,12 +12,23 @@ For Android builds, see the [Android Nix guide](../mobile/nix/README.md) and the
 ## Source baseline
 
 The packaging targets upstream stable **v1.4.272**, commit
-`6272306c5a5a59ed1c6b604896610bfadde180cc`, with Electron 43.8.10, Bun 1.4.4,
-pnpm 12.18.0 and packaged Node 24.22.1. This release builds and bundles three C
-helpers on Linux: the Wayland/X11 clipboard helper, the provider-exec helper and
-the journal file lock. Nix builds them against upstream's glibc ABI floor,
-prepares their caches using upstream's fingerprints and retains its ELF
-architecture, ABI-floor and protocol gates.
+`6272306c5a5a59ed1c6b604896610bfadde180cc`, with Electron 43.8.10, Bun 1.4.4
+and pnpm 12.18.0. The build runs on nixpkgs' Node 24.22.2; the package bundles
+upstream's pinned Node 24.22.1. This release builds and bundles three C helpers
+on Linux: the Wayland/X11 clipboard helper, the provider-exec helper and the
+journal file lock. Nix builds them against upstream's glibc ABI floor and
+prepares their caches using upstream's fingerprints. If a prepared helper no
+longer matches its fingerprint, the build stops at a `docker` stub that names
+the cause, instead of reaching Docker.
+
+| Helper                   | Build check (`nix flake check`)       | Installed check (`verify-desktop`)                                                     |
+| ------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `orca-wayland-clipboard` | ELF and ABI floor, `protocol_test.py` | `--help`, upstream's `x11_test.py` on a private Xvfb                                   |
+| `orca-provider-exec`     | ELF and ABI floor                     | `--exec-without-inherited-fds` drops inherited descriptors and keeps `NODE_CHANNEL_FD` |
+| `journal-file-lock`      | ELF and ABI floor                     | Excludes a live SQLite reader, blocks SQLite while held, releases on end of input      |
+
+electron-builder repeats the ABI-floor check on every bundled native binary when
+it packages the application.
 
 The Electron, desktop and mobile-web dependency hashes in `flake.nix` match this
 release.
@@ -125,19 +136,30 @@ Review the new revision and its [Nix CI result](https://github.com/mniehe/orca/a
 ### Sync a new upstream release
 
 Merge the upstream release tag, then measure each fixed-output hash in
-`flake.nix` again: `electronHash`, the desktop dependency hash and the mobile-web
-dependency hash. If upstream changed `packageManager`, update the pnpm version
-and hash in `mobile/nix/pnpm.nix` first, because the dependency archives depend
-on it.
+`flake.nix` again: the `electronRelease` hashes, the desktop dependency hash and
+the mobile-web dependency hash. If upstream changed `packageManager`, update the
+pnpm version and hash in `mobile/nix/pnpm.nix` first, because the dependency
+archives depend on it.
 
-The Electron version comes from `devDependencies.electron` in `package.json`, so
-a release that moves Electron only needs a new `electronHash`. To measure a hash,
-set it to `nixpkgs.lib.fakeHash`, build, and copy the `got:` value:
+`electronRelease` holds the Electron version with the hashes of its Linux zip
+(`x86_64-linux`) and its Node headers (`headers`). The build asserts that the
+version equals `devDependencies.electron` in `package.json`, so a release that
+moves Electron fails to evaluate until the version and both hashes are updated
+together.
+
+Measure a hash on x86_64 Linux: set it to `nixpkgs.lib.fakeHash`, build, and
+copy the `got:` value.
 
 ```sh
-nix build .#packages.x86_64-linux.orca.passthru.electron
+nix build .#packages.x86_64-linux.orca.electron
+nix build .#packages.x86_64-linux.orca.electron.headers
 nix build .#desktop-deps .#mobile-web-deps
 ```
+
+Measure again with a fake hash whenever an archive's inputs change, such as
+`package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc`, the mobile
+lockfile or the pnpm version. Do not rely on CI to catch a stale hash: Nix
+reuses any cached fixed-output path whose hash matches, without fetching again.
 
 Then build `.#orca` and run the verification below.
 
@@ -157,11 +179,11 @@ Then build `.#orca` and run the verification below.
 
 There are three levels of check, and only the last one exercises the installed application.
 
-| Command                           | What it proves                                                            |
-| --------------------------------- | ------------------------------------------------------------------------- |
-| `nix flake check --no-build`      | The flake evaluates. Nothing is compiled.                                 |
-| `nix flake check`                 | The native helpers build and pass their ABI-floor and protocol checks.    |
-| `nix run .#verify-desktop -- ...` | The installed package passes CLI, native-module and GUI smoke checks.     |
+| Command                           | What it proves                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `nix flake check --no-build`      | The flake evaluates. Nothing is compiled.                                     |
+| `nix flake check`                 | The native helpers build and pass their ABI-floor and protocol checks.        |
+| `nix run .#verify-desktop -- ...` | The installed package passes CLI, native-module, helper and GUI smoke checks. |
 
 To verify a built package:
 
@@ -173,7 +195,8 @@ nix run .#verify-desktop -- ./result ./nix-smoke-artifacts
 The first argument is the package output and the second is a directory for the results.
 The verification uses its own Xvfb display and fresh profile, rather than your existing desktop session or Orca profile.
 It writes a JSON result and a screenshot to the results directory.
-Checks include GTK file-chooser schema discovery, inherited tool precedence and final native executable loading.
+Checks include the exact Electron release, GTK file-chooser schema discovery, inherited tool precedence, final native executable loading, the installed helper behaviour in the table above and the updater's handling of the `nix` package-type marker.
+The journal-file-lock check needs a directory on ext4, XFS, Btrfs or ZFS; it tries `TMPDIR` first, then the results directory.
 The build also checks ANGLE library search paths; hardware GPU acceleration and interactive dialogs still need testing in a real desktop session.
 
 The fork's `Nix desktop` workflow runs the same build and verification on a GitHub-hosted runner.
