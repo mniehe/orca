@@ -2,7 +2,7 @@
 
 This fork packages the Orca desktop application for **x86_64 Linux** as a Nix flake.
 The application is built from source with upstream's build entry points; it is not a wrapped AppImage.
-Electron is the matching prebuilt nixpkgs runtime, not a Chromium source build.
+Electron is upstream's prebuilt release binary at the exact version upstream pins, packaged with nixpkgs' Electron builder, not a Chromium source build.
 
 The flake exports the desktop package and a verification app.
 It does not export a NixOS or Home Manager module, an overlay or a server-only package.
@@ -11,14 +11,16 @@ For Android builds, see the [Android Nix guide](../mobile/nix/README.md) and the
 
 ## Source baseline
 
-The packaging targets upstream stable **v1.4.261**, commit
-`92d4266cc4ffa945dbc1fa52850e62448d2dfc1c`, with Electron 43.8.7, Bun 1.4.4,
-pnpm 12.14.0 and packaged Node 24.22.1. This release builds and bundles only the
-Wayland/X11 clipboard C helper on Linux; it has no provider-exec helper. Nix
-prepares the clipboard cache using upstream's fingerprint and retains its ELF
+The packaging targets upstream stable **v1.4.272**, commit
+`6272306c5a5a59ed1c6b604896610bfadde180cc`, with Electron 43.8.10, Bun 1.4.4,
+pnpm 12.18.0 and packaged Node 24.22.1. This release builds and bundles three C
+helpers on Linux: the Wayland/X11 clipboard helper, the provider-exec helper and
+the journal file lock. Nix builds them against upstream's glibc ABI floor,
+prepares their caches using upstream's fingerprints and retains its ELF
 architecture, ABI-floor and protocol gates.
 
-The desktop and mobile-web dependency hashes in `flake.nix` match this release.
+The Electron, desktop and mobile-web dependency hashes in `flake.nix` match this
+release.
 After an upstream sync they must be measured again by the Nix CI build before
 the new revision is ready to install. Evaluation does not validate fixed-output
 hashes or demonstrate a successful package build.
@@ -120,13 +122,32 @@ nix flake update orca
 
 Review the new revision and its [Nix CI result](https://github.com/mniehe/orca/actions/workflows/nix.yml), then rebuild and activate your configuration as usual.
 
+### Sync a new upstream release
+
+Merge the upstream release tag, then measure each fixed-output hash in
+`flake.nix` again: `electronHash`, the desktop dependency hash and the mobile-web
+dependency hash. If upstream changed `packageManager`, update the pnpm version
+and hash in `mobile/nix/pnpm.nix` first, because the dependency archives depend
+on it.
+
+The Electron version comes from `devDependencies.electron` in `package.json`, so
+a release that moves Electron only needs a new `electronHash`. To measure a hash,
+set it to `nixpkgs.lib.fakeHash`, build, and copy the `got:` value:
+
+```sh
+nix build .#packages.x86_64-linux.orca.passthru.electron
+nix build .#desktop-deps .#mobile-web-deps
+```
+
+Then build `.#orca` and run the verification below.
+
 ## Flake outputs
 
 | Output                                  | Purpose                                              |
 | --------------------------------------- | ---------------------------------------------------- |
 | `packages.x86_64-linux.orca`            | Source-built desktop package                         |
 | `packages.x86_64-linux.default`         | Alias of `orca`                                      |
-| `packages.x86_64-linux.desktop-native`  | Native clipboard helper, built with its checks       |
+| `packages.x86_64-linux.desktop-native`  | Native C helpers, built with their checks            |
 | `packages.x86_64-linux.desktop-deps`    | Fixed-output pnpm dependency archive for the desktop |
 | `packages.x86_64-linux.mobile-web-deps` | Fixed-output pnpm dependency archive for mobile web  |
 | `checks.x86_64-linux.desktop-native`    | Native ABI-floor and protocol checks                 |
@@ -139,7 +160,7 @@ There are three levels of check, and only the last one exercises the installed a
 | Command                           | What it proves                                                            |
 | --------------------------------- | ------------------------------------------------------------------------- |
 | `nix flake check --no-build`      | The flake evaluates. Nothing is compiled.                                 |
-| `nix flake check`                 | The clipboard helper builds and passes its ABI-floor and protocol checks. |
+| `nix flake check`                 | The native helpers build and pass their ABI-floor and protocol checks.    |
 | `nix run .#verify-desktop -- ...` | The installed package passes CLI, native-module and GUI smoke checks.     |
 
 To verify a built package:

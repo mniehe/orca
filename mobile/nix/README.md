@@ -23,7 +23,7 @@ access remain available.
 
 ## Follow upstream, pin the environment
 
-The Node 24 major and pnpm 12.14.0 match the root/mobile package manifests. Java 17
+The Node 24 major and pnpm 12.18.0 match the root/mobile package manifests. Java 17
 matches the Android release workflow. Android settings follow React Native 0.88.1
 and the lockfile's Expo SDK 58 / expo-modules-autolinking 58.0.16:
 
@@ -98,14 +98,14 @@ server can still supply executable web-interface assets; APK signing does not pi
 those host-supplied assets.
 
 Historical validation on fork revision `3ae47e04643e68806c041f9f0a4c8bc34548c20c`
-(not the v1.4.261 baseline): frozen
+(not the v1.4.272 baseline): frozen
 dependency installation, Expo prebuild and Gradle `assembleRelease` succeeded
 with 1,204 tasks executed in 12m 25s. The APK reports version 0.0.67/code 31,
 `dev.orca.app`, compile SDK 37, target SDK 36 and all four supported ABIs.
 `apksigner verify` and `zipalign -c -P 16 4` passed. This intermediate used the
 public Expo template certificate, not a private signer.
 
-The v1.4.261 source declares Android version 0.0.65/code 29 in `mobile/app.json`;
+The v1.4.272 source declares Android version 0.0.68/code 32 in `mobile/app.json`;
 its APK has not been built or validated by this packaging adaptation. Do not use
 the historical version or task counts as evidence for this release.
 

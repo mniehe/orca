@@ -76,7 +76,7 @@ without hard-link support fails rather than falling back to unsafe overwrite.
 ## 3. Explicit ADB update (separate opt-in command)
 
 **Package identity is not a migration.** This fork uses `dev.orca.app`, version
-`0.0.65` / code `29` at the v1.4.261 source baseline. The previous phone app
+`0.0.68` / code `32` at the v1.4.272 source baseline. The previous phone app
 `com.stably.orca.mobile` (`0.0.62`) is a different package, even when both use your
 existing `localtrial` key. Installing this fork does not move the old app's data,
 credentials, permissions, or settings, and does not remove the old app.
