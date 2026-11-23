@@ -80,12 +80,14 @@ passed.
 
 ## Nix desktop validation
 
-`nix.yml` is fork-only and runs on relevant pushes to main, pull requests and
-manual dispatch, without a schedule. It evaluates both locked flakes and builds
-the source desktop package, including the native ABI-floor and protocol checks.
-It then tests the final CLI wrappers, Koffi and PTY execution under both bundled
-Node and Electron, and the renderer/preload IPC on a fresh profile and isolated
-Xvfb display through Playwright CDP. It does not disable Chromium's sandbox.
+`nix.yml` is fork-only and runs on every push to main, every pull request and
+manual dispatch, without a schedule or path filters. It evaluates both locked
+flakes and builds the source desktop package, including the native ABI-floor and
+protocol checks. It then tests the final CLI wrappers, the exact Electron
+release, Koffi and PTY execution under both bundled Node and Electron, the
+installed provider-exec, journal-file-lock and X11 clipboard helpers, and the
+renderer/preload IPC on a fresh profile and isolated Xvfb display through
+Playwright CDP. It does not disable Chromium's sandbox.
 The disposable Ubuntu runner permits unprivileged user namespaces by relaxing
 its AppArmor restriction when enabled, then verifies namespace creation before
 launching Electron. This changes only the CI host, not the packaged application.

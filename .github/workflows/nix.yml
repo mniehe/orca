@@ -1,37 +1,11 @@
 name: Nix desktop
 
+# No path filters: an allowlist of build inputs goes stale silently, and a
+# skipped run looks like a passing one.
 on:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/nix.yml'
-      - 'flake.nix'
-      - 'flake.lock'
-      - 'nix/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.npmrc'
-      - 'config/**'
-      - 'src/**'
-      - 'native/**'
-      - 'resources/**'
-      - 'mobile/**'
   pull_request:
-    paths:
-      - '.github/workflows/nix.yml'
-      - 'flake.nix'
-      - 'flake.lock'
-      - 'nix/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.npmrc'
-      - 'config/**'
-      - 'src/**'
-      - 'native/**'
-      - 'resources/**'
-      - 'mobile/**'
   workflow_dispatch:
 
 permissions:
