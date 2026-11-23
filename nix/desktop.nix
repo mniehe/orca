@@ -157,9 +157,13 @@ in
           --replace-fail '  chmodSync(destination, 0o755)' \
           '  chmodSync(destination, 0o755); require("node:child_process").execFileSync("${pkgs.patchelf}/bin/patchelf", ["--set-interpreter", "${pkgs.stdenv.cc.bintools.dynamicLinker}", "--set-rpath", "${runtimeLibraryPath}", destination])'
         # Reuse the externally-managed update gate, regardless of host dpkg/rpm availability.
+        # The `nix` package-type marker blocks native installs without the unknown-marker
+        # warning and stays off the AppImage (non-root) self-update path.
         substituteInPlace src/main/updater/linux-package/linux-update-package-type.ts \
           --replace-fail 'export function isExternallyManagedLinuxInstall(): boolean {' \
-          'export function isExternallyManagedLinuxInstall(): boolean { if (process.platform === "linux" && process.execPath.startsWith("/nix/store/")) return true;'
+          'export function isExternallyManagedLinuxInstall(): boolean { if (process.platform === "linux" && process.execPath.startsWith("/nix/store/")) return true;' \
+          --replace-fail "  if (value === 'AppImage') {" \
+          "  if (value === 'nix') return 'unusable'; if (value === 'AppImage') {"
       '';
 
       buildPhase = ''

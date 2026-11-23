@@ -217,6 +217,10 @@ try {
   const version = await page.evaluate(() => window.api.updater.getVersion())
   assert.equal(version, expectedVersion)
   await page.evaluate(() => window.api.updater.getStatus())
+  assert(
+    !fs.readFileSync(path.join(root, 'app.log'), 'utf8').includes('package-type marker unusable'),
+    'The updater must recognise the nix package-type marker'
+  )
   await page.screenshot({
     path: path.join(artifacts, 'desktop.png'),
     animations: 'disabled',
