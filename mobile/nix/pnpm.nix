@@ -1,10 +1,10 @@
 {pkgs}:
 pkgs.stdenvNoCC.mkDerivation {
   pname = "pnpm";
-  version = "12.14.0";
+  version = "12.18.0";
   src = pkgs.fetchurl {
-    url = "https://registry.npmjs.org/@pnpm/exe.linux-x64/-/exe.linux-x64-12.14.0.tgz";
-    hash = "sha256-HemO0uliEROwiHsGMitGHvud9z2RP8HRUQObELcRekE=";
+    url = "https://registry.npmjs.org/@pnpm/exe.linux-x64/-/exe.linux-x64-12.18.0.tgz";
+    hash = "sha256-Z53y7t8Vj2OdttHwDnE9dm0NevxqkxvFFJemJdHhvfc=";
   };
   dontConfigure = true;
   dontBuild = true;
