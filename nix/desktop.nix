@@ -19,6 +19,13 @@
     pkgs.callPackage (pkgs.path + "/pkgs/development/tools/electron/binary/generic.nix") {}
     electronRelease.version
     electronRelease.hashes;
+  # Upstream's native helper builders fall back to Docker when a staged prebuild's
+  # fingerprint stamp misses; fail with the cause instead of "spawnSync docker ENOENT".
+  dockerShim = pkgs.writeShellScriptBin "docker" ''
+    echo "docker is unavailable in the Nix build: a native helper prebuild from nix/desktop-native.nix" \
+      "no longer matches upstream's fingerprint (see nix/prepare-desktop-native.mjs)." >&2
+    exit 1
+  '';
   node = pkgs.nodejs_24;
   nodeVersion = "24.22.1";
   nodeArchive = pkgs.fetchurl {
@@ -106,6 +113,7 @@ in
         pkgs.binutils
         pkgs.patchelf
         pkgs.pnpmConfigHook
+        dockerShim
       ];
       buildInputs = runtimeLibraries;
       runtimeDependencies = map lib.getLib runtimeLibraries;
@@ -252,7 +260,7 @@ in
       '';
 
       passthru = {
-        inherit electron node desktopNative;
+        inherit electron node desktopNative dockerShim;
         includesOrcadTemplate = false;
       };
       meta = {
