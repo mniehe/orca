@@ -51,28 +51,25 @@ not reproduced by cloning the repository.
 - `release-javascript-benchmark.yml`
 - `unit-module-cache-benchmark.yml`
 - `windows-native-preparation-benchmark.yml`
-- `wsl-orcad-e2e-frozen-runner-retry.yml`
 
 ## Retained workflows without schedules
 
 Only their `schedule` triggers are removed; jobs, permissions, inputs and other
 triggers remain unchanged:
 
+- `bot-app-catalog-smoke.yml`
 - `computer-e2e.yml`
 - `computer-macos-native.yml`
 - `e2e.yml`
 - `node-next-compat.yml`
 - `node-server-tests.yml`
 - `orca-server-artifact.yml`
-- `packaged-browser-e2e.yml`
 - `performance-contracts.yml`
-- `terminal-ime-e2e.yml`
-- `wsl-orcad-e2e.yml`
 
 Do not disable a reusable workflow while an enabled workflow still calls it.
-In particular, PR Checks calls the unit workflows, E2E, terminal IME and Windows
-WSL checks. Do not provision upstream publishing credentials or custom runners
-merely to make an inherited maintenance or release workflow pass.
+In particular, PR Checks calls the unit workflows, E2E and Windows WSL checks.
+Do not provision upstream publishing credentials or custom runners merely to
+make an inherited maintenance or release workflow pass.
 
 After syncing upstream, review new workflow files (both `.yml` and `.yaml`),
 reintroduced schedules, and reusable callers before pushing. GitHub workflow
