@@ -13,8 +13,10 @@
   manifest = builtins.fromJSON (builtins.readFile ../package.json);
   # Upstream pins an exact Electron patch release that nixpkgs' electron_<major>-bin
   # rarely matches, so build the same binary package at upstream's version.
+  # Path concatenation, not interpolation: "${pkgs.path}" copies nixpkgs into a second
+  # store path that evaluation without builds cannot realise.
   electron =
-    pkgs.callPackage "${pkgs.path}/pkgs/development/tools/electron/binary/generic.nix" {}
+    pkgs.callPackage (pkgs.path + "/pkgs/development/tools/electron/binary/generic.nix") {}
     manifest.devDependencies.electron {x86_64-linux = electronHash;};
   node = pkgs.nodejs_24;
   nodeVersion = "24.22.1";
