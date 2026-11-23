@@ -5,12 +5,17 @@
   pnpmDeps,
   mobilePnpmDeps,
   desktopNative,
+  electronHash,
   buildCommit,
   sourceDateEpoch ? 1,
 }: let
   inherit (pkgs) lib;
   manifest = builtins.fromJSON (builtins.readFile ../package.json);
-  electron = pkgs.electron_43-bin;
+  # Upstream pins an exact Electron patch release that nixpkgs' electron_<major>-bin
+  # rarely matches, so build the same binary package at upstream's version.
+  electron =
+    pkgs.callPackage "${pkgs.path}/pkgs/development/tools/electron/binary/generic.nix" {}
+    manifest.devDependencies.electron {x86_64-linux = electronHash;};
   node = pkgs.nodejs_24;
   nodeVersion = "24.22.1";
   nodeArchive = pkgs.fetchurl {

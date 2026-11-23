@@ -39,6 +39,7 @@
     };
     desktop = import ./nix/desktop.nix {
       inherit pkgs pnpm src pnpmDeps mobilePnpmDeps desktopNative;
+      electronHash = "sha256-ZXmY6NZ1rv0W9iS0dx57no9t401sEav8nPkNVYlK3FM=";
       buildCommit = nixpkgs.lib.removeSuffix "-dirty" (self.rev or self.dirtyRev or "unknown");
       sourceDateEpoch = self.lastModified or 1;
     };
